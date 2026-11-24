@@ -325,7 +325,7 @@ function renderTransactions(target,items){
   const title=document.createElement('div');title.className='tx-title';
   title.textContent=incoming?'Получение TNC':'Отправка TNC';
   const date=document.createElement('div');date.className='tx-date';
-  date.textContent=item.created_at?new Date(item.created_at).toLocaleString('ru-RU'):'Операция';
+  date.textContent=item.created_at?new Date(item.created_at * 1000).toLocaleString('ru-RU'):'Операция';
   info.append(title,date);
   const amount=document.createElement('div');amount.className='tx-amount '+(incoming?'income':'outcome');
   amount.textContent=(incoming?'+':'−')+item.amount+' TNC';

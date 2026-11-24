@@ -1,9 +1,13 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
+from aiogram import Bot
 from fastapi import FastAPI,Depends,Header,HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel,Field
 from sqlalchemy.orm import Session
+from app.core.config import settings
 from app.database.connection import init_database,get_db
 from app.core.security import verify
 from app.services.accounts import get_or_create_user
@@ -11,7 +15,40 @@ from app.services.wallet import balance,fmt,history,send
 @asynccontextmanager
 async def lifespan(app):
     init_database()
-    yield
+    bot = None
+    polling_task = None
+    dispatcher = None
+
+    if settings.BOT_TOKEN:
+        from bot import dp as dispatcher
+        bot = Bot(token=settings.BOT_TOKEN)
+        polling_task = asyncio.create_task(
+            dispatcher.start_polling(
+                bot,
+                handle_signals=False,
+                close_bot_session=False,
+            )
+        )
+        logging.getLogger("tnc.api").info("Telegram bot polling started")
+    else:
+        logging.getLogger("tnc.api").warning("BOT_TOKEN is empty")
+
+    try:
+        yield
+    finally:
+        if dispatcher is not None and polling_task is not None:
+            try:
+                await dispatcher.stop_polling()
+                await polling_task
+            except Exception:
+                polling_task.cancel()
+                try:
+                    await polling_task
+                except asyncio.CancelledError:
+                    pass
+
+        if bot is not None:
+            await bot.session.close()
 app=FastAPI(title="TNC Ecosystem",version="1.0.0",lifespan=lifespan)
 def auth(raw,db):
     try:
