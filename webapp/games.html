@@ -60,7 +60,7 @@ button:disabled{opacity:.5}
 </section>
 
 <script>
-const tg=window.Telegram?.WebApp;
+const tg=window.Telegram?.WebApp || window.parent?.Telegram?.WebApp;
 tg?.ready();
 tg?.expand();
 
@@ -129,3 +129,4 @@ playButton.addEventListener("click",async()=>{
 </script>
 </body>
 </html>
+
