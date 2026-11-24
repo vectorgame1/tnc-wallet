@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -31,14 +31,14 @@ button:disabled{opacity:.5}
 </style>
 </head>
 <body>
-<header><div class="logo">TNC</div><a class="back" href="/app/">← Кошелёк</a></header>
+<header><div class="logo">TNC</div><a class="back" href="/app/"> Кошелёк</a></header>
 <div class="eyebrow">TNC ECOSYSTEM / GAME CENTER</div>
 <h1>Игровой центр</h1>
 <p class="sub">Играй, выполняй задания и собирай Game Tokens.</p>
 
 <section class="card balance">
  <div><span>ТВОЙ БАЛАНС</span><br><strong id="balance">— GT</strong></div>
- <span>1 ⭐ = 5 000 GT</span>
+ <span>1  = 5 000 GT</span>
 </section>
 
 <section class="card">
@@ -88,7 +88,7 @@ async function loadHistory(){
  if(!data.items?.length){historyEl.textContent="Пока раундов нет.";return}
  historyEl.innerHTML=data.items.map(item=>{
   const won=item.won;
-  return `<div class="item"><span>${new Date(item.created_at*1000).toLocaleString("ru-RU")}<br><span class="muted">Ставка ${item.stake} GT · цель ${(item.target_multiplier/100).toFixed(2)}x</span></span><strong class="${won?"win":"lose"}">${won?"+"+item.payout:"−"+item.stake} GT</strong></div>`;
+  return `<div class="item"><span>${new Date(item.created_at*1000).toLocaleString("ru-RU")}<br><span class="muted">Ставка ${item.stake} GT · цель ${(item.target_multiplier/100).toFixed(2)}x</span></span><strong class="${won?"win":"lose"}">${won?"+"+item.payout:""+item.stake} GT</strong></div>`;
  }).join("");
 }
 playButton.addEventListener("click",async()=>{
