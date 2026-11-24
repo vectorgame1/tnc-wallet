@@ -733,7 +733,7 @@ h1{font-size:clamp(27px,3vw,39px);line-height:1.12;margin:7px 0 0;letter-spacing
       toast(error.message);
     } finally {
       button.disabled = false;
-      button.textContent = 'Подтвердить перевод →';
+      button.textContent = 'Подтвердить перевод ';
     }
   }
 
@@ -876,7 +876,7 @@ h1{font-size:clamp(27px,3vw,39px);line-height:1.12;margin:7px 0 0;letter-spacing
   $('fullscreen-btn').addEventListener('click',toggleFullscreen);
 
   document.addEventListener('fullscreenchange',() => {
-    $('fullscreen-btn').textContent = document.fullscreenElement || tg?.isFullscreen ? '⤢' : '⛶';
+    $('fullscreen-btn').textContent = document.fullscreenElement || tg?.isFullscreen ? '' : '';
   });
 
   setupInstall();
