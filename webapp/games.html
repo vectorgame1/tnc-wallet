@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#08090d">
+<title>TNC Games</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#08090d;color:#f5f5f5;font-family:Arial,sans-serif;padding:22px 16px 40px}
+header{display:flex;justify-content:space-between;align-items:center;margin:8px 0 26px}
+.logo{font-size:24px;font-weight:900;letter-spacing:3px;color:#e8bd69}
+.back{color:#aaa;text-decoration:none;font-size:13px}
+.eyebrow{color:#b99a62;font-size:11px;letter-spacing:3px;text-transform:uppercase}
+h1{font-size:34px;margin:9px 0}
+.sub{color:#888;font-size:14px;line-height:1.5}
+.card{background:linear-gradient(145deg,#1b1b20,#101014);border:1px solid #353139;border-radius:22px;padding:20px;margin-top:20px;box-shadow:0 15px 40px #0008}
+.balance{display:flex;justify-content:space-between;align-items:center}
+.balance strong{font-size:27px;color:#e8bd69}
+.balance span{color:#999;font-size:12px}
+.game-title{font-size:22px;font-weight:800;margin:0 0 7px}
+input{width:100%;padding:15px;background:#090a0e;border:1px solid #393640;border-radius:12px;color:white;font-size:17px;margin:8px 0 15px;outline:none}
+label{font-size:12px;color:#aaa}
+button{width:100%;padding:16px;border:0;border-radius:13px;background:linear-gradient(100deg,#b88a42,#f0d18b);color:#17120a;font-size:15px;font-weight:900;cursor:pointer}
+button:disabled{opacity:.5}
+.result{margin-top:15px;padding:15px;border-radius:12px;background:#090a0e;line-height:1.7;white-space:pre-line}
+.muted{color:#888;font-size:12px;line-height:1.5}
+.item{padding:13px 0;border-bottom:1px solid #29272e;font-size:13px;display:flex;justify-content:space-between;gap:12px}
+.win{color:#8fdb9a}.lose{color:#ed8585}
+.notice{color:#e8bd69;font-size:12px;margin-top:14px;line-height:1.5}
+</style>
+</head>
+<body>
+<header><div class="logo">TNC</div><a class="back" href="/app/">← Кошелёк</a></header>
+<div class="eyebrow">TNC ECOSYSTEM / GAME CENTER</div>
+<h1>Игровой центр</h1>
+<p class="sub">Играй, выполняй задания и собирай Game Tokens.</p>
+
+<section class="card balance">
+ <div><span>ТВОЙ БАЛАНС</span><br><strong id="balance">— GT</strong></div>
+ <span>1 ⭐ = 5 000 GT</span>
+</section>
+
+<section class="card">
+ <div class="eyebrow">ИГРА 01</div>
+ <div class="game-title">CRASH</div>
+ <p class="muted">Выбери ставку и целевой множитель. Раунд рассчитывается сервером.</p>
+ <label for="stake">Ставка в GT</label>
+ <input id="stake" type="number" min="1" step="1" value="100">
+ <label for="target">Целевой множитель (1.10–10.00)</label>
+ <input id="target" type="number" min="1.1" max="10" step="0.1" value="2">
+ <button id="play">ИГРАТЬ</button>
+ <div id="result" class="result" hidden></div>
+ <div class="notice">Результат раунда определяется сервером. GT — внутриигровые токены, не выводятся и не обмениваются на TNC Coin.</div>
+</section>
+
+<section class="card">
+ <div class="game-title">История Crash</div>
+ <div id="history" class="muted">Загрузка истории…</div>
+</section>
+
+<script>
+const tg=window.Telegram?.WebApp;
+tg?.ready();
+tg?.expand();
+
+const headers={
+ "Content-Type":"application/json",
+ "X-Telegram-Init-Data":tg?.initData||""
+};
+const balanceEl=document.getElementById("balance");
+const resultEl=document.getElementById("result");
+const historyEl=document.getElementById("history");
+const playButton=document.getElementById("play");
+
+async function api(path,options={}){
+ const response=await fetch(path,{...options,headers:{...headers,...options.headers}});
+ const data=await response.json().catch(()=>({detail:"Ошибка ответа сервера"}));
+ if(!response.ok)throw new Error(data.detail||"Ошибка запроса");
+ return data;
+}
+async function loadWallet(){
+ const data=await api("/api/games/wallet");
+ balanceEl.textContent=Number(data.balance).toLocaleString("ru-RU")+" GT";
+}
+async function loadHistory(){
+ const data=await api("/api/games/crash/history");
+ if(!data.items?.length){historyEl.textContent="Пока раундов нет.";return}
+ historyEl.innerHTML=data.items.map(item=>{
+  const won=item.won;
+  return `<div class="item"><span>${new Date(item.created_at*1000).toLocaleString("ru-RU")}<br><span class="muted">Ставка ${item.stake} GT · цель ${(item.target_multiplier/100).toFixed(2)}x</span></span><strong class="${won?"win":"lose"}">${won?"+"+item.payout:"−"+item.stake} GT</strong></div>`;
+ }).join("");
+}
+playButton.addEventListener("click",async()=>{
+ const stake=Number(document.getElementById("stake").value);
+ const target=Number(document.getElementById("target").value);
+ if(!Number.isSafeInteger(stake)||stake<1){alert("Укажи целую ставку GT");return}
+ if(!Number.isFinite(target)||target<1.1||target>10){alert("Множитель должен быть от 1.10 до 10.00");return}
+ playButton.disabled=true;
+ playButton.textContent="РАУНД…";
+ resultEl.hidden=false;
+ resultEl.textContent="Сервер рассчитывает результат…";
+ try{
+  const data=await api("/api/games/crash/play",{method:"POST",body:JSON.stringify({stake,target})});
+  resultEl.textContent=(data.won?"ПОБЕДА":"РАУНД ПРОИГРАН")+
+   "\nРезультат: "+data.crash_at.toFixed(2)+"x"+
+   "\nТвоя цель: "+data.target.toFixed(2)+"x"+
+   "\nВыплата: "+data.payout+" GT"+
+   "\nИзменение баланса: "+(data.net>=0?"+":"")+data.net+" GT";
+  balanceEl.textContent=Number(data.balance).toLocaleString("ru-RU")+" GT";
+  await loadHistory();
+ }catch(error){
+  resultEl.textContent="Ошибка: "+error.message;
+ }finally{
+  playButton.disabled=false;
+  playButton.textContent="ИГРАТЬ";
+ }
+});
+(async()=>{
+ try{
+  if(!tg?.initData){throw new Error("Открой игру через Telegram Mini App")}
+  await loadWallet();
+  await loadHistory();
+ }catch(error){
+  balanceEl.textContent="Недоступен";
+  historyEl.textContent=error.message;
+ }
+})();
+</script>
+</body>
+</html>
