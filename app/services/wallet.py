@@ -1,5 +1,4 @@
-
-from decimal import Decimal, InvalidOperation
+﻿from decimal import Decimal, InvalidOperation
 
 from sqlalchemy import or_, select, update
 

@@ -1,0 +1,21 @@
+﻿{
+  "id": "/app/",
+  "name": "TNC Wallet",
+  "short_name": "TNC",
+  "description": "Your TNC digital wallet",
+  "start_url": "/app/",
+  "scope": "/app/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08090d",
+  "theme_color": "#08090d",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    {
+      "src": "/app/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

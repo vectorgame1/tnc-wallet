@@ -1,5 +1,4 @@
-
-const CACHE_NAME = 'tnc-wallet-v3';
+﻿const CACHE_NAME = 'tnc-wallet-v4';
 
 const APP_FILES = [
   '/app/',
@@ -20,7 +19,10 @@ self.addEventListener('activate', event => {
     caches.keys()
       .then(keys => Promise.all(
         keys
-          .filter(key => key.startsWith('tnc-wallet-') && key !== CACHE_NAME)
+          .filter(key =>
+            key.startsWith('tnc-wallet-') &&
+            key !== CACHE_NAME
+          )
           .map(key => caches.delete(key))
       ))
       .then(() => self.clients.claim())
@@ -36,7 +38,7 @@ self.addEventListener('fetch', event => {
 
   if (url.origin !== self.location.origin) return;
 
-  // API всегда запрашиваем с сервера: баланс и история не берутся из кэша.
+  // API-ответы не кэшируем: баланс и история должны быть актуальными.
   if (url.pathname.startsWith('/api/')) return;
 
   if (!url.pathname.startsWith('/app/')) return;
@@ -47,16 +49,24 @@ self.addEventListener('fetch', event => {
         .then(response => {
           if (response.ok) {
             const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put('/app/', copy));
+            event.waitUntil(
+              caches.open(CACHE_NAME)
+                .then(cache => cache.put('/app/', copy))
+            );
           }
           return response;
         })
         .catch(async () => {
           return (await caches.match('/app/')) ||
-            new Response('TNC Wallet сейчас недоступен офлайн.', {
-              status: 503,
-              headers: {'Content-Type':'text/plain; charset=utf-8'}
-            });
+            new Response(
+              'TNC Wallet временно недоступен. Проверь подключение к интернету.',
+              {
+                status: 503,
+                headers: {
+                  'Content-Type': 'text/plain; charset=utf-8'
+                }
+              }
+            );
         })
     );
     return;
@@ -64,15 +74,18 @@ self.addEventListener('fetch', event => {
 
   event.respondWith(
     caches.match(request).then(cached => {
-      if (cached) return cached;
-
-      return fetch(request).then(response => {
+      const network = fetch(request).then(response => {
         if (response.ok) {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+          event.waitUntil(
+            caches.open(CACHE_NAME)
+              .then(cache => cache.put(request, copy))
+          );
         }
         return response;
       });
+
+      return cached || network;
     })
   );
 });
