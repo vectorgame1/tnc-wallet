@@ -2,382 +2,1040 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#090909">
-<title>TNC Wallet</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090909">
+  <meta name="description" content="TNC Wallet — персональный цифровой кошелёк">
+  <title>TNC Wallet</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08090b;
+      --panel: #111317;
+      --panel2: #171a20;
+      --line: #252932;
+      --gold: #e8bd62;
+      --gold2: #f5d995;
+      --muted: #89909d;
+      --text: #f5f6f8;
+      --green: #69d6a0;
+      --red: #ff7b83;
+      --radius: 22px;
+      --shadow: 0 18px 60px #0008;
+    }
 
-:root {
-  --bg:#090909;
-  --panel:#141414;
-  --panel2:#1b1915;
-  --gold:#e8c477;
-  --gold2:#b58b43;
-  --text:#f5f1e8;
-  --muted:#858078;
-  --line:rgba(232,196,119,.13);
-  --green:#8bc9a0;
-  --red:#e58e8e;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;background:
-  radial-gradient(ellipse at 50% -15%,rgba(184,139,67,.16),transparent 45%),
-  var(--bg);color:var(--text);
-  font-family:'DM Sans',sans-serif;
-  min-height:100vh;padding-bottom:105px;
-}
-button,input{font:inherit}
-button{cursor:pointer}
-.app{width:min(100%,520px);margin:auto;padding:22px 19px 30px}
-.topbar{display:flex;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:11px}
-.logo{
- width:43px;height:43px;border-radius:15px;
- display:grid;place-items:center;color:#17120a;
- font-family:Manrope;font-weight:900;font-size:22px;
- background:linear-gradient(145deg,#f6dda0,#b58b43);
- box-shadow:0 5px 25px #b58b4333;
-}
-.brand-name{font-weight:800;letter-spacing:2px;font-size:15px}
-.brand-sub{font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:3px}
-.avatar{
- width:41px;height:41px;border-radius:50%;
- border:1px solid #70582e;background:#211b10;
- color:var(--gold);display:grid;place-items:center;font-weight:800;
-}
-.greeting{margin-top:32px}
-.kicker{font-size:10px;letter-spacing:3px;color:var(--gold);font-weight:700}
-h1{font:800 27px Manrope;margin:8px 0 5px;letter-spacing:-1px}
-.subtitle{font-size:13px;color:var(--muted)}
-.balance-card{
- position:relative;overflow:hidden;margin-top:23px;padding:24px 22px;
- border:1px solid #6f562e;border-radius:25px;
- background:linear-gradient(135deg,#292114 0%,#17140f 48%,#101010 100%);
- box-shadow:0 18px 45px #0008,inset 0 1px #ffffff12;
-}
-.balance-card:before{
- content:"";position:absolute;width:210px;height:210px;border-radius:50%;
- border:1px solid #e8c47717;right:-75px;top:-95px;
- box-shadow:0 0 0 22px #e8c47708,0 0 0 48px #e8c47706;
-}
-.balance-top{display:flex;justify-content:space-between;align-items:center;position:relative}
-.balance-label{font-size:11px;letter-spacing:2px;color:#c6b58f}
-.coin-tag{font-size:10px;color:var(--gold);border:1px solid #8d6c37;border-radius:20px;padding:6px 10px}
-.amount{font:800 clamp(30px,8vw,39px) Manrope;margin:23px 0 3px;letter-spacing:-1.5px;position:relative}
-.amount small{font-size:15px;color:var(--gold);letter-spacing:0}
-.balance-foot{font-size:11px;color:#a99d83;position:relative}
-.card-bottom{display:flex;justify-content:space-between;align-items:end;margin-top:25px;position:relative}
-.card-id{font-size:10px;color:#a99d83;letter-spacing:1px}
-.card-mark{font:800 17px Manrope;color:#e8c477;letter-spacing:3px}
-.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:19px}
-.action{border:0;background:none;color:var(--text);padding:0;text-align:center}
-.action-icon{
- height:57px;border-radius:18px;background:linear-gradient(145deg,#211d15,#151515);
- border:1px solid var(--line);display:grid;place-items:center;
- font-size:21px;margin-bottom:8px;transition:.2s;
-}
-.action:active .action-icon{transform:scale(.94);background:#302719}
-.action span:last-child{font-size:11px;color:#c9c2b5}
-.section-head{display:flex;align-items:center;justify-content:space-between;margin:31px 0 14px}
-.section-title{font:800 15px Manrope;letter-spacing:.2px}
-.section-link{font-size:11px;color:var(--gold);background:none;border:0}
-.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.feature{
- min-height:126px;border-radius:20px;padding:16px;
- border:1px solid var(--line);background:linear-gradient(145deg,#191714,#111);
- position:relative;overflow:hidden;text-align:left;color:var(--text);
-}
-.feature:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;right:-40px;bottom:-45px;background:#d6ad5b0c}
-.feature-icon{font-size:22px}
-.feature-title{font:700 14px Manrope;margin-top:15px}
-.feature-desc{font-size:10px;color:var(--muted);margin-top:4px}
-.feature-arrow{position:absolute;right:15px;top:15px;color:var(--gold);font-size:15px}
-.panel{
- background:linear-gradient(145deg,#171717,#111);
- border:1px solid #ffffff0c;border-radius:20px;padding:17px;
-}
-.tx-list{display:flex;flex-direction:column}
-.tx{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #ffffff0b}
-.tx:last-child{border-bottom:0}
-.tx-icon{width:39px;height:39px;border-radius:13px;display:grid;place-items:center;background:#252016;font-size:16px}
-.tx-info{flex:1;min-width:0}
-.tx-title{font-size:12px;font-weight:700}
-.tx-date{font-size:10px;color:var(--muted);margin-top:4px}
-.tx-amount{font-size:12px;font-weight:700;text-align:right}
-.income{color:var(--green)}.outcome{color:var(--text)}
-.empty{padding:22px 5px;text-align:center;color:var(--muted);font-size:12px}
-.form-title{font:700 14px Manrope;margin-bottom:15px}
-.field-label{display:block;font-size:11px;color:var(--muted);margin:12px 0 7px}
-.field{
- width:100%;padding:15px;border-radius:13px;border:1px solid #39352e;
- background:#0c0c0c;color:white;outline:none;
-}
-.field:focus{border-color:var(--gold2)}
-.primary{
- width:100%;border:0;border-radius:14px;padding:15px;
- background:linear-gradient(110deg,#f0d28d,#bd914a);
- color:#17120a;font-weight:800;margin-top:15px;
- box-shadow:0 7px 22px #bd914a20;
-}
-.notice{font-size:10px;line-height:1.6;color:#716d65;margin:20px 3px}
-.bottom-nav{
- position:fixed;z-index:5;bottom:0;left:0;right:0;
- padding:10px 12px calc(10px + env(safe-area-inset-bottom));
- background:#101010ed;backdrop-filter:blur(18px);
- border-top:1px solid #ffffff10;
- display:flex;justify-content:center;
-}
-.nav-inner{width:min(100%,490px);display:grid;grid-template-columns:repeat(4,1fr)}
-.nav-item{border:0;background:none;color:#77736c;font-size:10px;padding:5px 0}
-.nav-item b{display:block;font-size:19px;margin-bottom:4px;font-weight:400}
-.nav-item.active{color:var(--gold)}
-.page{display:none;animation:appear .25s ease}
-.page.active{display:block}
-@keyframes appear{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
-.toast{
- position:fixed;z-index:10;left:20px;right:20px;bottom:95px;
- max-width:480px;margin:auto;padding:13px 16px;
- border-radius:13px;background:#28231a;border:1px solid #70582e;
- color:#f5e6c5;font-size:12px;display:none;
-}
-.loading{color:var(--muted);font-size:12px}
-@media(min-width:500px){.app{padding-top:28px}}
-</style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 70% -15%, #4a351b55, transparent 38%), var(--bg);
+      color: var(--text);
+      font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 28px 18px;
+      border-right: 1px solid var(--line);
+      background: #0c0d10ef;
+      display: flex;
+      flex-direction: column;
+      z-index: 5;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 12px 34px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, #f5d995, #a87528);
+      color: #17120a;
+      font-weight: 950;
+      font-size: 19px;
+      box-shadow: 0 7px 28px #d5a84c33;
+    }
+
+    .brand-name {
+      font-weight: 850;
+      letter-spacing: .16em;
+      font-size: 15px;
+    }
+
+    .brand-sub {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: .22em;
+      margin-top: 2px;
+    }
+
+    .nav-label {
+      padding: 0 13px;
+      color: #626a77;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      margin: 8px 0 10px;
+    }
+
+    .nav { display: grid; gap: 7px; }
+
+    .nav-btn {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #aab0ba;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 14px;
+      transition: .2s;
+    }
+
+    .nav-btn:hover {
+      background: #ffffff08;
+      color: white;
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(100deg, #e8bd621c, #e8bd6208);
+      border-color: #e8bd6238;
+      color: var(--gold2);
+    }
+
+    .nav-icon {
+      width: 22px;
+      text-align: center;
+      font-size: 17px;
+    }
+
+    .side-bottom { margin-top: auto; }
+
+    .status-card {
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: #ffffff04;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 7px;
+      box-shadow: 0 0 12px #69d6a0;
+    }
+
+    .status-text { font-size: 12px; color: #b7bdc7; }
+    .side-foot { color: #59616d; font-size: 11px; padding: 18px 12px 0; }
+
+    main {
+      min-width: 0;
+      padding: 30px clamp(18px, 4vw, 56px) 60px;
+      max-width: 1500px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(25px, 3vw, 36px);
+      line-height: 1.15;
+      margin: 6px 0 0;
+      letter-spacing: -.04em;
+    }
+
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+      color: #cbd0d8;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #e8bd62, #6d4c1d);
+      color: #1b150a;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .page { display: none; animation: fade .22s ease; }
+    .page.active { display: block; }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(270px, .8fr);
+      gap: 18px;
+    }
+
+    .card {
+      background: linear-gradient(145deg, #171a20, #101216);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 23px;
+      box-shadow: var(--shadow);
+    }
+
+    .balance-card {
+      min-height: 255px;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 90% 8%, #e8bd6233, transparent 36%),
+        linear-gradient(135deg, #292219, #15171b 65%);
+    }
+
+    .balance-card:after {
+      content: "T";
+      position: absolute;
+      right: 28px;
+      bottom: -80px;
+      font-size: 300px;
+      line-height: 1;
+      color: #e8bd6209;
+      font-weight: 950;
+      pointer-events: none;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+
+    .balance {
+      font-size: clamp(38px, 6vw, 58px);
+      font-weight: 850;
+      letter-spacing: -.055em;
+      margin: 22px 0 3px;
+    }
+
+    .currency {
+      color: var(--gold2);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .15em;
+    }
+
+    .balance-note { color: #a9a39a; font-size: 12px; margin-top: 13px; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border-radius: 99px;
+      background: #e8bd6215;
+      border: 1px solid #e8bd6230;
+      color: var(--gold2);
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .quick {
+      border: 1px solid #ffffff14;
+      background: #ffffff08;
+      color: #f5f1e8;
+      border-radius: 15px;
+      padding: 13px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      transition: .2s;
+    }
+
+    .quick:hover {
+      border-color: #e8bd6270;
+      background: #e8bd6215;
+      transform: translateY(-1px);
+    }
+
+    .quick span { font-size: 17px; color: var(--gold); }
+
+    .profile-mini {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin: 17px 0 22px;
+    }
+
+    .profile-photo {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: #2b2e35;
+      display: grid;
+      place-items: center;
+      color: var(--gold2);
+      font-weight: 850;
+      font-size: 20px;
+      overflow: hidden;
+    }
+
+    .profile-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-name { font-weight: 800; }
+    .profile-handle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 13px 0;
+      border-bottom: 1px solid #ffffff0d;
+      font-size: 13px;
+    }
+
+    .info-row:last-child { border: 0; }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 30px 0 14px;
+    }
+
+    .section-head h2 { font-size: 17px; margin: 0; letter-spacing: -.02em; }
+
+    .text-btn {
+      background: none;
+      border: 0;
+      color: var(--gold2);
+      font-size: 12px;
+      font-weight: 750;
+      padding: 7px;
+    }
+
+    .transactions { display: grid; gap: 9px; }
+
+    .tx {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 13px 15px;
+      border: 1px solid #ffffff0d;
+      background: #111419;
+      border-radius: 16px;
+    }
+
+    .tx-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      background: #e8bd6215;
+      color: var(--gold2);
+      font-size: 17px;
+    }
+
+    .tx-main { min-width: 0; flex: 1; }
+    .tx-title { font-size: 13px; font-weight: 750; }
+    .tx-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .tx-amount { font-size: 13px; font-weight: 850; white-space: nowrap; }
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+
+    .empty {
+      padding: 32px 18px;
+      text-align: center;
+      border: 1px dashed #343943;
+      border-radius: 17px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .panel-title { font-size: 19px; font-weight: 800; margin: 0 0 5px; letter-spacing: -.03em; }
+    .panel-desc { font-size: 13px; color: var(--muted); margin: 0 0 22px; }
+
+    .field { display: grid; gap: 8px; margin: 16px 0; }
+    .field label { font-size: 12px; color: #aeb5c0; font-weight: 700; }
+
+    .field input {
+      width: 100%;
+      border: 1px solid #303640;
+      background: #0c0e12;
+      border-radius: 13px;
+      padding: 14px 15px;
+      color: white;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: #c99b43;
+      box-shadow: 0 0 0 3px #e8bd6216;
+    }
+
+    .primary {
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 18px;
+      background: linear-gradient(110deg, #f1d28a, #c18c36);
+      color: #17120a;
+      font-weight: 900;
+      width: 100%;
+      box-shadow: 0 8px 25px #d6a94b22;
+    }
+
+    .primary:hover { filter: brightness(1.07); }
+
+    .secondary {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 12px 15px;
+      background: #ffffff08;
+      color: #e8eaf0;
+    }
+
+    .notice {
+      border: 1px solid #e8bd6233;
+      background: #e8bd620c;
+      border-radius: 14px;
+      padding: 13px 14px;
+      color: #c7b78f;
+      font-size: 12px;
+      margin-top: 16px;
+    }
+
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .profile-hero { text-align: center; }
+
+    .profile-hero .profile-photo {
+      width: 88px;
+      height: 88px;
+      border-radius: 27px;
+      margin: 4px auto 14px;
+      font-size: 30px;
+    }
+
+    .profile-hero h2 { margin: 0; font-size: 19px; }
+    .profile-hero p { margin: 5px 0 18px; color: var(--muted); font-size: 12px; }
+
+    .coming {
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .coming-icon { font-size: 36px; margin-bottom: 10px; }
+    .mobile-nav { display: none; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 25px;
+      transform: translate(-50%, 20px);
+      opacity: 0;
+      pointer-events: none;
+      background: #242830;
+      border: 1px solid #424955;
+      color: #fff;
+      border-radius: 13px;
+      padding: 12px 17px;
+      box-shadow: var(--shadow);
+      z-index: 30;
+      transition: .25s;
+      max-width: min(90vw, 520px);
+      font-size: 13px;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .loading { opacity: .6; }
+
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      main { padding: 22px 18px 100px; }
+      .grid { grid-template-columns: 1fr; }
+      .profile-layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      main { padding: 18px 14px 100px; }
+      .topbar { margin-bottom: 22px; }
+      .topbar h1 { font-size: 25px; }
+      .card { padding: 18px; border-radius: 19px; }
+      .balance-card { min-height: 230px; }
+      .quick-actions { gap: 7px; }
+      .quick { font-size: 11px; padding: 12px 5px; gap: 5px; }
+      .top-actions .icon-btn { display: none; }
+
+      .mobile-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 20;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        padding: 9px 7px calc(9px + env(safe-area-inset-bottom));
+        background: #0c0e12ed;
+        backdrop-filter: blur(18px);
+        border-top: 1px solid var(--line);
+      }
+
+      .mobile-nav button {
+        border: 0;
+        background: none;
+        color: #7e8794;
+        font-size: 10px;
+        display: grid;
+        gap: 4px;
+        justify-items: center;
+        padding: 4px 0;
+      }
+
+      .mobile-nav button span { font-size: 18px; }
+      .mobile-nav button.active { color: var(--gold2); }
+    }
+
+    @media (min-width: 1500px) {
+      main { padding-top: 42px; }
+      .grid { gap: 22px; }
+    }
+  </style>
 </head>
+
 <body>
-<div class="app">
-<header class="topbar">
- <div class="brand">
-  <div class="logo">T</div>
-  <div><div class="brand-name">TNC ECOSYSTEM</div><div class="brand-sub">YOUR DIGITAL WORLD</div></div>
- </div>
- <div class="avatar" id="avatar">T</div>
-</header>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">T</div>
+      <div>
+        <div class="brand-name">TNC</div>
+        <div class="brand-sub">DIGITAL ECOSYSTEM</div>
+      </div>
+    </div>
 
-<main>
-<section class="page active" id="home">
- <div class="greeting">
-  <div class="kicker">WELCOME TO TNC</div>
-  <h1>Привет, <span id="hello">друг</span></h1>
-  <div class="subtitle">Твой аккаунт. Твои возможности.</div>
- </div>
+    <div class="nav-label">РАБОЧЕЕ ПРОСТРАНСТВО</div>
+    <nav class="nav">
+      <button class="nav-btn active" data-page="home"><span class="nav-icon">⌂</span>Обзор</button>
+      <button class="nav-btn" data-page="transfer"><span class="nav-icon">⇄</span>Перевод</button>
+      <button class="nav-btn" data-page="history"><span class="nav-icon">◷</span>История операций</button>
+    </nav>
 
- <div class="balance-card">
-  <div class="balance-top">
-   <div class="balance-label">ОБЩИЙ БАЛАНС</div>
-   <div class="coin-tag">✦ TNC COIN</div>
-  </div>
-  <div class="amount" id="balance">•••••• <small>TNC</small></div>
-  <div class="balance-foot">Внутренний баланс экосистемы</div>
-  <div class="card-bottom">
-   <div class="card-id">TNC ACCOUNT<br><span id="account-id">Загрузка...</span></div>
-   <div class="card-mark">TNC</div>
-  </div>
- </div>
+    <div class="nav-label" style="margin-top:28px">ЭКОСИСТЕМА</div>
+    <nav class="nav">
+      <button class="nav-btn" data-page="crypto"><span class="nav-icon">◇</span>TNC Crypto</button>
+      <button class="nav-btn" data-page="games"><span class="nav-icon">✧</span>TNC Games</button>
+      <button class="nav-btn" data-page="profile"><span class="nav-icon">◎</span>Мой профиль</button>
+    </nav>
 
- <div class="actions">
-  <button class="action" onclick="showPage('transfer')"><span class="action-icon">↗</span><span>Перевод</span></button>
-  <button class="action" onclick="showPage('history')"><span class="action-icon">↔</span><span>История</span></button>
-  <button class="action" onclick="showPage('crypto')"><span class="action-icon">₿</span><span>Crypto</span></button>
-  <button class="action" onclick="showPage('games')"><span class="action-icon">♛</span><span>Games</span></button>
- </div>
+    <div class="side-bottom">
+      <div class="status-card">
+        <div class="status-text"><span class="status-dot"></span>Система доступна</div>
+        <div class="muted small" style="margin-top:7px">Внутренний баланс TNC</div>
+      </div>
+      <div class="side-foot">TNC WALLET · VERSION 1.0</div>
+    </div>
+  </aside>
 
- <div class="section-head"><div class="section-title">ТВОЯ ЭКОСИСТЕМА</div></div>
- <div class="feature-grid">
-  <button class="feature" onclick="showPage('crypto')">
-   <span class="feature-arrow">↗</span><div class="feature-icon">₿</div>
-   <div class="feature-title">TNC Crypto</div><div class="feature-desc">Криптонаправление</div>
-  </button>
-  <button class="feature" onclick="showPage('games')">
-   <span class="feature-arrow">↗</span><div class="feature-icon">♛</div>
-   <div class="feature-title">TNC Games</div><div class="feature-desc">Игры и награды</div>
-  </button>
- </div>
+  <main>
+    <header class="topbar">
+      <div>
+        <div class="eyebrow" id="top-eyebrow">TNC WALLET / ЛИЧНЫЙ КАБИНЕТ</div>
+        <h1 id="page-title">Добро пожаловать</h1>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" title="Обновить" onclick="refreshData()">↻</button>
+        <div class="avatar" id="top-avatar">T</div>
+      </div>
+    </header>
 
- <div class="section-head"><div class="section-title">ПОСЛЕДНИЕ ОПЕРАЦИИ</div><button class="section-link" onclick="showPage('history')">Все операции →</button></div>
- <div class="panel"><div id="recent" class="tx-list"><div class="loading">Загружаем операции...</div></div></div>
- <p class="notice">TNC Coin — внутренняя учётная валюта экосистемы. Это не самостоятельная криптовалюта и не банковский депозит.</p>
-</section>
+    <section class="page active" id="page-home">
+      <div class="grid">
+        <div>
+          <div class="card balance-card">
+            <div class="card-head">
+              <span class="eyebrow">ВАШ ДОСТУПНЫЙ БАЛАНС</span>
+              <span class="pill">● TNC ACCOUNT</span>
+            </div>
+            <div class="balance" id="balance">— — —</div>
+            <div class="currency">TNC COIN</div>
+            <div class="balance-note">Внутренний баланс экосистемы TNC</div>
 
-<section class="page" id="transfer">
- <div class="greeting"><div class="kicker">TNC WALLET</div><h1>Перевод</h1><div class="subtitle">Отправь TNC другому участнику экосистемы.</div></div>
- <div class="balance-card">
-  <div class="balance-label">ДОСТУПНЫЙ БАЛАНС</div>
-  <div class="amount" id="transfer-balance">•••••• <small>TNC</small></div>
-  <div class="balance-foot">Проверяй Telegram ID получателя перед отправкой.</div>
- </div>
- <div class="panel" style="margin-top:18px">
-  <div class="form-title">НОВЫЙ ПЕРЕВОД</div>
-  <label class="field-label" for="receiver">Telegram ID получателя</label>
-  <input class="field" id="receiver" inputmode="numeric" placeholder="Например, 123456789">
-  <label class="field-label" for="amount">Сумма перевода</label>
-  <input class="field" id="amount" inputmode="decimal" placeholder="0.00">
-  <button class="primary" id="send-button" onclick="sendTnc()">Отправить TNC　↗</button>
- </div>
- <p class="notice">Переводы необратимы. Убедись, что ID получателя указан правильно.</p>
-</section>
+            <div class="quick-actions">
+              <button class="quick" onclick="showPage('transfer')"><span>⇄</span>Перевести</button>
+              <button class="quick" onclick="showPage('history')"><span>◷</span>История</button>
+              <button class="quick" onclick="refreshData()"><span>↻</span>Обновить</button>
+            </div>
+          </div>
 
-<section class="page" id="history">
- <div class="greeting"><div class="kicker">YOUR ACTIVITY</div><h1>Операции</h1><div class="subtitle">История движения твоих TNC.</div></div>
- <div class="panel" style="margin-top:22px"><div id="all-history" class="tx-list"><div class="loading">Загрузка...</div></div></div>
-</section>
+          <div class="section-head">
+            <h2>Последние операции</h2>
+            <button class="text-btn" onclick="showPage('history')">Вся история →</button>
+          </div>
+          <div class="transactions" id="recent">
+            <div class="empty">Загружаем операции…</div>
+          </div>
+        </div>
 
-<section class="page" id="crypto">
- <div class="greeting"><div class="kicker">DIGITAL ASSETS</div><h1>TNC Crypto</h1><div class="subtitle">Криптонаправление экосистемы.</div></div>
- <div class="balance-card"><div class="balance-label">TNC CRYPTO</div><div class="amount">COMING <small>SOON</small></div><div class="balance-foot">Подготовка к подключению блокчейн-сетей</div></div>
- <div class="panel" style="margin-top:17px">
-  <div class="form-title">БУДУЩИЕ ВОЗМОЖНОСТИ</div>
-  <div class="tx"><div class="tx-icon">◈</div><div class="tx-info"><div class="tx-title">Криптокошельки</div><div class="tx-date">Подключение сетей</div></div></div>
-  <div class="tx"><div class="tx-icon">⇄</div><div class="tx-info"><div class="tx-title">Отправка и получение</div><div class="tx-date">Внешние криптооперации</div></div></div>
-  <div class="tx"><div class="tx-icon">▤</div><div class="tx-info"><div class="tx-title">Активы и история</div><div class="tx-date">Единый обзор портфеля</div></div></div>
- </div>
- <p class="notice">Внешние криптооперации пока не подключены. Не отправляй сюда реальные криптовалюты.</p>
-</section>
+        <div>
+          <div class="card">
+            <div class="eyebrow">ВАШ АККАУНТ</div>
+            <div class="profile-mini">
+              <div class="profile-photo" id="home-photo">T</div>
+              <div>
+                <div class="profile-name" id="home-name">TNC User</div>
+                <div class="profile-handle" id="home-handle">Загрузка профиля…</div>
+              </div>
+            </div>
+            <div class="info-row"><span class="muted">ID аккаунта</span><strong id="home-id">—</strong></div>
+            <div class="info-row"><span class="muted">Статус</span><strong class="positive">Активен</strong></div>
+            <div class="info-row"><span class="muted">Валюта</span><strong>TNC</strong></div>
+            <button class="secondary" style="width:100%;margin-top:17px" onclick="showPage('profile')">Открыть профиль →</button>
+          </div>
 
-<section class="page" id="games">
- <div class="greeting"><div class="kicker">PLAY & EARN</div><h1>TNC Games</h1><div class="subtitle">Играй, выполняй задания, участвуй в турнирах.</div></div>
- <div class="feature-grid" style="margin-top:22px">
-  <div class="feature"><div class="feature-icon">🎮</div><div class="feature-title">Мини-игры</div><div class="feature-desc">Скоро в TNC</div></div>
-  <div class="feature"><div class="feature-icon">🏆</div><div class="feature-title">Турниры</div><div class="feature-desc">Соревнования и рейтинги</div></div>
-  <div class="feature"><div class="feature-icon">🎯</div><div class="feature-title">Задания</div><div class="feature-desc">Активности сообщества</div></div>
-  <div class="feature"><div class="feature-icon">🎁</div><div class="feature-title">Награды</div><div class="feature-desc">Будущие награды TNC</div></div>
- </div>
- <p class="notice">Игровые функции пока находятся в разработке. Награды ещё не начисляются.</p>
-</section>
+          <div class="card" style="margin-top:18px">
+            <div class="eyebrow">ЭКОСИСТЕМА</div>
+            <h2 class="panel-title" style="margin-top:12px">Всё в одном аккаунте</h2>
+            <p class="panel-desc" style="margin-bottom:0">TNC Wallet — единый интерфейс для внутренних сервисов TNC. Новые модули будут появляться здесь.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<section class="page" id="profile">
- <div class="greeting"><div class="kicker">YOUR IDENTITY</div><h1>Мой аккаунт</h1><div class="subtitle">Единый профиль TNC Ecosystem.</div></div>
- <div class="panel" style="margin-top:22px">
-  <div class="tx"><div class="tx-icon">👤</div><div class="tx-info"><div class="tx-title" id="profile-name">Загрузка...</div><div class="tx-date">Имя пользователя</div></div></div>
-  <div class="tx"><div class="tx-icon">◎</div><div class="tx-info"><div class="tx-title" id="profile-id">—</div><div class="tx-date">Telegram ID</div></div></div>
-  <div class="tx"><div class="tx-icon">✦</div><div class="tx-info"><div class="tx-title">TNC Account</div><div class="tx-date">Единый аккаунт экосистемы</div></div></div>
- </div>
- <div class="section-head"><div class="section-title">НАСТРОЙКИ</div></div>
- <div class="panel">
-  <div class="tx"><div class="tx-icon">🔔</div><div class="tx-info"><div class="tx-title">Уведомления</div><div class="tx-date">Настройки появятся позже</div></div></div>
-  <div class="tx"><div class="tx-icon">🛡</div><div class="tx-info"><div class="tx-title">Безопасность</div><div class="tx-date">Защита аккаунта</div></div></div>
- </div>
-</section>
-</main>
+    <section class="page" id="page-transfer">
+      <div class="card" style="max-width:650px">
+        <div class="eyebrow">TNC WALLET / ПЛАТЕЖИ</div>
+        <h2 class="panel-title" style="font-size:25px;margin-top:9px">Перевод TNC</h2>
+        <p class="panel-desc">Отправьте внутренние монеты другому пользователю TNC по Telegram ID.</p>
+
+        <div class="field">
+          <label for="receiver">Telegram ID получателя</label>
+          <input id="receiver" type="number" inputmode="numeric" placeholder="Например, 123456789">
+        </div>
+
+        <div class="field">
+          <label for="amount">Сумма перевода</label>
+          <input id="amount" type="number" min="0.01" step="0.01" placeholder="0.00">
+        </div>
+
+        <button class="primary" id="send-button" onclick="sendTnc()">Подтвердить перевод →</button>
+
+        <div class="notice">
+          Перед отправкой проверьте Telegram ID и сумму. Перевод выполняется внутри базы TNC и не является переводом в блокчейне.
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-history">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="eyebrow">TNC WALLET / АКТИВНОСТЬ</div>
+            <h2 class="panel-title" style="font-size:25px;margin-top:8px">История операций</h2>
+          </div>
+          <button class="secondary" onclick="refreshData()">↻ Обновить</button>
+        </div>
+        <p class="panel-desc">Все доступные операции вашего кошелька.</p>
+        <div class="transactions" id="all-history">
+          <div class="empty">Загружаем историю…</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-profile">
+      <div class="profile-layout">
+        <div class="card profile-hero">
+          <div class="profile-photo" id="profile-photo">T</div>
+          <h2 id="profile-name">TNC User</h2>
+          <p id="profile-handle">@username</p>
+          <span class="pill">● TNC ACCOUNT</span>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">ЛИЧНЫЕ ДАННЫЕ</div>
+          <h2 class="panel-title" style="margin-top:8px">Профиль аккаунта</h2>
+          <div class="info-row"><span class="muted">Telegram ID</span><strong id="profile-id">—</strong></div>
+          <div class="info-row"><span class="muted">Имя</span><strong id="profile-first">—</strong></div>
+          <div class="info-row"><span class="muted">Имя пользователя</span><strong id="profile-username">—</strong></div>
+          <div class="info-row"><span class="muted">Баланс</span><strong id="profile-balance">—</strong></div>
+          <div class="info-row"><span class="muted">Тип счёта</span><strong>TNC Wallet</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-crypto">
+      <div class="card coming">
+        <div>
+          <div class="coming-icon">◇</div>
+          <div class="eyebrow">TNC ECOSYSTEM</div>
+          <h2 class="panel-title">TNC Crypto</h2>
+          <p class="panel-desc">Раздел находится в разработке.<br>Внешние криптовалютные операции пока не подключены.</p>
+          <span class="pill">СКОРО</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-games">
+      <div class="card coming">
+        <div>
+          <div class="coming-icon">✧</div>
+          <div class="eyebrow">TNC ECOSYSTEM</div>
+          <h2 class="panel-title">TNC Games</h2>
+          <p class="panel-desc">Игровой раздел экосистемы появится здесь.</p>
+          <span class="pill">СКОРО</span>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>
 
-<nav class="bottom-nav">
- <div class="nav-inner">
-  <button class="nav-item active" data-page="home" onclick="showPage('home')"><b>⌂</b>Главная</button>
-  <button class="nav-item" data-page="history" onclick="showPage('history')"><b>↔</b>Операции</button>
-  <button class="nav-item" data-page="games" onclick="showPage('games')"><b>♛</b>Разделы</button>
-  <button class="nav-item" data-page="profile" onclick="showPage('profile')"><b>◉</b>Профиль</button>
- </div>
+<nav class="mobile-nav">
+  <button class="active" data-page="home"><span>⌂</span>Главная</button>
+  <button data-page="transfer"><span>⇄</span>Перевод</button>
+  <button data-page="history"><span>◷</span>История</button>
+  <button data-page="crypto"><span>◇</span>Crypto</button>
+  <button data-page="profile"><span>◎</span>Профиль</button>
 </nav>
+
 <div class="toast" id="toast"></div>
 
 <script>
-const tg=window.Telegram?.WebApp;
-tg?.ready();
-tg?.expand();
-if(tg?.setHeaderColor) tg.setHeaderColor('#090909');
-if(tg?.setBackgroundColor) tg.setBackgroundColor('#090909');
+(() => {
+  const tg = window.Telegram?.WebApp;
 
-const headers={'X-Telegram-Init-Data':tg?.initData||''};
-let profile=null;
-let transactions=[];
+  tg?.ready();
+  tg?.expand();
 
-async function api(path,opts={}){
- const response=await fetch(path,{
-  ...opts,
-  headers:{...headers,'Content-Type':'application/json',...(opts.headers||{})}
- });
- const data=await response.json();
- if(!response.ok) throw new Error(data.detail||'Ошибка запроса');
- return data;
-}
-function toast(message){
- const el=document.getElementById('toast');
- el.textContent=message;el.style.display='block';
- clearTimeout(window.toastTimer);
- window.toastTimer=setTimeout(()=>el.style.display='none',3200);
-}
-function showPage(name){
- document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));
- document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
- window.scrollTo({top:0,behavior:'smooth'});
- if(name==='history') renderHistory();
-}
-function escapeText(value){
- return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function renderTransactions(target,items){
- const root=document.getElementById(target);
- root.replaceChildren();
- if(!items.length){
-  const empty=document.createElement('div');empty.className='empty';
-  empty.textContent='Операций пока нет';root.append(empty);return;
- }
- items.forEach(item=>{
-  const incoming=Number(item.receiver_id)===Number(profile?.telegram_id);
-  const row=document.createElement('div');row.className='tx';
-  const icon=document.createElement('div');icon.className='tx-icon';icon.textContent=incoming?'↙':'↗';
-  const info=document.createElement('div');info.className='tx-info';
-  const title=document.createElement('div');title.className='tx-title';
-  title.textContent=incoming?'Получение TNC':'Отправка TNC';
-  const date=document.createElement('div');date.className='tx-date';
-  date.textContent=item.created_at?new Date(item.created_at * 1000).toLocaleString('ru-RU'):'Операция';
-  info.append(title,date);
-  const amount=document.createElement('div');amount.className='tx-amount '+(incoming?'income':'outcome');
-  amount.textContent=(incoming?'+':'−')+item.amount+' TNC';
-  row.append(icon,info,amount);root.append(row);
- });
-}
-function renderHistory(){
- renderTransactions('all-history',transactions);
-}
-async function loadData(){
- try{
-  if(!headers['X-Telegram-Init-Data']){
-   document.getElementById('recent').textContent='Открой Mini App через Telegram-бота, чтобы войти.';
-   document.getElementById('all-history').textContent='Требуется вход через Telegram.';
-   return;
+  try {
+    tg?.setHeaderColor?.('#090909');
+    tg?.setBackgroundColor?.('#090909');
+  } catch (_) {}
+
+  const initData = tg?.initData || '';
+  const tgUser = tg?.initDataUnsafe?.user || null;
+  const headers = initData ? {'X-Telegram-Init-Data': initData} : {};
+
+  let profile = null;
+  let transactions = [];
+  let toastTimer;
+
+  const $ = id => document.getElementById(id);
+
+  const safe = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[ch]));
+
+  function toast(message) {
+    const node = $('toast');
+    node.textContent = message;
+    node.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => node.classList.remove('show'), 3200);
   }
-  const [p,h]=await Promise.all([api('/api/profile'),api('/api/wallet/history')]);
-  profile=p;transactions=h.transactions||[];
-  document.getElementById('balance').innerHTML=escapeText(p.balance)+' <small>TNC</small>';
-  document.getElementById('transfer-balance').innerHTML=escapeText(p.balance)+' <small>TNC</small>';
-  document.getElementById('hello').textContent=p.first_name||'друг';
-  document.getElementById('avatar').textContent=(p.first_name||'T').slice(0,1).toUpperCase();
-  document.getElementById('account-id').textContent='#'+p.telegram_id;
-  document.getElementById('profile-name').textContent=p.first_name||'Пользователь TNC';
-  document.getElementById('profile-id').textContent=p.telegram_id;
-  renderTransactions('recent',transactions.slice(0,4));
-  renderHistory();
- }catch(error){
-  toast(error.message);
-  document.getElementById('recent').textContent='Не удалось загрузить данные.';
- }
-}
-async function sendTnc(){
- const receiver=Number(document.getElementById('receiver').value);
- const amount=document.getElementById('amount').value.trim();
- const button=document.getElementById('send-button');
- if(!Number.isSafeInteger(receiver)||receiver<=0){toast('Проверь Telegram ID получателя');return}
- if(!amount){toast('Укажи сумму перевода');return}
- button.disabled=true;button.textContent='Отправляем...';
- try{
-  const result=await api('/api/wallet/transfer',{
-   method:'POST',
-   body:JSON.stringify({receiver_id:receiver,amount})
+
+  function money(value) {
+    if (value === undefined || value === null || value === '') return '0.00';
+    const n = Number(String(value).replace(',', '.'));
+    return Number.isFinite(n)
+      ? n.toLocaleString('ru-RU', {minimumFractionDigits:2, maximumFractionDigits:2})
+      : String(value);
+  }
+
+  async function api(path, options = {}) {
+    let response;
+
+    try {
+      response = await fetch(path, {
+        ...options,
+        headers: {
+          ...headers,
+          'Content-Type':'application/json',
+          ...(options.headers || {})
+        }
+      });
+    } catch (_) {
+      throw new Error('Не удалось связаться с сервером. Проверьте интернет.');
+    }
+
+    const type = response.headers.get('content-type') || '';
+    const data = type.includes('application/json') ? await response.json() : {};
+
+    if (!response.ok) {
+      throw new Error(data.detail || `Ошибка сервера (${response.status})`);
+    }
+
+    return data;
+  }
+
+  function setUserVisuals(user) {
+    const first = user?.first_name || profile?.first_name || 'TNC User';
+    const username = user?.username || profile?.username || '';
+    const id = user?.id || profile?.telegram_id || '';
+    const photo = user?.photo_url || '';
+    const initial = (first.trim()[0] || 'T').toUpperCase();
+
+    ['home-name','profile-name'].forEach(id => {
+      $(id).textContent = first;
+    });
+
+    $('home-handle').textContent = username ? '@' + username : 'Аккаунт TNC';
+    $('home-id').textContent = id || '—';
+    $('profile-id').textContent = id || '—';
+    $('profile-first').textContent = first;
+    $('profile-username').textContent = username ? '@' + username : 'Не указан';
+    $('profile-handle').textContent = username ? '@' + username : 'Telegram аккаунт';
+    $('top-avatar').textContent = initial;
+
+    ['home-photo','profile-photo'].forEach(nodeId => {
+      const node = $(nodeId);
+
+      if (photo) {
+        node.innerHTML = `<img src="${safe(photo)}" alt="Аватар">`;
+      } else {
+        node.textContent = initial;
+      }
+    });
+  }
+
+  function renderTx(items, target) {
+    const node = $(target);
+
+    if (!items.length) {
+      node.innerHTML = '<div class="empty">Операций пока нет. Когда появятся переводы, они отобразятся здесь.</div>';
+      return;
+    }
+
+    node.innerHTML = items.map(tx => {
+      const outgoing = profile && Number(tx.sender_id) === Number(profile.telegram_id);
+      const amount = money(tx.amount);
+      const title = tx.kind === 'transfer'
+        ? (outgoing ? 'Перевод отправлен' : 'Перевод получен')
+        : (tx.kind || 'Операция');
+
+      const sign = outgoing ? '−' : '+';
+
+      const date = tx.created_at
+        ? new Date(Number(tx.created_at) * 1000).toLocaleString('ru-RU', {
+            day:'2-digit',
+            month:'short',
+            hour:'2-digit',
+            minute:'2-digit'
+          })
+        : 'Дата не указана';
+
+      return `
+        <div class="tx">
+          <div class="tx-icon">${outgoing ? '↗' : '↙'}</div>
+          <div class="tx-main">
+            <div class="tx-title">${safe(title)}</div>
+            <div class="tx-meta">${safe(date)} · ID ${safe(tx.id || '—')}</div>
+          </div>
+          <div class="tx-amount ${outgoing ? 'negative' : 'positive'}">
+            ${sign}${safe(amount)} TNC
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function refreshData() {
+    if (!initData) {
+      const note = 'Откройте приложение через кнопку Mini App в Telegram-боте, чтобы войти в аккаунт.';
+
+      $('recent').innerHTML = `<div class="empty">${note}</div>`;
+      $('all-history').innerHTML = `<div class="empty">${note}</div>`;
+
+      if (tgUser) setUserVisuals(tgUser);
+
+      toast('Нет данных авторизации Telegram. Откройте Mini App из бота.');
+      return;
+    }
+
+    $('balance').classList.add('loading');
+
+    try {
+      const [p, h] = await Promise.all([
+        api('/api/profile'),
+        api('/api/wallet/history')
+      ]);
+
+      profile = p;
+      transactions = h.transactions || [];
+
+      $('balance').textContent = money(p.balance);
+      $('profile-balance').textContent = money(p.balance) + ' TNC';
+
+      setUserVisuals({
+        ...tgUser,
+        ...p,
+        id: p.telegram_id,
+        first_name: p.first_name || tgUser?.first_name
+      });
+
+      renderTx(transactions.slice(0, 4), 'recent');
+      renderTx(transactions, 'all-history');
+
+    } catch (error) {
+      $('recent').innerHTML = `<div class="empty">${safe(error.message)}</div>`;
+      $('all-history').innerHTML = `<div class="empty">${safe(error.message)}</div>`;
+      toast(error.message);
+
+    } finally {
+      $('balance').classList.remove('loading');
+    }
+  }
+
+  async function sendTnc() {
+    if (!initData) {
+      toast('Для перевода войдите через Telegram Mini App.');
+      return;
+    }
+
+    const receiver_id = Number($('receiver').value);
+    const amount = $('amount').value.trim();
+
+    if (!Number.isSafeInteger(receiver_id) || receiver_id <= 0) {
+      toast('Введите корректный Telegram ID получателя.');
+      return;
+    }
+
+    if (!amount || !Number.isFinite(Number(amount)) || Number(amount) <= 0) {
+      toast('Введите сумму больше нуля.');
+      return;
+    }
+
+    const button = $('send-button');
+    button.disabled = true;
+    button.textContent = 'Выполняем перевод…';
+
+    try {
+      const result = await api('/api/wallet/transfer', {
+        method: 'POST',
+        body: JSON.stringify({receiver_id, amount})
+      });
+
+      toast(`Перевод ${money(result.amount)} TNC выполнен.`);
+      $('receiver').value = '';
+      $('amount').value = '';
+
+      await refreshData();
+      showPage('home');
+
+    } catch (error) {
+      toast(error.message);
+
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Подтвердить перевод →';
+    }
+  }
+
+  const titles = {
+    home: 'Добро пожаловать',
+    transfer: 'Перевод TNC',
+    history: 'История операций',
+    crypto: 'TNC Crypto',
+    games: 'TNC Games',
+    profile: 'Мой профиль'
+  };
+
+  window.showPage = function(page) {
+    document.querySelectorAll('.page').forEach(el => {
+      el.classList.toggle('active', el.id === 'page-' + page);
+    });
+
+    document.querySelectorAll('[data-page]').forEach(el => {
+      el.classList.toggle('active', el.dataset.page === page);
+    });
+
+    $('page-title').textContent = titles[page] || 'TNC Wallet';
+    $('top-eyebrow').textContent = 'TNC WALLET / ' +
+      (page === 'home' ? 'ЛИЧНЫЙ КАБИНЕТ' : page.toUpperCase());
+
+    window.scrollTo({top:0, behavior:'smooth'});
+  };
+
+  document.querySelectorAll('[data-page]').forEach(button => {
+    button.addEventListener('click', () => showPage(button.dataset.page));
   });
-  if(tg?.showAlert) tg.showAlert('Перевод выполнен: '+result.amount+' TNC');
-  else toast('Перевод выполнен: '+result.amount+' TNC');
-  document.getElementById('amount').value='';
-  await loadData();showPage('home');
- }catch(error){toast(error.message)}
- finally{button.disabled=false;button.textContent='Отправить TNC　↗'}
-}
-loadData();
+
+  window.refreshData = refreshData;
+  window.sendTnc = sendTnc;
+
+  if (tgUser) setUserVisuals(tgUser);
+
+  refreshData();
+})();
 </script>
 </body>
 </html>
