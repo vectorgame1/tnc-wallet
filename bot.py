@@ -49,17 +49,17 @@ dp = Dispatcher(storage=MemoryStorage())
 # TNC MENU
 # --------------------------------------------------
 
-WALLET = "рџ’Ћ РљРѕС€РµР»С‘Рє"
-TRANSFER = "рџ’ё РџРµСЂРµРІРµСЃС‚Рё TNC"
-HISTORY = "рџ“Љ РСЃС‚РѕСЂРёСЏ"
-ACCOUNT = "рџ‘¤ РђРєРєР°СѓРЅС‚"
-CRYPTO = "в‚ї TNC Crypto"
-GAMES = "рџЋ® TNC Games"
-COMMUNITY = "рџ‘Ґ Community"
-SETTINGS = "вљ™пёЏ РќР°СЃС‚СЂРѕР№РєРё"
-MINI_APP = "рџЊђ РћС‚РєСЂС‹С‚СЊ Mini App"
-CANCEL = "вќЊ РћС‚РјРµРЅР°"
-BACK = "в¬…пёЏ Р“Р»Р°РІРЅРѕРµ РјРµРЅСЋ"
+WALLET = "💎 Кошелёк"
+TRANSFER = "💸 Перевести TNC"
+HISTORY = "📊 История"
+ACCOUNT = "👤 Аккаунт"
+CRYPTO = "₿ TNC Crypto"
+GAMES = "🎮 TNC Games"
+COMMUNITY = "👥 Community"
+SETTINGS = "⚙️ Настройки"
+MINI_APP = "🌐 Открыть Mini App"
+CANCEL = "❌ Отмена"
+BACK = "⬅️ Главное меню"
 
 
 class TransferFlow(StatesGroup):
@@ -105,7 +105,7 @@ def main_keyboard():
         keyboard=rows,
         resize_keyboard=True,
         is_persistent=True,
-        input_field_placeholder="Р’С‹Р±РµСЂРё СЂР°Р·РґРµР» TNC",
+        input_field_placeholder="Выбери раздел TNC",
     )
 
 
@@ -195,14 +195,14 @@ async def show_home(message: Message, greeting=True):
     if greeting:
         name = html.escape(message.from_user.first_name or "User")
         caption = (
-            f"рџ’Ћ <b>Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ РІ TNC, {name}!</b>\n\n"
-            "РўРІРѕР№ РµРґРёРЅС‹Р№ Р°РєРєР°СѓРЅС‚ С†РёС„СЂРѕРІРѕР№ СЌРєРѕСЃРёСЃС‚РµРјС‹.\n"
-            "Р’С‹Р±РёСЂР°Р№ СЂР°Р·РґРµР» СЃ РїРѕРјРѕС‰СЊСЋ РєР»Р°РІРёР°С‚СѓСЂС‹ РЅРёР¶Рµ."
+            f"💎 <b>Добро пожаловать в TNC, {name}!</b>\n\n"
+            "Твой единый аккаунт цифровой экосистемы.\n"
+            "Выбирай раздел с помощью клавиатуры ниже."
         )
     else:
         caption = (
-            "рџ’Ћ <b>TNC ECOSYSTEM</b>\n\n"
-            "Р“Р»Р°РІРЅРѕРµ РјРµРЅСЋ. Р’С‹Р±РµСЂРё РЅСѓР¶РЅС‹Р№ СЂР°Р·РґРµР»."
+            "💎 <b>TNC ECOSYSTEM</b>\n\n"
+            "Главное меню. Выбери нужный раздел."
         )
 
     await send_section(
@@ -210,7 +210,7 @@ async def show_home(message: Message, greeting=True):
         "TNC ECOSYSTEM",
         "WELCOME TO TNC",
         "YOUR ACCOUNT. YOUR ECOSYSTEM.",
-        "WALLET  вЂў  CRYPTO  вЂў  GAMES",
+        "WALLET  •  CRYPTO  •  GAMES",
         caption,
     )
 
@@ -244,15 +244,15 @@ async def help_handler(message: Message):
         message,
         "TNC SUPPORT",
         "HELP CENTER",
-        "РљРѕРјР°РЅРґС‹ Рё РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё TNC Wallet",
-        "/start  вЂў  /menu  вЂў  /help",
+        "Команды и возможности TNC Wallet",
+        "/start  •  /menu  •  /help",
         (
-            "в„№пёЏ <b>РџРѕРјРѕС‰СЊ TNC</b>\n\n"
-            "/start вЂ” Р·Р°РїСѓСЃРє Р°РєРєР°СѓРЅС‚Р°\n"
-            "/menu вЂ” РіР»Р°РІРЅРѕРµ РјРµРЅСЋ\n"
-            "/help вЂ” РїРѕРјРѕС‰СЊ\n\n"
-            "Р”Р»СЏ РїРµСЂРµРІРѕРґР° РїРѕР»СѓС‡Р°С‚РµР»СЊ РґРѕР»Р¶РµРЅ Р·Р°РїСѓСЃС‚РёС‚СЊ Р±РѕС‚Р°.\n"
-            "TNC Coin вЂ” РІРЅСѓС‚СЂРµРЅРЅСЏСЏ СѓС‡С‘С‚РЅР°СЏ РІР°Р»СЋС‚Р° СЌРєРѕСЃРёСЃС‚РµРјС‹."
+            "ℹ️ <b>Помощь TNC</b>\n\n"
+            "/start — запуск аккаунта\n"
+            "/menu — главное меню\n"
+            "/help — помощь\n\n"
+            "Для перевода получатель должен запустить бота.\n"
+            "TNC Coin — внутренняя учётная валюта экосистемы."
         ),
     )
 
@@ -282,15 +282,15 @@ async def wallet_handler(message: Message):
             f"{current_balance} TNC",
             "SECURE INTERNAL ACCOUNT",
             (
-                "рџ’Ћ <b>TNC WALLET</b>\n\n"
-                f"Р”РѕСЃС‚СѓРїРЅС‹Р№ Р±Р°Р»Р°РЅСЃ: <b>{current_balance} TNC</b>\n\n"
-                "Р—РґРµСЃСЊ РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ РІРЅСѓС‚СЂРµРЅРЅРёРµ СЃСЂРµРґСЃС‚РІР° С‚РІРѕРµРіРѕ Р°РєРєР°СѓРЅС‚Р°."
+                "💎 <b>TNC WALLET</b>\n\n"
+                f"Доступный баланс: <b>{current_balance} TNC</b>\n\n"
+                "Здесь отображаются внутренние средства твоего аккаунта."
             ),
         )
     except Exception:
         logger.exception("Wallet screen failed")
         await message.answer(
-            "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РєРѕС€РµР»С‘Рє. РџРѕРїСЂРѕР±СѓР№ РµС‰С‘ СЂР°Р·.",
+            "Не удалось открыть кошелёк. Попробуй ещё раз.",
             reply_markup=main_keyboard(),
         )
 
@@ -313,17 +313,17 @@ async def transfer_start(message: Message, state: FSMContext):
         message,
         "TNC TRANSFER",
         "SEND TNC",
-        "Р‘С‹СЃС‚СЂС‹Р№ РІРЅСѓС‚СЂРµРЅРЅРёР№ РїРµСЂРµРІРѕРґ",
-        "RECIPIENT  в†’  AMOUNT  в†’  CONFIRMATION",
+        "Быстрый внутренний перевод",
+        "RECIPIENT  →  AMOUNT  →  CONFIRMATION",
         (
-            "рџ’ё <b>РќРѕРІС‹Р№ РїРµСЂРµРІРѕРґ</b>\n\n"
-            "Р’РІРµРґРё Telegram ID РїРѕР»СѓС‡Р°С‚РµР»СЏ.\n"
-            "РџРѕР»СѓС‡Р°С‚РµР»СЊ РґРѕР»Р¶РµРЅ РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅРѕ Р·Р°РїСѓСЃС‚РёС‚СЊ TNC Wallet."
+            "💸 <b>Новый перевод</b>\n\n"
+            "Введи Telegram ID получателя.\n"
+            "Получатель должен предварительно запустить TNC Wallet."
         ),
     )
 
     await message.answer(
-        "РћС‚РїСЂР°РІСЊ Telegram ID РїРѕР»СѓС‡Р°С‚РµР»СЏ РёР»Рё РЅР°Р¶РјРё В«РћС‚РјРµРЅР°В».",
+        "Отправь Telegram ID получателя или нажми «Отмена».",
         reply_markup=cancel_keyboard(),
     )
 
@@ -340,11 +340,11 @@ async def transfer_receiver(message: Message, state: FSMContext):
         if receiver_id <= 0:
             raise ValueError
     except (ValueError, AttributeError):
-        await message.answer("Р’РІРµРґРё РєРѕСЂСЂРµРєС‚РЅС‹Р№ С‡РёСЃР»РѕРІРѕР№ Telegram ID.")
+        await message.answer("Введи корректный числовой Telegram ID.")
         return
 
     if receiver_id == message.from_user.id:
-        await message.answer("РќРµР»СЊР·СЏ РѕС‚РїСЂР°РІРёС‚СЊ РїРµСЂРµРІРѕРґ СЃР°РјРѕРјСѓ СЃРµР±Рµ.")
+        await message.answer("Нельзя отправить перевод самому себе.")
         return
 
     await state.update_data(receiver_id=receiver_id)
@@ -354,13 +354,13 @@ async def transfer_receiver(message: Message, state: FSMContext):
         message,
         "TNC TRANSFER",
         "TRANSFER AMOUNT",
-        "РЈРєР°Р¶Рё СЃСѓРјРјСѓ РІ TNC",
+        "Укажи сумму в TNC",
         "MAXIMUM: 1 000 000 TNC",
-        f"РџРѕР»СѓС‡Р°С‚РµР»СЊ: <code>{receiver_id}</code>\n\nРўРµРїРµСЂСЊ РІРІРµРґРё СЃСѓРјРјСѓ РїРµСЂРµРІРѕРґР°.",
+        f"Получатель: <code>{receiver_id}</code>\n\nТеперь введи сумму перевода.",
     )
 
     await message.answer(
-        "РќР°РїСЂРёРјРµСЂ: 25 РёР»Рё 125.50",
+        "Например: 25 или 125.50",
         reply_markup=cancel_keyboard(),
     )
 
@@ -399,9 +399,9 @@ async def transfer_amount(message: Message, state: FSMContext):
             message.from_user.first_name or "TNC USER",
             operation_id,
             (
-                "вњ… <b>РџРµСЂРµРІРѕРґ РІС‹РїРѕР»РЅРµРЅ</b>\n\n"
-                f"РџРѕР»СѓС‡Р°С‚РµР»СЊ: <code>{receiver_id}</code>\n"
-                f"РћРїРµСЂР°С†РёСЏ: <code>{operation_id}</code>"
+                "✅ <b>Перевод выполнен</b>\n\n"
+                f"Получатель: <code>{receiver_id}</code>\n"
+                f"Операция: <code>{operation_id}</code>"
             ),
         )
 
@@ -420,23 +420,23 @@ async def transfer_amount(message: Message, state: FSMContext):
                 recipient_name,
                 operation_id,
                 (
-                    "рџ’› <b>РўС‹ РїРѕР»СѓС‡РёР» РїРµСЂРµРІРѕРґ TNC!</b>\n\n"
-                    f"РћС‚РїСЂР°РІРёС‚РµР»СЊ: <code>{message.from_user.id}</code>\n"
-                    f"РћРїРµСЂР°С†РёСЏ: <code>{operation_id}</code>"
+                    "💛 <b>Ты получил перевод TNC!</b>\n\n"
+                    f"Отправитель: <code>{message.from_user.id}</code>\n"
+                    f"Операция: <code>{operation_id}</code>"
                 ),
             )
         except Exception:
             logger.exception("Could not notify transfer recipient")
 
         await message.answer(
-            "Р“Р»Р°РІРЅРѕРµ РјРµРЅСЋ РґРѕСЃС‚СѓРїРЅРѕ РЅРёР¶Рµ.",
+            "Главное меню доступно ниже.",
             reply_markup=main_keyboard(),
         )
 
     except ValueError as error:
         await state.clear()
         await message.answer(
-            f"вќЊ {html.escape(str(error))}",
+            f"❌ {html.escape(str(error))}",
             reply_markup=main_keyboard(),
             parse_mode="HTML",
         )
@@ -444,7 +444,7 @@ async def transfer_amount(message: Message, state: FSMContext):
         logger.exception("Transfer failed")
         await state.clear()
         await message.answer(
-            "РќРµ СѓРґР°Р»РѕСЃСЊ РІС‹РїРѕР»РЅРёС‚СЊ РїРµСЂРµРІРѕРґ. РџРѕРїСЂРѕР±СѓР№ РїРѕР·Р¶Рµ.",
+            "Не удалось выполнить перевод. Попробуй позже.",
             reply_markup=main_keyboard(),
         )
 
@@ -465,38 +465,38 @@ async def history_handler(message: Message):
             message,
             "TNC ACTIVITY",
             "TRANSACTION HISTORY",
-            "Р’СЃРµ РѕРїРµСЂР°С†РёРё С‚РІРѕРµРіРѕ Р°РєРєР°СѓРЅС‚Р°",
-            f"{len(transactions)} РїРѕСЃР»РµРґРЅРёС… Р·Р°РїРёСЃРµР№",
-            "рџ“Љ <b>РСЃС‚РѕСЂРёСЏ TNC Wallet</b>",
+            "Все операции твоего аккаунта",
+            f"{len(transactions)} последних записей",
+            "📊 <b>История TNC Wallet</b>",
         )
 
         if not transactions:
             await message.answer(
-                "РџРѕРєР° РЅРµС‚ РѕРїРµСЂР°С†РёР№.",
+                "Пока нет операций.",
                 reply_markup=main_keyboard(),
             )
             return
 
-        lines = ["<b>РџРѕСЃР»РµРґРЅРёРµ РѕРїРµСЂР°С†РёРё:</b>\n"]
+        lines = ["<b>Последние операции:</b>\n"]
 
         for tx in transactions:
             outgoing = tx.sender_id == message.from_user.id
 
             if tx.kind == "deposit":
-                icon = "рџџў"
-                label = "РџРѕРїРѕР»РЅРµРЅРёРµ"
+                icon = "🟢"
+                label = "Пополнение"
                 sign = "+"
             elif tx.kind == "withdraw":
-                icon = "рџ”ґ"
-                label = "РЎРїРёСЃР°РЅРёРµ"
-                sign = "в€’"
+                icon = "🔴"
+                label = "Списание"
+                sign = "−"
             elif outgoing:
-                icon = "в†—пёЏ"
-                label = "РћС‚РїСЂР°РІР»РµРЅРѕ"
-                sign = "в€’"
+                icon = "↗️"
+                label = "Отправлено"
+                sign = "−"
             else:
-                icon = "в†™пёЏ"
-                label = "РџРѕР»СѓС‡РµРЅРѕ"
+                icon = "↙️"
+                label = "Получено"
                 sign = "+"
 
             lines.append(
@@ -513,7 +513,7 @@ async def history_handler(message: Message):
 
     except Exception:
         logger.exception("History failed")
-        await message.answer("РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РёСЃС‚РѕСЂРёСЋ.")
+        await message.answer("Не удалось загрузить историю.")
 
 
 # --------------------------------------------------
@@ -532,7 +532,7 @@ async def account_handler(message: Message):
         username = (
             f"@{html.escape(user.username)}"
             if user.username
-            else "РќРµ СѓРєР°Р·Р°РЅ"
+            else "Не указан"
         )
 
         await send_section(
@@ -542,17 +542,17 @@ async def account_handler(message: Message):
             html.escape(user.first_name),
             f"ID: {user.telegram_id}",
             (
-                "рџ‘¤ <b>РўРІРѕР№ TNC Account</b>\n\n"
+                "👤 <b>Твой TNC Account</b>\n\n"
                 f"РРјСЏ: {html.escape(user.first_name)}\n"
                 f"Username: {username}\n"
                 f"Telegram ID: <code>{user.telegram_id}</code>\n"
-                f"Р‘Р°Р»Р°РЅСЃ: <b>{current_balance} TNC</b>"
+                f"Баланс: <b>{current_balance} TNC</b>"
             ),
         )
 
     except Exception:
         logger.exception("Account screen failed")
-        await message.answer("РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ Р°РєРєР°СѓРЅС‚.")
+        await message.answer("Не удалось открыть аккаунт.")
 
 
 # --------------------------------------------------
@@ -565,12 +565,12 @@ async def crypto_handler(message: Message):
         message,
         "TNC CRYPTO",
         "CRYPTO HUB",
-        "Р•РґРёРЅРѕРµ РєСЂРёРїС‚РѕРЅР°РїСЂР°РІР»РµРЅРёРµ TNC",
-        "BLOCKCHAIN INTEGRATIONS вЂ” COMING",
+        "Единое криптонаправление TNC",
+        "BLOCKCHAIN INTEGRATIONS — COMING",
         (
-            "в‚ї <b>TNC CRYPTO</b>\n\n"
-            "Р—РґРµСЃСЊ Р±СѓРґРµС‚ РѕС‚РґРµР»СЊРЅРѕРµ РЅР°РїСЂР°РІР»РµРЅРёРµ РґР»СЏ РєСЂРёРїС‚РѕРІР°Р»СЋС‚.\n"
-            "Р’РЅРµС€РЅРёРµ Р±Р»РѕРєС‡РµР№РЅС‹ Рё СЂРµР°Р»СЊРЅС‹Рµ РєСЂРёРїС‚РѕРѕРїРµСЂР°С†РёРё РїРѕРєР° РЅРµ РїРѕРґРєР»СЋС‡РµРЅС‹."
+            "₿ <b>TNC CRYPTO</b>\n\n"
+            "Здесь будет отдельное направление для криптовалют.\n"
+            "Внешние блокчейны и реальные криптооперации пока не подключены."
         ),
     )
 
@@ -581,12 +581,12 @@ async def games_handler(message: Message):
         message,
         "TNC GAMES",
         "GAME CENTER",
-        "РРіСЂС‹, Р·Р°РґР°РЅРёСЏ Рё С‚СѓСЂРЅРёСЂС‹",
-        "PLAY  вЂў  EARN  вЂў  COMPETE",
+        "Игры, задания и турниры",
+        "PLAY  •  EARN  •  COMPETE",
         (
-            "рџЋ® <b>TNC GAMES</b>\n\n"
-            "РРіСЂРѕРІРѕРµ РЅР°РїСЂР°РІР»РµРЅРёРµ Р±СѓРґРµС‚ СЂР°Р±РѕС‚Р°С‚СЊ РѕС‚РґРµР»СЊРЅРѕ "
-            "Рё РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РµРґРёРЅС‹Р№ TNC Account."
+            "🎮 <b>TNC GAMES</b>\n\n"
+            "Игровое направление будет работать отдельно "
+            "и использовать единый TNC Account."
         ),
     )
 
@@ -603,11 +603,11 @@ async def community_handler(message: Message):
         message,
         "TNC COMMUNITY",
         "JOIN THE COMMUNITY",
-        "Р Р°Р·РІРёРІР°Р№ СЌРєРѕСЃРёСЃС‚РµРјСѓ РІРјРµСЃС‚Рµ СЃ РЅР°РјРё",
-        "INVITE  вЂў  CONNECT  вЂў  GROW",
+        "Развивай экосистему вместе с нами",
+        "INVITE  •  CONNECT  •  GROW",
         (
-            "рџ‘Ґ <b>TNC COMMUNITY</b>\n\n"
-            f"РўРІРѕСЏ СЃСЃС‹Р»РєР°:\n"
+            "👥 <b>TNC COMMUNITY</b>\n\n"
+            f"Твоя ссылка:\n"
             f"https://t.me/{me.username}?start=ref_{message.from_user.id}"
         ),
     )
@@ -619,12 +619,12 @@ async def settings_handler(message: Message):
         message,
         "TNC SETTINGS",
         "PREFERENCES",
-        "РќР°СЃС‚СЂРѕР№РєРё Р°РєРєР°СѓРЅС‚Р°",
-        "ACCOUNT  вЂў  SECURITY  вЂў  NOTIFICATIONS",
+        "Настройки аккаунта",
+        "ACCOUNT  •  SECURITY  •  NOTIFICATIONS",
         (
-            "вљ™пёЏ <b>РќР°СЃС‚СЂРѕР№РєРё TNC</b>\n\n"
-            "Р Р°Р·РґРµР» РїРѕРґРіРѕС‚РѕРІР»РµРЅ РґР»СЏ РїРѕРґРєР»СЋС‡РµРЅРёСЏ РЅР°СЃС‚СЂРѕРµРє СѓРІРµРґРѕРјР»РµРЅРёР№, "
-            "Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё Рё РїСЂРѕС„РёР»СЏ."
+            "⚙️ <b>Настройки TNC</b>\n\n"
+            "Раздел подготовлен для подключения настроек уведомлений, "
+            "безопасности и профиля."
         ),
     )
 
@@ -635,7 +635,7 @@ async def miniapp_handler(message: Message):
 
     if url.startswith("https://"):
         await message.answer(
-            "РћС‚РєСЂРѕР№ Mini App РєРЅРѕРїРєРѕР№ РІ РіР»Р°РІРЅРѕРј РјРµРЅСЋ.",
+            "Открой Mini App кнопкой в главном меню.",
             reply_markup=main_keyboard(),
         )
     else:
@@ -643,9 +643,9 @@ async def miniapp_handler(message: Message):
             message,
             "TNC MINI APP",
             "WEB APP",
-            "Р‘РѕР»СЊС€РѕРµ РїСЂРёР»РѕР¶РµРЅРёРµ TNC РіРѕС‚РѕРІРёС‚СЃСЏ",
+            "Большое приложение TNC готовится",
             "HTTPS ADDRESS NOT CONNECTED",
-            "рџЊђ <b>Mini App РµС‰С‘ РЅРµ РѕРїСѓР±Р»РёРєРѕРІР°РЅ.</b>",
+            "🌐 <b>Mini App ещё не опубликован.</b>",
         )
 
 
@@ -660,14 +660,14 @@ def is_admin(user_id):
 @dp.message(Command("credit"))
 async def admin_credit(message: Message):
     if not is_admin(message.from_user.id):
-        await message.answer("в›” РќРµС‚ РґРѕСЃС‚СѓРїР°.")
+        await message.answer("⛔ Нет доступа.")
         return
 
     parts = (message.text or "").split()
 
     if len(parts) != 3:
         await message.answer(
-            "Р¤РѕСЂРјР°С‚: <code>/credit TELEGRAM_ID РЎРЈРњРњРђ</code>",
+            "Формат: <code>/credit TELEGRAM_ID СУММА</code>",
             parse_mode="HTML",
         )
         return
@@ -690,37 +690,37 @@ async def admin_credit(message: Message):
             "deposit",
             "TNC WALLET",
             tx.operation_id,
-            "рџ’› <b>РќР° С‚РІРѕР№ Р±Р°Р»Р°РЅСЃ Р·Р°С‡РёСЃР»РµРЅС‹ TNC.</b>",
+            "💛 <b>На твой баланс зачислены TNC.</b>",
         )
 
         await message.answer(
-            "вњ… РџРѕРїРѕР»РЅРµРЅРёРµ РІС‹РїРѕР»РЅРµРЅРѕ.\n"
-            f"РџРѕР»СѓС‡Р°С‚РµР»СЊ: <code>{target_id}</code>\n"
-            f"РЎСѓРјРјР°: <b>{fmt(tx.amount_units)} TNC</b>",
+            "✅ Пополнение выполнено.\n"
+            f"Получатель: <code>{target_id}</code>\n"
+            f"Сумма: <b>{fmt(tx.amount_units)} TNC</b>",
             parse_mode="HTML",
             reply_markup=main_keyboard(),
         )
 
     except ValueError as error:
-        await message.answer(f"вќЊ {html.escape(str(error))}")
+        await message.answer(f"❌ {html.escape(str(error))}")
     except Exception:
         logger.exception("Admin credit failed")
         await message.answer(
-            "РћРїРµСЂР°С†РёСЏ РЅРµ РІС‹РїРѕР»РЅРµРЅР°. РџСЂРѕРІРµСЂСЊ ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ Рё РµРіРѕ РєРѕС€РµР»С‘Рє."
+            "Операция не выполнена. Проверь ID пользователя и его кошелёк."
         )
 
 
 @dp.message(Command("debit"))
 async def admin_debit(message: Message):
     if not is_admin(message.from_user.id):
-        await message.answer("в›” РќРµС‚ РґРѕСЃС‚СѓРїР°.")
+        await message.answer("⛔ Нет доступа.")
         return
 
     parts = (message.text or "").split()
 
     if len(parts) != 3:
         await message.answer(
-            "Р¤РѕСЂРјР°С‚: <code>/debit TELEGRAM_ID РЎРЈРњРњРђ</code>",
+            "Формат: <code>/debit TELEGRAM_ID СУММА</code>",
             parse_mode="HTML",
         )
         return
@@ -743,48 +743,48 @@ async def admin_debit(message: Message):
             "withdraw",
             "TNC WALLET",
             tx.operation_id,
-            "вљ пёЏ <b>РЎ Р±Р°Р»Р°РЅСЃР° СЃРїРёСЃР°РЅС‹ TNC.</b>",
+            "⚠️ <b>С баланса списаны TNC.</b>",
         )
 
         await message.answer(
-            "вњ… РЎРїРёСЃР°РЅРёРµ РІС‹РїРѕР»РЅРµРЅРѕ.\n"
-            f"РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ: <code>{target_id}</code>\n"
-            f"РЎСѓРјРјР°: <b>{fmt(tx.amount_units)} TNC</b>",
+            "✅ Списание выполнено.\n"
+            f"Пользователь: <code>{target_id}</code>\n"
+            f"Сумма: <b>{fmt(tx.amount_units)} TNC</b>",
             parse_mode="HTML",
             reply_markup=main_keyboard(),
         )
 
     except ValueError as error:
-        await message.answer(f"вќЊ {html.escape(str(error))}")
+        await message.answer(f"❌ {html.escape(str(error))}")
     except Exception:
         logger.exception("Admin debit failed")
-        await message.answer("РћРїРµСЂР°С†РёСЏ РЅРµ РІС‹РїРѕР»РЅРµРЅР°.")
+        await message.answer("Операция не выполнена.")
 
 
 # --------------------------------------------------
 # --------------------------------------------------
-# TNC SHOP вЂ” TELEGRAM STARS
+# TNC SHOP — TELEGRAM STARS
 # --------------------------------------------------
 
 @dp.message(Command("shop"))
 async def tnc_shop_handler(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="1 TNC вЂ” 50 в­ђ", callback_data="tnc_buy:1"),
-            InlineKeyboardButton(text="10 TNC вЂ” 500 в­ђ", callback_data="tnc_buy:10"),
+            InlineKeyboardButton(text="1 TNC — 50 ⭐", callback_data="tnc_buy:1"),
+            InlineKeyboardButton(text="10 TNC — 500 ⭐", callback_data="tnc_buy:10"),
         ],
         [
-            InlineKeyboardButton(text="100 TNC вЂ” 5 000 в­ђ", callback_data="tnc_buy:100"),
+            InlineKeyboardButton(text="100 TNC — 5 000 ⭐", callback_data="tnc_buy:100"),
         ],
         [
-            InlineKeyboardButton(text="1 000 TNC вЂ” 50 000 в­ђ", callback_data="tnc_buy:1000"),
+            InlineKeyboardButton(text="1 000 TNC — 50 000 ⭐", callback_data="tnc_buy:1000"),
         ],
     ])
     await message.answer(
-        "рџ›Ќ <b>TNC SHOP</b>\n\n"
-        "Р’С‹Р±РµСЂРё РїР°РєРµС‚ РїРѕРїРѕР»РЅРµРЅРёСЏ.\n"
-        "РљСѓСЂСЃ: 1 TNC = 50 в­ђ\n\n"
-        "Р‘Р°Р»Р°РЅСЃ Р±СѓРґРµС‚ РїРѕРїРѕР»РЅРµРЅ РїРѕСЃР»Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ РѕРїР»Р°С‚С‹ Telegram.",
+        "🛍 <b>TNC SHOP</b>\n\n"
+        "Выбери пакет пополнения.\n"
+        "Курс: 1 TNC = 50 ⭐\n\n"
+        "Баланс будет пополнен после подтверждения оплаты Telegram.",
         reply_markup=keyboard,
         parse_mode="HTML",
     )
@@ -800,7 +800,7 @@ async def tnc_buy_handler(callback: CallbackQuery):
 
         await callback.message.answer_invoice(
             title=f"{package} TNC",
-            description=f"РџРѕРїРѕР»РЅРµРЅРёРµ РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ Р±Р°Р»Р°РЅСЃР° TNC РЅР° {package} РјРѕРЅРµС‚.",
+            description=f"Пополнение внутреннего баланса TNC на {package} монет.",
             payload=payload,
             currency="XTR",
             prices=[LabeledPrice(label=f"{package} TNC", amount=stars)],
@@ -808,7 +808,7 @@ async def tnc_buy_handler(callback: CallbackQuery):
         await callback.answer()
     except Exception:
         logger.exception("Could not create TNC Stars invoice")
-        await callback.answer("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ СЃС‡С‘С‚. РџРѕРїСЂРѕР±СѓР№ РµС‰С‘ СЂР°Р·.", show_alert=True)
+        await callback.answer("Не удалось создать счёт. Попробуй ещё раз.", show_alert=True)
 
 
 @dp.pre_checkout_query()
@@ -1133,7 +1133,7 @@ async def gt_admin_log_handler(message: Message):
 @dp.message()
 async def unknown_handler(message: Message):
     await message.answer(
-        "РќРµ РїРѕРЅСЏР» РєРѕРјР°РЅРґСѓ. РСЃРїРѕР»СЊР·СѓР№ РєРЅРѕРїРєРё РјРµРЅСЋ РЅРёР¶Рµ РёР»Рё /help.",
+        "Не понял команду. Используй кнопки меню ниже или /help.",
         reply_markup=main_keyboard(),
     )
 
@@ -1144,11 +1144,11 @@ async def unknown_handler(message: Message):
 
 async def main():
     if not settings.BOT_TOKEN:
-        raise RuntimeError("BOT_TOKEN РЅРµ РЅР°СЃС‚СЂРѕРµРЅ.")
+        raise RuntimeError("BOT_TOKEN не настроен.")
 
     if not settings.ADMIN_IDS:
         logger.warning(
-            "ADMIN_IDS РїСѓСЃС‚. РљРѕРјР°РЅРґС‹ /credit Рё /debit РЅРµРґРѕСЃС‚СѓРїРЅС‹."
+            "ADMIN_IDS пуст. Команды /credit и /debit недоступны."
         )
 
     init_database()
