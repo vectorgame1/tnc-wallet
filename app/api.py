@@ -302,5 +302,3 @@ app.mount(
     StaticFiles(directory=str(web), html=True),
     name="webapp",
 )
-
-        
