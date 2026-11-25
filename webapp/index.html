@@ -1,961 +1,263 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#08090b">
-<meta name="description" content="TNC Wallet — кошелёк экосистемы TNC">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#090a0c">
+<meta name="description" content="TNC — единое пространство цифровой экосистемы">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="/app/manifest.webmanifest">
-<link rel="icon" href="/app/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/app/icon.svg">
-<title>TNC Wallet</title>
-
+<title>TNC — Web3 Digital Ecosystem</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{
-  color-scheme:dark;
-  --bg:#08090b;--surface:#111419;--surface2:#191e25;
-  --line:#292f39;--gold:#e8bd62;--gold-light:#f8dfa2;
-  --text:#f5f5f2;--muted:#929ba8;
-  --green:#65d6a0;--red:#ff7d86;
-  --top:env(safe-area-inset-top,0px);
-  --bottom:env(safe-area-inset-bottom,0px);
-}
-*{box-sizing:border-box}
-html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
-body{
-  margin:0;min-height:100vh;min-height:100dvh;
-  background:
-    radial-gradient(ellipse at 78% -10%,#78551f30,transparent 38%),
-    var(--bg);
-  color:var(--text);
-  font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
-}
-button,input{font:inherit}
-button{cursor:pointer}
-button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-button:disabled{opacity:.55;cursor:wait}
-.app{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:255px minmax(0,1fr)}
-.sidebar{
-  height:100vh;height:100dvh;position:sticky;top:0;
-  padding:26px 16px;background:#0c0e12;
-  border-right:1px solid var(--line);
-  display:flex;flex-direction:column;z-index:5;
-}
-.brand{display:flex;align-items:center;gap:12px;padding:4px 10px 34px}
-.brand-icon{
-  width:44px;height:44px;border-radius:15px;
-  display:grid;place-items:center;
-  background:linear-gradient(145deg,#ffe9b7,#b7802d);
-  color:#211706;font-size:22px;font-weight:1000;
-  box-shadow:0 8px 30px #d5a84c35;
-}
-.brand-name{font-size:15px;font-weight:950;letter-spacing:.22em}
-.brand-sub{font-size:9px;color:#7f8793;letter-spacing:.18em;margin-top:3px}
-.nav-label{padding:0 12px;color:#69717e;font-size:9px;font-weight:900;letter-spacing:.18em;margin:7px 0 12px}
-.nav{display:grid;gap:7px}
-.nav-btn{
-  width:100%;border:1px solid transparent;background:transparent;
-  color:#aab1bc;display:flex;align-items:center;gap:13px;
-  text-align:left;padding:13px 14px;border-radius:14px;transition:.2s;
-}
-.nav-btn:hover{background:#ffffff09;color:white}
-.nav-btn.active{
-  color:var(--gold-light);background:#e8bd6215;
-  border-color:#e8bd6240;
-}
-.nav-icon{width:22px;text-align:center;font-size:18px}
-.side-bottom{margin-top:auto}
-.status-card{padding:15px;border:1px solid var(--line);border-radius:16px;background:#ffffff04}
-.status-text{font-size:12px;color:#c4c9d0}
-.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:8px;box-shadow:0 0 12px var(--green)}
-.side-foot{font-size:10px;color:#59616d;padding:18px 12px 0;letter-spacing:.1em}
-main{
-  width:100%;max-width:1800px;min-width:0;margin:auto;
-  padding:34px clamp(20px,4vw,65px) 65px;
-}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:30px}
-.eyebrow{font-size:10px;color:var(--gold);font-weight:900;letter-spacing:.19em}
-h1{font-size:clamp(27px,3vw,39px);line-height:1.12;margin:7px 0 0;letter-spacing:-.045em}
-.top-actions{display:flex;align-items:center;gap:8px}
-.icon-btn,.avatar{
-  width:43px;height:43px;border:1px solid var(--line);
-  border-radius:14px;background:var(--surface);color:#e3e6eb;
-  display:grid;place-items:center;
-}
-.icon-btn{font-size:19px}
-.icon-btn:hover{border-color:#b98a3d;color:var(--gold-light)}
-.avatar{background:linear-gradient(145deg,#f0d18a,#956321);color:#211706;font-weight:950}
-.install-btn{
-  border:1px solid #e8bd6250;border-radius:13px;padding:10px 13px;
-  background:#e8bd6217;color:var(--gold-light);font-size:12px;font-weight:850;
-}
-.install-btn[hidden]{display:none}
-.page{display:none;animation:fade .2s ease}
-.page.active{display:block}
-@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-.dashboard{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.8fr);gap:20px}
-.card{
-  background:linear-gradient(145deg,#191d24,#101216);
-  border:1px solid var(--line);border-radius:22px;padding:24px;
-  box-shadow:0 20px 60px #0006;
-}
-.balance-card{
-  min-height:285px;position:relative;overflow:hidden;
-  background:
-    radial-gradient(circle at 88% 10%,#e8bd6240,transparent 35%),
-    linear-gradient(130deg,#302719,#17191e 68%);
-}
-.balance-card:after{
-  content:"T";position:absolute;right:25px;bottom:-110px;
-  font-size:350px;line-height:1;color:#e8bd620a;
-  font-weight:1000;pointer-events:none;
-}
-.balance-card>*{position:relative;z-index:1}
-.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.pill{
-  display:inline-flex;align-items:center;gap:7px;padding:7px 11px;
-  border-radius:99px;background:#e8bd6215;border:1px solid #e8bd6238;
-  color:var(--gold-light);font-size:10px;font-weight:850;white-space:nowrap;
-}
-.balance{
-  font-size:clamp(42px,6vw,69px);font-weight:950;
-  letter-spacing:-.065em;margin:28px 0 0;line-height:1.08;overflow-wrap:anywhere;
-}
-.currency{color:var(--gold-light);font-size:12px;font-weight:900;letter-spacing:.2em;margin-top:8px}
-.balance-note{color:#aaa397;font-size:12px;margin-top:12px}
-.quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:24px;max-width:580px}
-.quick{
-  border:1px solid #ffffff16;background:#ffffff09;color:#f5f1e8;
-  border-radius:14px;padding:12px 8px;display:flex;align-items:center;
-  justify-content:center;gap:8px;font-size:12px;font-weight:800;transition:.2s;
-}
-.quick:hover{border-color:#e8bd6270;background:#e8bd6215;transform:translateY(-2px)}
-.quick span{font-size:18px;color:var(--gold)}
-.profile-mini{display:flex;align-items:center;gap:13px;margin:19px 0 23px}
-.profile-photo{
-  width:54px;height:54px;border-radius:17px;background:#2b2e35;
-  display:grid;place-items:center;color:var(--gold-light);
-  font-size:20px;font-weight:900;overflow:hidden;flex-shrink:0;
-}
-.profile-photo img{width:100%;height:100%;object-fit:cover}
-.profile-name{font-weight:850}
-.profile-handle{font-size:12px;color:var(--muted);margin-top:2px}
-.info-row{
-  display:flex;justify-content:space-between;align-items:center;gap:14px;
-  padding:13px 0;border-bottom:1px solid #ffffff0d;font-size:13px;
-}
-.info-row:last-child{border:0}
-.info-row strong{text-align:right;overflow-wrap:anywhere}
-.muted{color:var(--muted)}
-.small{font-size:12px}
-.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:29px 0 14px}
-.section-head h2{font-size:17px;margin:0}
-.text-btn{background:none;border:0;color:var(--gold-light);font-size:12px;font-weight:800;padding:7px}
-.transactions{display:grid;gap:9px}
-.tx{
-  display:flex;align-items:center;gap:12px;padding:14px;
-  border:1px solid #ffffff0e;background:#111419;border-radius:15px;
-}
-.tx-icon{
-  width:41px;height:41px;border-radius:13px;display:grid;place-items:center;
-  background:#e8bd6215;color:var(--gold-light);font-size:18px;flex-shrink:0;
-}
-.tx-main{min-width:0;flex:1}
-.tx-title{font-size:13px;font-weight:800}
-.tx-meta{font-size:11px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}
-.tx-amount{font-size:12px;font-weight:900;white-space:nowrap}
-.positive{color:var(--green)}
-.negative{color:var(--red)}
-.empty{padding:30px 17px;text-align:center;border:1px dashed #343943;border-radius:16px;color:var(--muted);font-size:13px}
-.panel-title{font-size:21px;font-weight:900;margin:0 0 5px;letter-spacing:-.035em}
-.panel-desc{font-size:13px;color:var(--muted);margin:0 0 22px}
-.field{display:grid;gap:8px;margin:17px 0}
-.field label{font-size:12px;color:#b9c0ca;font-weight:750}
-.field input{
-  width:100%;border:1px solid #303640;background:#0c0e12;
-  border-radius:13px;padding:15px;color:white;outline:none;
-}
-.field input:focus{border-color:#c99b43;box-shadow:0 0 0 3px #e8bd6216}
-.primary{
-  border:0;border-radius:14px;padding:15px 18px;width:100%;
-  background:linear-gradient(110deg,#f4d995,#c18c36);
-  color:#17120a;font-weight:950;box-shadow:0 8px 25px #d6a94b22;
-}
-.primary:hover{filter:brightness(1.07)}
-.secondary{border:1px solid var(--line);border-radius:13px;padding:11px 14px;background:#ffffff08;color:#e8eaf0}
-.secondary:hover{border-color:#9a783d}
-.notice{border:1px solid #e8bd6233;background:#e8bd620c;border-radius:13px;padding:13px;color:#c7b78f;font-size:12px;margin-top:16px}
-.profile-layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px}
-.profile-hero{text-align:center}
-.profile-hero .profile-photo{width:90px;height:90px;border-radius:28px;margin:5px auto 15px;font-size:30px}
-.profile-hero h2{margin:0;font-size:20px}
-.profile-hero p{margin:5px 0 18px;color:var(--muted);font-size:12px}
-.coming{min-height:280px;display:grid;place-items:center;text-align:center}
-.coming-icon{font-size:42px;color:var(--gold);margin-bottom:10px}
-.mobile-nav{display:none}
-.toast{
-  position:fixed;left:50%;bottom:calc(24px + var(--bottom));
-  transform:translate(-50%,18px);opacity:0;pointer-events:none;
-  background:#242830;border:1px solid #424955;color:#fff;
-  border-radius:13px;padding:12px 17px;box-shadow:0 20px 60px #0009;
-  z-index:50;transition:.2s;max-width:90vw;font-size:13px;text-align:center;
-}
-.toast.show{opacity:1;transform:translate(-50%,0)}
-.loading{opacity:.55}
-.auth-notice{margin-bottom:18px}
-@media(min-width:1500px){.app{grid-template-columns:280px minmax(0,1fr)}main{padding-top:43px}.card{padding:28px}}
-@media(max-width:1000px){
-  .app{grid-template-columns:1fr}.sidebar{display:none}
-  main{padding:23px 21px calc(100px + var(--bottom))}
-  .dashboard{grid-template-columns:1fr}.profile-layout{grid-template-columns:1fr}
-}
-@media(max-width:600px){
-  main{padding:calc(15px + var(--top)) 13px calc(94px + var(--bottom))}
-  .topbar{margin-bottom:21px}
-  .topbar h1{font-size:25px}
-  .eyebrow{font-size:9px}
-  .card{padding:17px;border-radius:18px}
-  .balance-card{min-height:255px}
-  .balance{font-size:clamp(38px,11vw,55px);margin-top:24px}
-  .quick-actions{gap:6px;margin-top:20px}
-  .quick{font-size:10px;padding:11px 4px;gap:5px}
-  .top-actions{gap:5px}
-  .icon-btn,.avatar{width:38px;height:38px;border-radius:11px}
-  .install-btn{padding:9px 10px;font-size:10px}
-  .mobile-nav{
-    position:fixed;bottom:0;left:0;right:0;z-index:30;
-    display:grid;grid-template-columns:repeat(6,1fr);
-    padding:8px 5px calc(8px + var(--bottom));
-    background:#0c0e12ed;backdrop-filter:blur(20px);
-    border-top:1px solid var(--line);
-  }
-  .mobile-nav button{
-    border:0;background:none;color:#818a97;font-size:9px;
-    display:grid;gap:3px;justify-items:center;padding:4px 0;
-  }
-  .mobile-nav button span{font-size:18px}
-  .mobile-nav button.active{color:var(--gold-light)}
-  .section-head{margin-top:23px}
-  .tx{padding:11px 9px;gap:8px}
-  .tx-amount{font-size:10px}
-  .tx-icon{width:35px;height:35px}
-}
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
-}
+:root{color-scheme:dark;--bg:#090a0c;--panel:#111419;--panel2:#171b21;--line:#282e37;--gold:#e7bd68;--gold2:#f7dfa5;--text:#f4f1e9;--muted:#89919e;--green:#6bd6a0;--red:#ff7c86;--r:22px;--safeB:env(safe-area-inset-bottom,0px);--safeT:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}html{background:var(--bg);scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 78% -12%,#8b64252b,transparent 35%),radial-gradient(ellipse at 0% 45%,#24304418,transparent 40%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}button:disabled{opacity:.55;cursor:not-allowed}.shell{min-height:100vh;display:grid;grid-template-columns:250px minmax(0,1fr)}
+.sidebar{height:100dvh;position:sticky;top:0;padding:25px 15px 18px;background:#0c0e11ed;border-right:1px solid var(--line);display:flex;flex-direction:column;z-index:5;backdrop-filter:blur(20px)}.brand{display:flex;align-items:center;gap:12px;padding:4px 10px 35px}.brandmark{width:43px;height:43px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#ffedc4,#b47b29);color:#211606;font-size:22px;font-weight:1000;box-shadow:0 8px 30px #d5a84c35}.brandname{font-size:15px;font-weight:950;letter-spacing:.24em}.brandtag{font-size:9px;letter-spacing:.19em;color:#737d89;margin-top:3px}.navlabel{font-size:9px;color:#66707d;letter-spacing:.2em;font-weight:900;padding:0 12px;margin:4px 0 11px}.nav{display:grid;gap:6px}.nav button{border:1px solid transparent;border-radius:13px;background:none;color:#aab1bc;padding:12px 13px;display:flex;align-items:center;gap:12px;text-align:left;font-weight:700;transition:.18s}.nav button:hover{background:#ffffff08;color:#fff}.nav button.active{color:var(--gold2);border-color:#e7bd6842;background:linear-gradient(100deg,#e7bd681a,#e7bd6808)}.navicon{width:22px;text-align:center;font-size:17px}.sidebottom{margin-top:auto}.online{padding:14px;border:1px solid var(--line);border-radius:15px;background:#ffffff04}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);margin-right:8px}.sideversion{padding:16px 12px 0;color:#59616d;font-size:9px;letter-spacing:.16em}
+main{width:100%;max-width:1700px;min-width:0;margin:auto;padding:30px clamp(18px,4vw,58px) 70px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:27px}.eyebrow{font-size:9px;font-weight:900;color:var(--gold);letter-spacing:.2em}.topbar h1{font-size:clamp(26px,3vw,38px);letter-spacing:-.05em;line-height:1.12;margin:7px 0 0}.topright{display:flex;align-items:center;gap:9px}.iconbtn,.avatar{width:42px;height:42px;border:1px solid var(--line);border-radius:13px;background:var(--panel);color:#e7e9ed;display:grid;place-items:center;font-size:17px}.avatar{background:linear-gradient(145deg,#f0d69a,#966526);color:#211706;font-weight:950}.iconbtn:hover{border-color:#a9874a;color:var(--gold2)}.page{display:none;animation:appear .22s ease}.page.active{display:block}@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.grid{display:grid;gap:17px}.dashboard{grid-template-columns:minmax(0,1.55fr) minmax(270px,.8fr)}.card{min-width:0;padding:22px;border:1px solid var(--line);border-radius:var(--r);background:linear-gradient(145deg,#191d24,#101216);box-shadow:0 18px 55px #0005}.hero{min-height:285px;position:relative;overflow:hidden;background:radial-gradient(circle at 88% 10%,#e7bd6840,transparent 34%),linear-gradient(130deg,#33291a,#191a1f 70%)}.hero:after{content:"T";position:absolute;right:24px;bottom:-125px;font-size:370px;line-height:1;font-weight:1000;color:#e7bd680b;pointer-events:none}.hero>*{position:relative;z-index:1}.cardhead{display:flex;justify-content:space-between;align-items:center;gap:10px}.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #e7bd6840;background:#e7bd6815;color:var(--gold2);border-radius:99px;padding:6px 10px;font-size:9px;font-weight:900;letter-spacing:.07em;white-space:nowrap}.balance{font-size:clamp(43px,6vw,68px);font-weight:950;letter-spacing:-.07em;line-height:1.08;margin:28px 0 0;overflow-wrap:anywhere}.currency{font-size:11px;color:var(--gold2);font-weight:900;letter-spacing:.22em;margin-top:7px}.muted{color:var(--muted)}.tiny{font-size:11px}.herofoot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:25px}.quickrow{display:flex;flex-wrap:wrap;gap:8px}.btn{border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:#ffffff08;color:#e9e9e8;font-weight:800;font-size:12px;transition:.18s}.btn:hover{border-color:#a9874a;transform:translateY(-1px)}.btn.gold{background:linear-gradient(110deg,#f5dfa7,#bd8938);border:0;color:#211706;box-shadow:0 8px 24px #d6a94b20}.btn.gold:hover{filter:brightness(1.06)}.btn.block{width:100%;padding:14px}.btn:disabled{transform:none}.profileline{display:flex;align-items:center;gap:12px;margin:18px 0 20px}.photo{width:52px;height:52px;border-radius:17px;display:grid;place-items:center;background:#2b3038;color:var(--gold2);font-size:20px;font-weight:900;overflow:hidden;flex-shrink:0}.photo img{width:100%;height:100%;object-fit:cover}.name{font-weight:850}.handle{font-size:11px;color:var(--muted);margin-top:2px}.info{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #ffffff0d;font-size:12px}.info:last-child{border:0}.info strong{text-align:right;overflow-wrap:anywhere}.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 13px}.sectionhead h2{font-size:17px;margin:0;letter-spacing:-.02em}.linkbtn{border:0;background:none;color:var(--gold2);font-size:11px;font-weight:850;padding:7px}.transactions{display:grid;gap:8px}.tx{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #ffffff0e;border-radius:15px;background:#111419}.txicon{width:39px;height:39px;border-radius:12px;display:grid;place-items:center;background:#e7bd6815;color:var(--gold2);font-size:17px;flex-shrink:0}.txmain{min-width:0;flex:1}.txtitle{font-size:12px;font-weight:850}.txmeta{font-size:10px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}.txamount{font-size:12px;font-weight:900;white-space:nowrap}.positive{color:var(--green)}.negative{color:var(--red)}.empty{padding:28px 16px;text-align:center;border:1px dashed #343b45;border-radius:15px;color:var(--muted);font-size:12px}.stats{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:16px}.stat{padding:16px;border:1px solid var(--line);border-radius:17px;background:#ffffff04}.statlabel{font-size:10px;color:var(--muted)}.statvalue{font-size:21px;font-weight:900;letter-spacing:-.04em;margin-top:6px}.twocol{grid-template-columns:repeat(2,minmax(0,1fr))}.pageintro{margin-bottom:20px}.pageintro h2{font-size:25px;letter-spacing:-.04em;margin:6px 0}.pageintro p{color:var(--muted);font-size:12px;margin:0;max-width:650px}.formcard{max-width:700px}.field{display:grid;gap:7px;margin:16px 0}.field label{font-size:11px;color:#bbc2cc;font-weight:800}.field input,.search{width:100%;border:1px solid #303640;border-radius:12px;background:#0c0e12;padding:14px;color:#fff;outline:none}.field input:focus,.search:focus{border-color:#c99b43;box-shadow:0 0 0 3px #e7bd6815}.notice{border:1px solid #e7bd6833;background:#e7bd680c;border-radius:13px;padding:12px;color:#c9b98f;font-size:11px;margin-top:14px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0}.toolbar .search{flex:1;min-width:170px}.segmented{display:flex;gap:5px;padding:4px;background:#0c0e12;border:1px solid var(--line);border-radius:12px}.segmented button{border:0;border-radius:8px;padding:7px 10px;background:none;color:var(--muted);font-size:10px}.segmented button.active{background:#e7bd681c;color:var(--gold2)}.featuregrid{grid-template-columns:repeat(3,minmax(0,1fr))}.feature{position:relative;overflow:hidden;min-height:190px}.feature .featureicon{font-size:27px;color:var(--gold);margin-bottom:18px}.feature h3{font-size:16px;margin:0 0 6px}.feature p{font-size:11px;color:var(--muted);margin:0 0 16px}.feature .soon{font-size:9px;letter-spacing:.14em;color:#c9b98f}.feature.disabled{opacity:.78}.profilegrid{grid-template-columns:280px minmax(0,1fr)}.profilehero{text-align:center}.profilehero .photo{width:88px;height:88px;border-radius:27px;margin:5px auto 14px;font-size:28px}.profilehero h3{margin:0}.profilehero p{color:var(--muted);font-size:11px}.settingsrow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid #ffffff0d;font-size:12px}.settingsrow:last-child{border:0}.status{font-size:10px;color:var(--green)}.toast{position:fixed;left:50%;bottom:calc(24px + var(--safeB));z-index:80;transform:translate(-50%,18px);opacity:0;pointer-events:none;background:#242a32;border:1px solid #46505e;color:white;border-radius:13px;padding:12px 17px;box-shadow:0 20px 60px #000a;transition:.2s;max-width:90vw;font-size:12px;text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}.loading{opacity:.55}.authbanner{margin-bottom:18px}.mobilebar{display:none}.skeleton{height:12px;border-radius:8px;background:#ffffff10;animation:pulse 1.2s infinite alternate}@keyframes pulse{to{opacity:.35}}
+@media(max-width:1000px){.shell{grid-template-columns:1fr}.sidebar{display:none}main{padding:22px 20px calc(95px + var(--safeB))}.dashboard{grid-template-columns:1fr}.profilegrid{grid-template-columns:1fr}}
+@media(max-width:620px){main{padding:calc(14px + var(--safeT)) 13px calc(92px + var(--safeB))}.topbar{margin-bottom:20px}.topbar h1{font-size:25px}.topright{gap:5px}.iconbtn,.avatar{width:37px;height:37px;border-radius:11px}.card{padding:17px;border-radius:18px}.hero{min-height:255px}.balance{font-size:clamp(39px,11vw,55px);margin-top:23px}.herofoot{align-items:flex-end}.herofoot .quickrow{gap:6px}.herofoot .btn{padding:9px 10px;font-size:10px}.stats{gap:7px}.stat{padding:12px}.statvalue{font-size:17px}.statlabel{font-size:9px}.featuregrid{grid-template-columns:repeat(2,minmax(0,1fr))}.feature{min-height:180px}.twocol{grid-template-columns:1fr}.mobilebar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);padding:7px 5px calc(7px + var(--safeB));background:#0c0e12ed;backdrop-filter:blur(22px);border-top:1px solid var(--line)}.mobilebar button{border:0;background:none;color:#7e8794;font-size:9px;display:grid;justify-items:center;gap:3px;padding:3px 0}.mobilebar button span{font-size:18px}.mobilebar button.active{color:var(--gold2)}.tx{padding:10px;gap:8px}.txamount{font-size:10px}.txicon{width:34px;height:34px}.sectionhead{margin-top:22px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* TNC winter season / expansive layouts */
+:root{--winter:#b9d9ef;--ice:#e7f5ff}
+main{max-width:none;width:100%;padding-left:clamp(18px,3.2vw,54px);padding-right:clamp(18px,3.2vw,54px)}
+.page{width:100%}.page>.grid,.page>.card,.page>.pageintro{width:100%}.dashboard{grid-template-columns:minmax(0,1.8fr) minmax(300px,.72fr)}
+.card{backdrop-filter:blur(12px)}
+.winter-banner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:124px;padding:22px 28px;margin:0 0 13px;border:1px solid #a9d9f13b;border-radius:22px;overflow:hidden;background:radial-gradient(ellipse at 85% 50%,#b8e4ff26,transparent 38%),linear-gradient(105deg,#14202b,#18202a 58%,#242c36);box-shadow:inset 0 1px #ffffff12,0 18px 48px #0005}
+.winter-banner:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,#d9f1ff09 50%,transparent 70%);transform:translateX(-100%);animation:iceShimmer 9s ease-in-out infinite}
+.winter-copy{position:relative;z-index:1;display:grid;gap:5px}.winter-kicker{font-size:9px;letter-spacing:.22em;font-weight:950;color:#b9dff5}.winter-copy strong{font-size:clamp(19px,2.2vw,29px);letter-spacing:-.04em}.winter-copy>span:last-child{font-size:12px;color:#b4c4d1}.winter-emblem{font-size:64px;color:#d8efff;text-shadow:0 0 30px #9bd9ff77;animation:snowFloat 5s ease-in-out infinite;line-height:1}
+.market-strip{min-height:42px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:9px 15px;margin:0 0 25px;border:1px solid #9dc7e51f;border-radius:13px;background:#101923b8;color:#aab9c7;font-size:10px;letter-spacing:.03em}.market-live{display:flex;align-items:center;gap:7px;color:#bfe5ff;font-weight:950;letter-spacing:.15em}.market-live i{width:7px;height:7px;border-radius:50%;background:#74dca9;box-shadow:0 0 12px #74dca9}.market-item{display:flex;gap:7px}.market-item b{color:#edf5fb}.market-separator{color:#b38a4b}.market-status{margin-left:auto;color:#8c9eae}
+#snow-layer{position:fixed;inset:0;width:100%;height:100%;z-index:60;pointer-events:none;opacity:.55}
+.pageintro{max-width:none}.pageintro p{max-width:900px}.featuregrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@keyframes iceShimmer{0%,65%{transform:translateX(-100%)}100%{transform:translateX(100%)}}@keyframes snowFloat{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-7px) rotate(5deg)}}
+@media(min-width:1500px){.dashboard{grid-template-columns:minmax(0,2fr) minmax(320px,.72fr)}.card{padding:27px}.pageintro h2{font-size:31px}}
+@media(max-width:1000px){.dashboard{grid-template-columns:1fr}.market-status{margin-left:0}}
+@media(max-width:600px){main{padding-left:13px;padding-right:13px}.winter-banner{min-height:112px;padding:17px;border-radius:17px}.winter-copy>span:last-child{max-width:255px;font-size:10px}.winter-emblem{font-size:45px}.market-strip{gap:10px;padding:10px;font-size:9px;margin-bottom:19px}.market-status{width:100%}.featuregrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.winter-banner:before,.winter-emblem{animation:none!important}#snow-layer{display:none}}
+
+
+/* Web3 visual system: layered glass, luminous gradients and restrained motion */
+:root{--bg:#070a10;--panel:#0d1420;--panel2:#111c2b;--line:#25354a;--gold:#e6bd72;--gold2:#ffe1a0;--ice:#80d8ff;--mint:#54e2b2;--text:#f4f7fb;--muted:#91a0b3}
+body{background:radial-gradient(ellipse at 75% -12%,#176ca52c,transparent 34%),radial-gradient(ellipse at 4% 34%,#8b64251c,transparent 35%),linear-gradient(145deg,#070a10,#0a101a 58%,#070a10);background-attachment:fixed}
+.sidebar{background:#080d15eF;border-right-color:#203148;box-shadow:12px 0 50px #0003}
+.brandmark{background:linear-gradient(145deg,#fff0c8,#c38b37 58%,#6d4b1c);box-shadow:0 0 28px #d5a84c45, inset 0 1px #fff8}
+.brandname{letter-spacing:.28em}
+.nav button{transition:background .28s,border-color .28s,color .28s,transform .28s}
+.nav button:hover{transform:translateX(3px);background:#80d8ff0b}.nav button.active{background:linear-gradient(100deg,#55c9ff1d,#e6bd720d);border-color:#70cfff42;color:#d9f4ff;box-shadow:inset 3px 0 #71d5ff,0 8px 25px #0002}
+main{max-width:none;padding-top:26px}
+.card{background:linear-gradient(145deg,#142032ed,#0c1420f5 72%);border-color:#263b52;box-shadow:0 20px 65px #0005,inset 0 1px #ffffff0b;backdrop-filter:blur(18px);transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .35s,box-shadow .35s}
+.card:hover{transform:translateY(-3px);border-color:#4b7898;box-shadow:0 25px 70px #0007,0 0 35px #48bfff0a,inset 0 1px #ffffff12}
+.hero{background:radial-gradient(circle at 88% 10%,#42c9ff29,transparent 32%),radial-gradient(circle at 15% 100%,#d5a84c17,transparent 45%),linear-gradient(130deg,#14283b,#101722 68%);border-color:#36516a}
+.hero:after{content:"◈";right:28px;bottom:-95px;font-size:300px;color:#7bdcff0a;text-shadow:0 0 90px #65cfff18}
+.balance{background:linear-gradient(100deg,#fff 15%,#d7f4ff 55%,#e6bd72 95%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 8px 34px #6bcfff1b;font-variant-numeric:tabular-nums}
+.currency{color:#8edcff;letter-spacing:.28em}
+.pill{border-color:#65cfff44;background:#4bbcff12;color:#bfeeff}
+.btn{transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,border-color .25s,background .25s}.btn:hover{transform:translateY(-2px);box-shadow:0 9px 25px #0004}.btn.gold{background:linear-gradient(110deg,#ffe8b2,#d8a64e 60%,#a9782c);box-shadow:0 8px 28px #d6a94b25,inset 0 1px #fff9}
+.stat{background:linear-gradient(145deg,#122033aa,#0c1420aa);border-color:#263c53;transition:.3s}.stat:hover{border-color:#5aa8d0;transform:translateY(-2px)}
+.tx{background:#0b1420;border-color:#1d3044;transition:border-color .25s,transform .25s}.tx:hover{border-color:#426c8d;transform:translateX(3px)}
+.page.active{animation:pageEnter .42s cubic-bezier(.2,.8,.2,1)}@keyframes pageEnter{from{opacity:0;transform:translateY(12px) scale(.995);filter:blur(3px)}to{opacity:1;transform:none;filter:blur(0)}}
+.crypto-banner{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:space-between;min-height:245px;overflow:hidden;padding:clamp(22px,4vw,42px);margin:0 0 14px;border:1px solid #4b78974d;border-radius:26px;background:radial-gradient(ellipse at 78% 52%,#1f9bd22c,transparent 38%),radial-gradient(ellipse at 0% 100%,#bd8b3820,transparent 48%),linear-gradient(115deg,#101c2b,#0d1725 55%,#102335);box-shadow:0 24px 70px #0006,inset 0 1px #ffffff12}
+.crypto-banner:before{content:"";position:absolute;inset:-50%;z-index:-1;background:conic-gradient(from 0deg,transparent,#5bcfff0b,transparent,#e6bd720a,transparent);animation:bannerSpin 28s linear infinite}
+.crypto-copy{position:relative;z-index:2;display:grid;gap:12px}.crypto-kicker{display:flex;align-items:center;gap:9px;color:#8edfff;font-size:9px;font-weight:950;letter-spacing:.22em}.crypto-kicker i{width:7px;height:7px;border-radius:50%;background:#55e2b2;box-shadow:0 0 14px #55e2b2;animation:livePulse 2s infinite}.crypto-copy strong{font-size:clamp(28px,4.1vw,50px);line-height:1.02;letter-spacing:-.055em}.crypto-copy strong em{font-style:normal;background:linear-gradient(90deg,#8be0ff,#e6bd72);-webkit-background-clip:text;background-clip:text;color:transparent}.crypto-copy>span:not(.crypto-kicker){font-size:12px;color:#a5b7c9}.crypto-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px}.crypto-chips span{padding:6px 9px;border:1px solid #5cb9e52e;border-radius:99px;background:#62c9ff0b;color:#b4d9eb;font-size:8px;font-weight:900;letter-spacing:.1em}
+.crypto-orbit{position:relative;width:230px;height:190px;flex:0 0 230px;margin-right:clamp(0px,5vw,65px);display:grid;place-items:center;perspective:600px}.coin-core{width:88px;height:88px;border-radius:28px;display:grid;place-items:center;align-content:center;gap:0;background:linear-gradient(145deg,#fff0c4,#d2a14c 55%,#80561e);color:#17202a;font-size:30px;font-weight:1000;box-shadow:0 0 35px #d9ae5b66,0 0 100px #50c7ff26,inset 0 2px #fff;transform:rotate(-12deg);animation:coinFloat 5s ease-in-out infinite}.coin-core span{font-size:12px}.orbit{position:absolute;border:1px solid #79d9ff55;border-radius:50%;transform:rotate(-25deg);box-shadow:0 0 18px #55caff13}.orbit-a{width:175px;height:78px;animation:orbitSpin 13s linear infinite}.orbit-b{width:205px;height:110px;transform:rotate(55deg);border-color:#e6bd7255;animation:orbitSpin 18s linear infinite reverse}.orbit-c{width:220px;height:150px;transform:rotate(-65deg);border-style:dashed;opacity:.55;animation:orbitSpin 30s linear infinite}.orbit-node{position:absolute;width:30px;height:30px;border-radius:11px;display:grid;place-items:center;background:#122a3c;border:1px solid #6dcfff66;color:#b9ebff;box-shadow:0 0 20px #48c5ff33;font-size:15px}.node-a{top:7px;right:48px}.node-b{bottom:13px;left:28px}.node-c{top:45%;right:0;color:#ffdda0;border-color:#d9ae5b77}
+.market-strip{min-height:64px;display:flex;align-items:center;gap:clamp(12px,2vw,28px);flex-wrap:wrap;padding:10px 17px;margin:0 0 26px;border:1px solid #2b4b65;border-radius:15px;background:linear-gradient(100deg,#0d1926ed,#0b1420ed);box-shadow:0 12px 35px #0003,inset 0 1px #ffffff08;color:#aab9c7;font-size:10px}.market-live{display:flex;align-items:center;gap:8px;color:#9de6ff;font-weight:950;letter-spacing:.14em}.market-live i{width:7px;height:7px;border-radius:50%;background:#55e2b2;box-shadow:0 0 12px #55e2b2;animation:livePulse 1.8s infinite}.market-item{display:flex;align-items:center;gap:9px;padding-right:18px;border-right:1px solid #ffffff12}.market-item b{color:#b4c6d8;font-size:9px;letter-spacing:.08em}.market-item strong{color:#f2f7fc;font-size:12px;font-variant-numeric:tabular-nums}.market-item small{font-size:10px;font-weight:850;color:#55e2b2}.market-item small.down{color:#ff8290}.market-status{margin-left:auto;color:#748da3;font-size:9px}
+#network-layer{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.45} .shell{position:relative;z-index:1}
+@keyframes livePulse{50%{opacity:.45;box-shadow:0 0 3px #55e2b2}}@keyframes coinFloat{0%,100%{transform:translateY(0) rotate(-12deg)}50%{transform:translateY(-8px) rotate(-5deg)}}@keyframes orbitSpin{to{rotate:360deg}}@keyframes bannerSpin{to{transform:rotate(360deg)}}
+@media(max-width:760px){.crypto-banner{min-height:205px;padding:20px}.crypto-copy strong{font-size:clamp(26px,7vw,38px)}.crypto-orbit{width:115px;height:130px;flex-basis:115px;margin:0 -7px 0 0;transform:scale(.68)}.crypto-chips span{font-size:7px}.market-strip{gap:10px}.market-status{width:100%;margin:0}.market-item{padding-right:10px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}#network-layer{display:none}}
+
+
+/* Separate-screen navigation and animated crypto hardware */
+.mobilebar{grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;padding-left:3px;padding-right:3px}
+.mobilebar button{min-width:0;white-space:nowrap;font-size:clamp(7px,1.8vw,9px);letter-spacing:-.025em}
+.mobilebar button span{font-size:20px;line-height:1.15;transition:transform .35s cubic-bezier(.2,.8,.2,1),filter .35s}
+.mobilebar button.active span{transform:translateY(-3px) scale(1.12);filter:drop-shadow(0 0 8px #77d9ff)}
+.mobilebar button:active span{transform:scale(.82) rotate(-12deg)}
+.coin-lab{display:flex;align-items:center;gap:15px;min-height:210px;margin:10px 0 6px;padding:10px 4px 14px;border-bottom:1px solid #ffffff12}
+.coin-stage{position:relative;width:190px;height:175px;flex:0 0 190px;display:grid;place-items:center;perspective:800px;isolation:isolate}
+.coin-ring{position:absolute;border:1px solid #6ed5ff66;border-radius:50%;transform-style:preserve-3d;box-shadow:0 0 22px #45bfff15}
+.ring-one{width:160px;height:68px;transform:rotate(-28deg);animation:coinOrbit 7s linear infinite}
+.ring-two{width:176px;height:90px;transform:rotate(55deg);border-color:#e5b95c70;animation:coinOrbit 11s linear infinite reverse}
+.ring-three{width:145px;height:145px;border-style:dashed;border-color:#7bcfff36;animation:coinOrbit 19s linear infinite}
+.spin-coin{position:relative;width:92px;height:92px;transform-style:preserve-3d;animation:coinFlip 5s linear infinite;filter:drop-shadow(0 12px 22px #46bfff40)}
+.coin-face{position:absolute;inset:0;display:grid;place-content:center;text-align:center;border-radius:50%;border:3px solid #ffe9b0;background:radial-gradient(circle at 30% 22%,#fff2c9,#d5a34b 48%,#80551c 100%);color:#162332;font-size:20px;font-weight:1000;letter-spacing:.04em;box-shadow:inset 0 0 0 4px #a9782c,inset 0 0 20px #fff8,0 0 30px #e2b35455;backface-visibility:hidden}
+.coin-face small{display:block;font-size:11px;letter-spacing:.2em}.coin-back{transform:rotateY(180deg);background:radial-gradient(circle at 35% 25%,#e2f8ff,#5db9df 50%,#174a70);border-color:#c5efff;color:#092033;box-shadow:inset 0 0 0 4px #327da5,inset 0 0 20px #fff8}
+.coin-edge{position:absolute;inset:3px;border-radius:50%;transform:translateZ(-3px);background:repeating-linear-gradient(0deg,#b27e2e 0 3px,#f3d68e 3px 5px);backface-visibility:visible}
+.coin-satellite{position:absolute;width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:#10283a;border:1px solid #6bcfff88;color:#b9edff;font-style:normal;font-size:13px;box-shadow:0 0 20px #4fc8ff35;animation:satelliteBob 3s ease-in-out infinite}
+.sat-one{top:7px;right:17px}.sat-two{bottom:12px;left:15px;animation-delay:-1.4s}
+.coin-caption{display:grid;gap:7px;min-width:0}.coin-caption b{font-size:12px;letter-spacing:.13em;color:#dff6ff}.coin-caption span{font-size:10px;color:#8ea4b9}.spin-toggle{justify-self:start;margin-top:7px;font-size:10px}
+.wallet-tech{overflow:hidden;position:relative}.wallet-tech:before{content:"";position:absolute;inset:auto -30% -45% 20%;height:170px;background:radial-gradient(ellipse,#46bfff12,transparent 65%);pointer-events:none}
+@keyframes coinFlip{from{transform:rotateY(0) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
+@keyframes coinOrbit{to{rotate:360deg}}@keyframes satelliteBob{0%,100%{translate:0 0}50%{translate:0 -8px}}
+.spin-coin.fast{animation-duration:1.5s}.spin-coin.hyper{animation-duration:.65s}
+@media(max-width:620px){.mobilebar{overflow-x:auto;grid-template-columns:repeat(7,minmax(48px,1fr));padding-top:6px}.mobilebar button{font-size:8px}.coin-lab{gap:7px;min-height:170px}.coin-stage{width:145px;height:150px;flex-basis:145px;transform:scale(.88);transform-origin:left center;margin-right:-15px}.coin-caption b{font-size:10px}.coin-caption span{font-size:9px}.spin-toggle{padding:9px 10px}}
+@media(prefers-reduced-motion:reduce){.spin-coin,.coin-ring,.coin-satellite{animation:none!important}}
+
+
+/* Live exchange + assistant modules */
+.market-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.8fr);gap:16px}.market-chart{height:280px;width:100%;display:block}.market-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.market-toolbar button{border:1px solid var(--line);background:#ffffff08;color:#bfc9d6;padding:8px 12px;border-radius:10px;font-size:11px}.market-toolbar button.active{border-color:#6ac6ef66;color:#bfeaff;background:#55b8ed16}.coin-table{width:100%;border-collapse:collapse;font-size:12px}.coin-table th,.coin-table td{padding:13px 9px;border-bottom:1px solid #ffffff10;text-align:left}.coin-table th{color:#8793a2;font-size:10px;font-weight:700}.coin-table td:last-child,.coin-table th:last-child{text-align:right}.coin-cell{display:flex;align-items:center;gap:9px;font-weight:850}.coin-badge{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;background:#ffffff12;color:#d9e8f5}.market-disclaimer{font-size:10px;color:#8793a2;margin-top:12px}.assistant-shell{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px}.chat-card{min-height:560px;display:flex;flex-direction:column}.chat-messages{flex:1;min-height:330px;max-height:55vh;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:8px 2px 18px}.bubble{max-width:86%;padding:13px 15px;border:1px solid #ffffff12;border-radius:16px;background:#151a22;font-size:12px;line-height:1.6;white-space:pre-wrap}.bubble.user{align-self:flex-end;background:linear-gradient(130deg,#26394a,#17222d);border-color:#6ac6ef35}.bubble.bot{align-self:flex-start}.chat-compose{display:flex;gap:9px;border-top:1px solid #ffffff12;padding-top:14px}.chat-compose input{flex:1;min-width:0;border:1px solid #303a46;border-radius:13px;background:#0b1016;padding:13px;color:#fff}.chat-compose button{min-width:54px}.suggestions{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}.suggestions button{border:1px solid #ffffff17;background:#ffffff08;color:#b8c7d6;border-radius:99px;padding:8px 10px;font-size:10px}.assistant-orb{width:72px;height:72px;border-radius:24px;display:grid;place-items:center;font-size:34px;background:radial-gradient(circle at 30% 20%,#b7eaff,#2774a8 50%,#111d31);box-shadow:0 0 40px #38a9e544;animation:orbfloat 4s ease-in-out infinite}@keyframes orbfloat{50%{transform:translateY(-7px) rotate(5deg);box-shadow:0 0 55px #38a9e577}}.ai-status{font-size:10px;color:#e7c77e;border:1px solid #e7bd6833;border-radius:99px;padding:6px 9px;display:inline-block}.market-live-dot{color:#74dca9}.table-wrap{overflow:auto}
+@media(max-width:1000px){.market-layout,.assistant-shell{grid-template-columns:1fr}.chat-card{min-height:500px}.assistant-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+@media(max-width:620px){.market-chart{height:220px}.coin-table{min-width:470px}.chat-messages{max-height:48vh}.assistant-side{grid-template-columns:1fr}.mobilebar{grid-template-columns:repeat(9,minmax(62px,1fr));overflow-x:auto;justify-content:start}.mobilebar button{min-width:62px}}
+
+
+/* TNC reconstruction: richer motion, dedicated paper trading terminal, responsive navigation */
+.home-only{display:block}body:not([data-page="home"]) .home-only{display:none}
+.crypto-banner,.market-strip{transition:opacity .35s ease,transform .45s cubic-bezier(.2,.8,.2,1)}
+.shell:has(#page-home:not(.active)) .crypto-banner,.shell:has(#page-home:not(.active)) .market-strip{display:none}
+.coin-stage{perspective:900px}.spin-coin{transform-style:preserve-3d;animation:coinFloat 5s ease-in-out infinite,coinSpin 12s linear infinite}.coin-ring{animation:ringOrbit 10s linear infinite}.ring-two{animation-direction:reverse;animation-duration:14s}.ring-three{animation-duration:18s}.coin-satellite{animation:satellitePulse 2.8s ease-in-out infinite alternate}
+@keyframes coinFloat{0%,100%{translate:0 0}50%{translate:0 -10px}}@keyframes ringOrbit{to{transform:rotateX(68deg) rotateZ(360deg)}}@keyframes satellitePulse{from{filter:drop-shadow(0 0 3px #68d9ff);scale:.94}to{filter:drop-shadow(0 0 13px #68d9ff);scale:1.08}}
+.trade-layout{grid-template-columns:minmax(0,1.55fr) minmax(280px,.72fr);margin-top:17px;align-items:start}.trade-top{margin-bottom:17px}.trade-account{background:radial-gradient(circle at 90% 5%,#62caff24,transparent 38%),linear-gradient(145deg,#1b2632,#101419)}.trade-warning{position:relative;overflow:hidden}.trade-warning h3{margin:0 0 7px}.trade-orb{width:92px;height:92px;float:right;position:relative;margin:0 10px 8px 20px;border:1px solid #73d7ff55;border-radius:50%;animation:orbSpin 14s linear infinite;box-shadow:0 0 35px #55caff20,inset 0 0 25px #55caff12}.trade-orb:before,.trade-orb:after{content:"";position:absolute;inset:10px;border:1px solid #8bdfff70;border-radius:50%;transform:rotateX(65deg)}.trade-orb:after{transform:rotateY(65deg)}.trade-orb-core{position:absolute;inset:26px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 25%,#f9e9bd,#b88943 55%,#302214);color:#17120b;font-weight:1000;box-shadow:0 0 22px #e7bd6855}.trade-orb i,.trade-orb b{position:absolute;width:7px;height:7px;border-radius:50%;background:#8ce3ff;box-shadow:0 0 12px #69d9ff;top:8px;left:42px}.trade-orb b{top:auto;left:auto;bottom:9px;right:8px;background:#e7bd68;box-shadow:0 0 12px #e7bd68}@keyframes orbSpin{to{transform:rotate(360deg)}}
+.trade-chart-card{min-width:0}.trade-price{font-size:31px;font-weight:950;letter-spacing:-.05em;margin-top:7px}.trade-select{max-width:190px;border:1px solid var(--line);border-radius:12px;background:#0d1117;color:#fff;padding:11px}.order-card{position:sticky;top:18px}.trade-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#0c0f13;border:1px solid var(--line);border-radius:13px;padding:5px;margin:17px 0}.trade-tabs button{border:0;border-radius:9px;padding:11px;background:none;color:var(--muted);font-weight:850}.trade-tabs button.active.buy{background:#1b503a;color:#9af0c3}.trade-tabs button.active:not(.buy){background:#56272d;color:#ffb0b7}.trade-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:-5px 0 14px}.trade-presets button{border:1px solid var(--line);border-radius:8px;padding:7px;background:#ffffff06;color:#c8d0da;font-size:10px}.trade-presets button:hover{border-color:#6ecdf2}.trade-positions{margin-top:17px}.trade-positions h3{margin:6px 0 14px}.typing{opacity:.7;animation:typingPulse 1s ease-in-out infinite alternate}@keyframes typingPulse{to{opacity:.35}}.assistant-orb{width:42px;height:42px;border-radius:50%;position:relative;background:radial-gradient(circle at 32% 27%,#e7faff,#4bbce8 30%,#12324a 68%,#08111b);box-shadow:0 0 28px #5dc9f555,inset -6px -8px 15px #02070c;animation:orbFloat 4s ease-in-out infinite}.assistant-orb:before,.assistant-orb:after{content:"";position:absolute;inset:-5px;border:1px solid #73d7ff80;border-radius:50%;transform:rotateX(68deg);animation:ringOrbit 8s linear infinite}.assistant-orb:after{inset:-9px;transform:rotateY(68deg);animation-direction:reverse}.assistant-orb span{position:absolute;inset:13px;border-radius:50%;background:#fff;filter:blur(5px);opacity:.8}@keyframes orbFloat{50%{transform:translateY(-4px)}}
+@media(max-width:1000px){.trade-layout{grid-template-columns:1fr}.order-card{position:static}}
+@media(max-width:620px){.trade-top{grid-template-columns:1fr}.trade-select{max-width:145px}.trade-price{font-size:25px}.mobilebar{grid-template-columns:repeat(10,minmax(68px,1fr))}.order-card{padding:16px}}
+@media(prefers-reduced-motion:reduce){.spin-coin,.coin-ring,.coin-satellite,.trade-orb,.assistant-orb{animation:none!important}}
+
+ .icon-orb{display:inline-grid;place-items:center;width:48px;height:48px;border-radius:16px;background:radial-gradient(circle at 30% 25%,#fff1c5,#c38a35 42%,#34220e 78%);color:#1b1409;font-weight:1000;font-size:21px;box-shadow:0 8px 25px #d7a54a38,inset 0 1px 5px #fff8}
 </style>
 </head>
-
-<body>
-<div class="app">
+<body data-page="home">
+<canvas id="network-layer" aria-hidden="true"></canvas>
+<div class="shell">
 <aside class="sidebar">
-  <div class="brand">
-    <div class="brand-icon">T</div>
-    <div><div class="brand-name">TNC</div><div class="brand-sub">DIGITAL ECOSYSTEM</div></div>
-  </div>
-  <div class="nav-label">РАБОЧЕЕ ПРОСТРАНСТВО</div>
-  <nav class="nav">
-    <button class="nav-btn active" data-page="home"><span class="nav-icon">⌂</span>Обзор</button>
-    <button class="nav-btn" data-page="transfer"><span class="nav-icon">⇄</span>Перевод</button>
-    <button class="nav-btn" data-page="shop"><span class="nav-icon">✦</span>Магазин TNC</button>
-    <button class="nav-btn" data-page="history"><span class="nav-icon">◷</span>История операций</button>
+  <div class="brand"><div class="brandmark">T</div><div><div class="brandname">TNC</div><div class="brandtag">DIGITAL ECOSYSTEM</div></div></div>
+  <div class="navlabel">WORKSPACE</div>
+  <nav class="nav" aria-label="Основная навигация">
+    <button class="active" data-page="home"><span class="navicon">⌂</span>Обзор</button>
+    <button data-page="wallet"><span class="navicon">◈</span>Кошелёк</button>
+    <button data-page="transfer"><span class="navicon">⇄</span>Переводы</button>
+    <button data-page="history"><span class="navicon">◷</span>История</button>
+    <button data-page="market"><span class="navicon">⌁</span>Live Биржа</button>
+    <button data-page="trading"><span class="navicon">⌁</span>Трейдинг</button>
+    <button data-page="assistant"><span class="navicon">✧</span>ИИ Помощник</button>
   </nav>
-  <div class="nav-label" style="margin-top:27px">ЭКОСИСТЕМА</div>
+  <div class="navlabel" style="margin-top:25px">ECOSYSTEM</div>
   <nav class="nav">
-    <button class="nav-btn" data-page="crypto"><span class="nav-icon">◈</span>TNC Crypto</button>
-    <button class="nav-btn" data-page="games"><span class="nav-icon">✦</span>TNC Games</button>
-    <button class="nav-btn" data-page="profile"><span class="nav-icon">◎</span>Мой профиль</button>
+    <button data-page="games"><span class="navicon">◇</span>Games</button>
+    <button data-page="rewards"><span class="navicon">◇</span>Награды</button>
+    <button data-page="profile"><span class="navicon">◎</span>Профиль</button>
   </nav>
-  <div class="side-bottom">
-    <div class="status-card">
-      <div class="status-text"><span class="status-dot"></span>Интерфейс доступен</div>
-      <div class="muted small" style="margin-top:7px">Внутренний баланс TNC</div>
-    </div>
-    <div class="side-foot">TNC WALLET · VERSION 3.0</div>
-  </div>
+  <div class="sidebottom"><div class="online"><div class="tiny"><i class="dot"></i><span id="connection-label">Подключение</span></div><div class="muted tiny" style="margin-top:7px">Ваш единый аккаунт TNC</div></div><div class="sideversion">TNC ECOSYSTEM · RECONSTRUCTION 07</div></div>
 </aside>
-
 <main>
-<header class="topbar">
-  <div>
-    <div class="eyebrow" id="top-eyebrow">TNC WALLET / ЛИЧНЫЙ КАБИНЕТ</div>
-    <h1 id="page-title">Добро пожаловать</h1>
-  </div>
-  <div class="top-actions">
-    <button class="install-btn" id="install-btn" hidden>↓ Установить</button>
-    <button class="icon-btn" title="Обновить" aria-label="Обновить" id="refresh-btn">↻</button>
-    <button class="icon-btn" title="Полный экран" aria-label="Полный экран" id="fullscreen-btn">⛶</button>
-    <div class="avatar" id="top-avatar">T</div>
-  </div>
-</header>
-
-<div class="notice auth-notice" id="auth-notice" hidden></div>
-
+<header class="topbar"><div><div class="eyebrow" id="crumb">TNC / PERSONAL SPACE</div><h1 id="page-title">Добро пожаловать</h1></div><div class="topright"><button class="iconbtn" id="refresh" aria-label="Обновить" title="Обновить">↻</button><button class="iconbtn" id="fullscreen" aria-label="Полный экран" title="Полный экран"></button><div class="avatar" id="top-avatar">T</div></div></header>
+<div class="crypto-banner home-only"><div class="crypto-copy"><span class="crypto-kicker"><i></i> TNC DIGITAL ASSET ECOSYSTEM</span><strong>Твоя цифровая<br><em>финансовая вселенная.</em></strong><span>Единый аккаунт · Прозрачные операции · Контроль активов</span><div class="crypto-chips"><span>◈ WALLET</span><span>⌁ ON-CHAIN INSPIRED</span><span> WEB3 EXPERIENCE</span></div></div><div class="crypto-orbit" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="orbit orbit-c"></div><div class="coin-core">TNC<span>◈</span></div><b class="orbit-node node-a">₿</b><b class="orbit-node node-b">Ξ</b><b class="orbit-node node-c">◈</b></div></div>
+<div class="market-strip home-only" aria-label="Криптовалютная рыночная лента"><span class="market-live"><i></i> LIVE MARKET</span><span class="market-item"><b>BTC / USD</b><strong id="btc-price">Загрузка…</strong><small id="btc-change">—</small></span><span class="market-item"><b>ETH / USD</b><strong id="eth-price">Загрузка…</strong><small id="eth-change">—</small></span><span class="market-status" id="market-status">Публичные рыночные данные · CoinGecko</span></div>
+<div class="notice authbanner" id="auth-banner" hidden></div>
 <section class="page active" id="page-home">
-  <div class="dashboard">
+  <div class="grid dashboard">
     <div>
-      <div class="card balance-card">
-        <div class="card-head">
-          <span class="eyebrow">ВАШ ДОСТУПНЫЙ БАЛАНС</span>
-          <span class="pill">◉ TNC ACCOUNT</span>
-        </div>
-        <div class="balance" id="balance">— — —</div>
-        <div class="currency">TNC COIN</div>
-        <div class="balance-note">Внутренний баланс экосистемы TNC</div>
-        <div class="quick-actions">
-          <button class="quick" data-go="transfer"><span>⇄</span>Перевести</button>
-          <button class="quick" data-go="history"><span>◷</span>История</button>
-          <button class="quick" id="quick-refresh"><span>↻</span>Обновить</button>
-        </div>
-      </div>
-      <div class="section-head">
-        <h2>Последние операции</h2>
-        <button class="text-btn" data-go="history">Вся история →</button>
-      </div>
-      <div class="transactions" id="recent"><div class="empty">Ожидание данных…</div></div>
+      <article class="card hero"><div class="cardhead"><span class="eyebrow">TOTAL AVAILABLE BALANCE</span><span class="pill">● TNC ACCOUNT</span></div><div class="balance" id="balance">— — —</div><div class="currency">TNC COIN</div><div class="muted tiny" style="margin-top:9px">Внутренний баланс экосистемы TNC</div><div class="herofoot"><div class="quickrow"><button class="btn gold" data-go="transfer">⇄ Перевести</button><button class="btn" data-go="history">История</button></div><span class="muted tiny" id="balance-updated">Синхронизация</span></div></article>
+      <div class="grid stats"><div class="stat"><div class="statlabel">Операций в истории</div><div class="statvalue" id="stat-count">—</div></div><div class="stat"><div class="statlabel">Отправлено TNC</div><div class="statvalue" id="stat-out">—</div></div><div class="stat"><div class="statlabel">Получено TNC</div><div class="statvalue" id="stat-in">—</div></div></div>
+      <div class="sectionhead"><h2>Последние операции</h2><button class="linkbtn" data-go="history">Вся история →</button></div><div class="transactions" id="recent"><div class="empty">Загрузка данных аккаунта…</div></div>
     </div>
-    <div>
-      <div class="card">
-        <div class="eyebrow">ВАШ АККАУНТ</div>
-        <div class="profile-mini">
-          <div class="profile-photo" id="home-photo">T</div>
-          <div><div class="profile-name" id="home-name">TNC User</div><div class="profile-handle" id="home-handle">Telegram аккаунт</div></div>
-        </div>
-        <div class="info-row"><span class="muted">ID аккаунта</span><strong id="home-id">—</strong></div>
-        <div class="info-row"><span class="muted">Статус</span><strong class="positive">Активен</strong></div>
-        <div class="info-row"><span class="muted">Валюта</span><strong>TNC</strong></div>
-        <button class="secondary" style="width:100%;margin-top:17px" data-go="profile">Открыть профиль →</button>
-      </div>
-      <div class="card" style="margin-top:17px">
-        <div class="eyebrow">ЭКОСИСТЕМА</div>
-        <h2 class="panel-title" style="margin-top:12px">Один аккаунт. Вся TNC.</h2>
-        <p class="panel-desc" style="margin-bottom:0">Единый интерфейс внутренних сервисов TNC.</p>
-      </div>
+    <div class="grid" style="align-content:start;gap:15px">
+      <article class="card"><div class="eyebrow">YOUR ACCOUNT</div><div class="profileline"><div class="photo" id="home-photo">T</div><div><div class="name" id="home-name">TNC User</div><div class="handle" id="home-handle">Telegram account</div></div></div><div class="info"><span class="muted">Telegram ID</span><strong id="home-id">—</strong></div><div class="info"><span class="muted">Статус</span><strong class="positive">Активен</strong></div><div class="info"><span class="muted">Аккаунт</span><strong>TNC Wallet</strong></div><button class="btn block" style="margin-top:15px" data-go="profile">Открыть профиль →</button></article>
+      <article class="card"><div class="eyebrow">ONE ACCOUNT. ONE ECOSYSTEM.</div><h2 style="font-size:20px;line-height:1.2;margin:13px 0 8px;letter-spacing:-.04em">Всё пространство TNC — в одном месте.</h2><p class="muted tiny" style="margin:0">Управляйте балансом, переводами и активностью из единого интерфейса.</p></article>
     </div>
   </div>
 </section>
-
-<section class="page" id="page-transfer">
-  <div class="card" style="max-width:720px">
-    <div class="eyebrow">TNC WALLET / ПЛАТЕЖИ</div>
-    <h2 class="panel-title" style="font-size:26px;margin-top:9px">Перевод TNC</h2>
-    <p class="panel-desc">Отправьте внутренние монеты другому пользователю по Telegram ID.</p>
-    <div class="field">
-      <label for="receiver">Telegram ID получателя</label>
-      <input id="receiver" type="number" inputmode="numeric" placeholder="Например, 123456789" autocomplete="off">
-    </div>
-    <div class="field">
-      <label for="amount">Сумма перевода</label>
-      <input id="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00">
-    </div>
-    <button class="primary" id="send-button">Подтвердить перевод →</button>
-    <div class="notice">Проверьте ID и сумму перед отправкой. TNC Coin — внутренний баланс базы данных, а не отдельный блокчейн-токен.</div>
-  </div>
+<section class="page" id="page-wallet"><div class="pageintro"><div class="eyebrow">TNC FINANCE</div><h2>Ваш кошелёк</h2><p>Управление внутренним балансом TNC Coin. Средства и операции учитываются на сервере.</p></div><div class="grid twocol"><article class="card hero"><div class="eyebrow">AVAILABLE BALANCE</div><div class="balance" id="wallet-balance">— — —</div><div class="currency">TNC COIN</div><div class="quickrow" style="margin-top:25px"><button class="btn gold" data-go="transfer">⇄ Отправить</button><button class="btn" data-go="history">История</button></div></article><article class="card wallet-tech"><div class="eyebrow">WALLET DETAILS · DIGITAL ASSET</div><div class="coin-lab"><div class="coin-stage" id="coin-stage" aria-label="Анимированная монета TNC"><div class="coin-ring ring-one"></div><div class="coin-ring ring-two"></div><div class="coin-ring ring-three"></div><div class="spin-coin" id="spin-coin"><span class="coin-face">TNC<small>◈</small></span><span class="coin-edge"></span><span class="coin-face coin-back">◈<small>TNC NETWORK</small></span></div><i class="coin-satellite sat-one">₿</i><i class="coin-satellite sat-two">Ξ</i></div><div class="coin-caption"><b> TNC DIGITAL CORE</b><span>Анимированная визуализация актива</span><button class="btn spin-toggle" id="spin-toggle" type="button">⟳ Ускорить вращение</button></div></div><div class="info" style="margin-top:18px"><span class="muted">Валюта</span><strong>TNC Coin</strong></div><div class="info"><span class="muted">Тип баланса</span><strong>Внутренний</strong></div><div class="info"><span class="muted">Точность учёта</span><strong>До 6 знаков</strong></div><div class="info"><span class="muted">Состояние</span><strong class="positive">Активен</strong></div><div class="notice">TNC Coin в этой версии — запись внутреннего баланса базы данных, не отдельная блокчейн-криптовалюта.</div></article></div></section>
+<section class="page" id="page-transfer"><div class="pageintro"><div class="eyebrow">TNC WALLET / TRANSFERS</div><h2>Перевод TNC</h2><p>Отправьте внутренние монеты другому зарегистрированному пользователю по Telegram ID.</p></div><article class="card formcard"><div class="field"><label for="receiver">TELEGRAM ID ПОЛУЧАТЕЛЯ</label><input id="receiver" type="number" inputmode="numeric" placeholder="Например, 123456789" autocomplete="off"></div><div class="field"><label for="amount">СУММА ПЕРЕВОДА</label><input id="amount" type="number" min="0.000001" max="1000000" step="0.000001" inputmode="decimal" placeholder="0.00"></div><div class="info"><span class="muted">Доступно</span><strong id="transfer-balance">— TNC</strong></div><button class="btn gold block" id="send">Проверить и отправить →</button><div class="notice">Перед отправкой проверьте ID и сумму. Перевод выполняется сервером; отменить завершённую операцию через приложение нельзя.</div></article></section>
+<section class="page" id="page-history"><div class="pageintro"><div class="eyebrow">ACCOUNT ACTIVITY</div><h2>История операций</h2><p>Журнал переводов, связанных с вашим аккаунтом.</p></div><article class="card"><div class="toolbar"><input class="search" id="history-search" placeholder="Поиск по ID или типу операции…" aria-label="Поиск операций"><div class="segmented" id="history-filter"><button class="active" data-filter="all">Все</button><button data-filter="in">Входящие</button><button data-filter="out">Исходящие</button></div><button class="btn" id="history-refresh">↻</button></div><div class="transactions" id="all-history"><div class="empty">Загрузка истории…</div></div></article></section>
+<section class="page" id="page-market">
+ <div class="pageintro"><div class="eyebrow">GLOBAL CRYPTO MARKETS</div><h2>Live Биржа</h2><p>Рыночные цены криптовалют в реальном времени с публичного источника CoinGecko. Это справочная информация, не торговая площадка TNC.</p></div>
+ <div class="market-layout"><div class="grid" style="align-content:start"><article class="card"><div class="cardhead"><div><div class="eyebrow">BITCOIN · BTC / USD</div><div class="balance" style="font-size:clamp(34px,5vw,52px);margin:10px 0" id="market-btc-main">Загрузка…</div><div class="tiny" id="market-btc-change">24ч: —</div></div><span class="pill"><i class="dot"></i> LIVE DATA</span></div><div class="market-toolbar" style="margin-top:18px"><button class="active" data-range="1">24Ч</button><button data-range="7">7Д</button><button data-range="30">30Д</button><span class="market-status" id="chart-status">График загружается…</span></div><canvas id="btc-chart" class="market-chart" aria-label="График цены Bitcoin"></canvas></article>
+ <article class="card"><div class="cardhead"><h3 style="margin:0">Популярные активы</h3><button class="btn" id="market-refresh">↻ Обновить</button></div><div class="table-wrap"><table class="coin-table"><thead><tr><th>АКТИВ</th><th>ЦЕНА USD</th><th>24Ч</th></tr></thead><tbody id="market-coins"><tr><td colspan="3">Загрузка котировок…</td></tr></tbody></table></div><div class="market-disclaimer">Данные предоставляются CoinGecko и могут иметь задержку или лимиты API. Это не финансовая рекомендация.</div></article></div>
+ <div class="grid" style="align-content:start"><article class="card"><div class="eyebrow">MARKET SNAPSHOT</div><h3 style="font-size:22px;margin:12px 0 4px">Крипторынок</h3><p class="muted tiny">Сводка по публичным котировкам.</p><div class="info"><span class="muted">Ethereum</span><strong id="market-eth-main">—</strong></div><div class="info"><span class="muted">Solana</span><strong id="market-sol-main">—</strong></div><div class="info"><span class="muted">Обновлено</span><strong id="market-updated">—</strong></div></article><article class="card"><div class="eyebrow">TNC ASSET NOTICE</div><h3 style="margin:12px 0 7px">TNC Coin</h3><p class="muted tiny">Ваш TNC-баланс отображается в кошельке и хранится во внутреннем реестре экосистемы. Публичной биржевой котировки TNC в приложении пока нет.</p><button class="btn block" data-go="wallet">Открыть TNC Wallet →</button></article></div></div>
 </section>
 
-<section class="page" id="page-shop">
-  <div class="card" style="max-width:850px">
-    <div class="eyebrow">TNC ECOSYSTEM / SHOP</div>
-    <h2 class="panel-title" style="font-size:28px;margin-top:9px">Магазин TNC</h2>
-    <p class="panel-desc">Пополняйте внутренний баланс TNC Coin с помощью Telegram Stars.</p>
-
-    <div class="card-head" style="margin:22px 0 12px">
-      <strong>Выберите пакет</strong>
-      <span class="pill">1 TNC = 50 ⭐</span>
-    </div>
-
-    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-      <button class="quick" type="button" data-shop-amount="1">
-        <strong>1 TNC</strong><span>50 ⭐</span>
-      </button>
-      <button class="quick" type="button" data-shop-amount="10">
-        <strong>10 TNC</strong><span>500 ⭐</span>
-      </button>
-      <button class="quick" type="button" data-shop-amount="100">
-        <strong>100 TNC</strong><span>5 000 ⭐</span>
-      </button>
-      <button class="quick" type="button" data-shop-amount="1000">
-        <strong>1 000 TNC</strong><span>50 000 ⭐</span>
-      </button>
-    </div>
-
-    <div style="border-top:1px solid var(--line);margin-top:24px;padding-top:20px">
-      <div class="eyebrow">СВОЯ СУММА</div>
-      <label for="shop-amount" class="panel-desc">От 0,1 TNC, шаг 0,1</label>
-      <input id="shop-amount" type="number" min="0.1" max="1000000" step="0.1"
-        inputmode="decimal" placeholder="Например, 2.5"
-        style="width:100%;margin:10px 0;padding:15px;border-radius:13px;border:1px solid var(--line);background:#111318;color:white;font:inherit">
-      <div class="card-head" style="margin:10px 0 15px">
-        <span class="muted">К оплате</span>
-        <strong id="shop-price">— ⭐</strong>
-      </div>
-      <button class="quick" id="shop-custom-buy" type="button" style="width:100%">
-        Перейти к оплате →
-      </button>
-    </div>
-
-    <div class="notice" style="margin-top:18px">
-      TNC Coin — внутренний баланс экосистемы, а не отдельный блокчейн-токен.
-      Монеты зачисляются после подтверждения успешной оплаты Telegram.
-    </div>
-  </div>
+<section class="page" id="page-trading">
+ <div class="pageintro"><div class="eyebrow">TNC PAPER EXCHANGE</div><h2>Трейдинг</h2><p>Учебная спотовая торговля на виртуальном балансе. Реальные деньги и TNC Coin не используются. Котировки и исполнение рассчитываются сервером.</p></div>
+ <div class="trade-top grid twocol">
+  <article class="card trade-account"><div class="eyebrow">ВИРТУАЛЬНЫЙ БАЛАНС</div><div class="balance" id="paper-cash">Загрузка…</div><div class="currency">USD · PAPER MODE</div><div class="info"><span class="muted">Стоимость портфеля</span><strong id="paper-equity">—</strong></div><div class="info"><span class="muted">Открытые позиции</span><strong id="paper-position-count">—</strong></div></article>
+  <article class="card trade-warning"><div class="eyebrow">РЕЖИМ СИМУЛЯЦИИ</div><div class="trade-orb"><div class="trade-orb-core">T</div><i></i><b></b></div><h3>Практикуйся без риска</h3><p class="muted tiny">Ордеры исполняются по публичной рыночной цене и записываются в отдельный виртуальный портфель. Они не отправляются на биржу и не затрагивают кошелёк TNC.</p></article>
+ </div>
+ <div class="trade-layout grid">
+  <article class="card trade-chart-card"><div class="cardhead"><div><div class="eyebrow">MARKET CHART</div><h3 id="trade-asset-title">Bitcoin · BTC / USD</h3><div class="trade-price" id="trade-price">Загрузка цены…</div><div class="tiny" id="trade-price-change">—</div></div><select id="trade-asset" class="trade-select" aria-label="Торговый актив"><option value="bitcoin">Bitcoin · BTC</option><option value="ethereum">Ethereum · ETH</option><option value="solana">Solana · SOL</option><option value="binancecoin">BNB · BNB</option><option value="ripple">XRP · XRP</option><option value="dogecoin">Dogecoin · DOGE</option></select></div>
+   <div class="market-toolbar"><button class="active" data-trade-range="1">24Ч</button><button data-trade-range="7">7Д</button><button data-trade-range="30">30Д</button><span id="trade-chart-status" class="market-status">Загрузка графика…</span></div><canvas id="trade-chart" class="market-chart" aria-label="График торгового актива"></canvas>
+  </article>
+  <article class="card order-card"><div class="eyebrow">MARKET ORDER</div><div class="trade-tabs"><button class="active buy" data-side="buy">Купить</button><button data-side="sell">Продать</button></div><div class="field"><label for="trade-amount">КОЛИЧЕСТВО АКТИВА</label><input id="trade-amount" type="number" min="0.000001" step="0.000001" placeholder="0.001"></div><div class="trade-presets"><button data-portion="25">25%</button><button data-portion="50">50%</button><button data-portion="75">75%</button><button data-portion="100">100%</button></div><div class="info"><span class="muted">Рыночная цена</span><strong id="order-price">—</strong></div><div class="info"><span class="muted">Оценка ордера</span><strong id="order-total">—</strong></div><div class="info"><span class="muted">Доступно</span><strong id="order-available">—</strong></div><button class="btn gold block" id="paper-submit">Подтвердить учебный ордер</button><div class="notice">Это симулятор. Здесь нет вывода средств, подключения API-ключей биржи или реального исполнения сделок.</div>
+  </article>
+ </div>
+ <article class="card trade-positions"><div class="cardhead"><div><div class="eyebrow">PORTFOLIO</div><h3>Мои позиции</h3></div><button class="btn" id="paper-refresh">Обновить</button></div><div class="table-wrap"><table class="coin-table"><thead><tr><th>АКТИВ</th><th>КОЛИЧЕСТВО</th><th>СР. ЦЕНА</th><th>ТЕКУЩАЯ СТОИМОСТЬ</th></tr></thead><tbody id="paper-positions"><tr><td colspan="4">Загрузка портфеля…</td></tr></tbody></table></div></article>
+ <article class="card trade-positions"><div class="eyebrow">ORDER HISTORY</div><h3>Последние ордера</h3><div class="table-wrap"><table class="coin-table"><thead><tr><th>ВРЕМЯ</th><th>СТОРОНА</th><th>АКТИВ</th><th>СУММА USD</th><th>СТАТУС</th></tr></thead><tbody id="paper-orders"><tr><td colspan="5">История появится после первого ордера.</td></tr></tbody></table></div></article>
 </section>
 
-<section class="page" id="page-history">
-  <div class="card">
-    <div class="card-head">
-      <div><div class="eyebrow">TNC WALLET / АКТИВНОСТЬ</div><h2 class="panel-title" style="font-size:26px;margin-top:8px">История операций</h2></div>
-      <button class="secondary" id="history-refresh">↻ Обновить</button>
-    </div>
-    <p class="panel-desc">Операции вашего кошелька.</p>
-    <div class="transactions" id="all-history"><div class="empty">Ожидание данных…</div></div>
-  </div>
+<section class="page" id="page-assistant"><div class="pageintro"><div class="eyebrow">TNC INTELLIGENCE</div><h2>ИИ Помощник</h2><p>Универсальный ИИ-чат для вопросов о криптовалютах, технологиях, обучении, программировании и самом приложении. Не отправляйте пароли, seed-фразы и приватные ключи.</p></div>
+ <div class="assistant-shell"><article class="card chat-card"><div class="cardhead"><div style="display:flex;align-items:center;gap:12px"><div class="assistant-orb"><span></span></div><div><b>TNC Assistant</b><div class="muted tiny">Генеративная модель · серверное подключение</div></div></div><span class="ai-status" id="ai-status">ПРОВЕРКА ПОДКЛЮЧЕНИЯ</span></div><div class="chat-messages" id="chat-messages"><div class="bubble bot">Здравствуйте! Я TNC Assistant. Задавайте вопросы на любые темы: криптовалюты, технологии, учёба, программирование, финансы и работа с приложением. Для ответов используется серверная ИИ-модель, если администратор подключил AI API.</div></div><div class="suggestions"><button data-prompt="Объясни, как работает блокчейн, на простом примере">Объясни блокчейн</button><button data-prompt="Помоги разобраться в графике BTC и объясни основные показатели">Разобрать график</button><button data-prompt="Составь план изучения Python на 30 дней">План обучения</button><button data-prompt="Как защитить криптокошелёк от мошенников?">Безопасность</button></div><form class="chat-compose" id="assistant-form"><input id="assistant-input" autocomplete="off" maxlength="4000" placeholder="Напишите любой вопрос…" aria-label="Сообщение помощнику"><button class="btn gold" type="submit" aria-label="Отправить сообщение">Отправить</button></form><div class="muted tiny" style="padding:0 16px 14px">ИИ может ошибаться. Не используйте ответы как единственный источник финансовых или юридических решений.</div></article>
+ <aside class="assistant-side"><article class="card"><div class="eyebrow">AI CAPABILITIES</div><h3>Универсальный помощник</h3><p class="muted tiny">Может объяснять сложные темы, писать и проверять код, помогать с текстами, планированием и анализом информации. Доступные возможности зависят от подключённой модели.</p></article><article class="card"><div class="eyebrow">КОНФИДЕНЦИАЛЬНОСТЬ</div><p class="muted tiny">Сообщения отправляются на сервер для обработки ИИ. Не передавайте секретные ключи, пароли, seed-фразы, коды авторизации или персональные платёжные данные.</p></article><article class="card"><div class="eyebrow">TNC WALLET</div><p class="muted tiny">Помощник не выполняет переводы, не меняет баланс и не размещает реальные биржевые ордера.</p><button class="btn block" data-go="wallet">Перейти в кошелёк</button></article></aside></div>
 </section>
-
-<section class="page" id="page-profile">
-  <div class="profile-layout">
-    <div class="card profile-hero">
-      <div class="profile-photo" id="profile-photo">T</div>
-      <h2 id="profile-name">TNC User</h2>
-      <p id="profile-handle">Telegram аккаунт</p>
-      <span class="pill">◉ TNC ACCOUNT</span>
-    </div>
-    <div class="card">
-      <div class="eyebrow">ЛИЧНЫЕ ДАННЫЕ</div>
-      <h2 class="panel-title" style="margin-top:8px">Профиль аккаунта</h2>
-      <div class="info-row"><span class="muted">Telegram ID</span><strong id="profile-id">—</strong></div>
-      <div class="info-row"><span class="muted">Имя</span><strong id="profile-first">—</strong></div>
-      <div class="info-row"><span class="muted">Имя пользователя</span><strong id="profile-username">—</strong></div>
-      <div class="info-row"><span class="muted">Баланс</span><strong id="profile-balance">—</strong></div>
-      <div class="info-row"><span class="muted">Тип счёта</span><strong>TNC Wallet</strong></div>
-    </div>
-  </div>
-</section>
-
-<section class="page" id="page-crypto">
-  <div class="card coming"><div>
-    <div class="coming-icon">◈</div><div class="eyebrow">TNC ECOSYSTEM</div>
-    <h2 class="panel-title">TNC Crypto</h2>
-    <p class="panel-desc">Раздел находится в разработке.<br>Внешние криптовалютные операции пока не подключены.</p>
-    <span class="pill">СКОРО</span>
-  </div></div>
-</section>
-
-<section class="page" id="page-games">
-  <div class="card coming"><div>
-    <div class="coming-icon">✦</div><div class="eyebrow">TNC ECOSYSTEM</div>
-    <h2 class="panel-title">TNC Games</h2>
-    <p class="panel-desc">Игровой раздел экосистемы появится здесь.</p>
-    <span class="pill">СКОРО</span>
-  </div></div>
-</section>
-</main>
-</div>
-
-<nav class="mobile-nav" aria-label="Основная навигация">
-  <button class="active" data-page="home"><span>⌂</span>Главная</button>
-  <button data-page="transfer"><span>⇄</span>Перевод</button>
-  <button data-page="shop"><span>✦</span>Магазин</button>
-  <button data-page="history"><span>◷</span>История</button>
-  <button data-page="crypto"><span>◈</span>Crypto</button>
-  <button data-page="profile"><span>◎</span>Профиль</button>
-</nav>
-
+<section class="page" id="page-games"><div class="pageintro"><div class="eyebrow">TNC PLAY</div><h2>Игровая вселенная</h2><p>Отдельное игровое направление TNC. Игровые токены GT не являются балансом TNC Coin и не конвертируются в него.</p></div><div class="grid featuregrid"><article class="card feature"><div class="featureicon"><span class="icon-orb">C</span></div><h3>Crash</h3><p>Раунды, множитель и динамика полёта.</p><div class="soon">В РАЗРАБОТКЕ</div></article><article class="card feature"><div class="featureicon"><span class="icon-orb">D</span></div><h3>Dice</h3><p>Классическая игра с серверным результатом.</p><div class="soon">В РАЗРАБОТКЕ</div></article><article class="card feature"><div class="featureicon"><span class="icon-orb">M</span></div><h3>Mines</h3><p>Выбор клеток и игровая стратегия.</p><div class="soon">В РАЗРАБОТКЕ</div></article><article class="card feature"><div class="featureicon"><span class="icon-orb">S</span></div><h3>Slots</h3><p>Игровые автоматы и игровые события.</p><div class="soon">В РАЗРАБОТКЕ</div></article><article class="card feature"><div class="featureicon"><span class="icon-orb">T</span></div><h3>Турниры</h3><p>Соревнования и таблицы результатов.</p><div class="soon">В РАЗРАБОТКЕ</div></article><article class="card feature"><div class="featureicon"><span class="icon-orb">G</span></div><h3>GT Wallet</h3><p>Отдельный баланс игровых токенов.</p><div class="soon">СЕРВЕРНЫЙ МОДУЛЬ НЕ ПОДКЛЮЧЁН</div></article></div><div class="notice">Игровые разделы пока представлены информационными карточками. Ставки, начисления и результаты не имитируются на стороне браузера.</div></section>
+<section class="page" id="page-rewards"><div class="pageintro"><div class="eyebrow">TNC COMMUNITY</div><h2>Награды и задания</h2><p>Раздел будущих активностей экосистемы.</p></div><div class="grid twocol"><article class="card"><div style="font-size:28px">◇</div><h3>Задания</h3><p class="muted tiny">Система заданий, прогресса и наград будет подключена к серверу.</p><span class="pill">В РАЗРАБОТКЕ</span></article><article class="card"><div class="icon-orb">A</div><h3>Достижения</h3><p class="muted tiny">История достижений и уровни аккаунта появятся после подключения модуля.</p><span class="pill">В РАЗРАБОТКЕ</span></article></div></section>
+<section class="page" id="page-profile"><div class="pageintro"><div class="eyebrow">IDENTITY & SECURITY</div><h2>Мой профиль</h2><p>Данные Telegram-аккаунта, связанного с TNC.</p></div><div class="grid profilegrid"><article class="card profilehero"><div class="photo" id="profile-photo">T</div><h3 id="profile-name">TNC User</h3><p id="profile-handle">Telegram account</p><span class="pill">● TNC ACCOUNT</span></article><article class="card"><div class="eyebrow">ACCOUNT INFORMATION</div><div class="info" style="margin-top:15px"><span class="muted">Telegram ID</span><strong id="profile-id">—</strong></div><div class="info"><span class="muted">Имя</span><strong id="profile-first">—</strong></div><div class="info"><span class="muted">Username</span><strong id="profile-username">—</strong></div><div class="info"><span class="muted">Баланс</span><strong id="profile-balance">—</strong></div><div class="settingsrow"><span>Авторизация</span><span class="status">Telegram initData</span></div><div class="settingsrow"><span>Серверная проверка</span><span class="status">Включена</span></div><div class="notice">Для защиты аккаунта не передавайте Telegram initData, токен бота или данные авторизации третьим лицам.</div></article></div></section>
+</main></div>
+<nav class="mobilebar" aria-label="Разделы приложения"><button class="active" data-page="home"><span>⌂</span>Главная</button><button data-page="wallet"><span>◈</span>Кошелёк</button><button data-page="transfer"><span>⇄</span>Перевод</button><button data-page="history"><span>◷</span>История</button><button data-page="market"><span>⌁</span>Биржа</button><button data-page="trading"><span>↗</span>Трейдинг</button><button data-page="assistant"><span>✧</span>ИИ</button><button data-page="games"><span>◇</span>Games</button><button data-page="rewards"><span>◇</span>Награды</button><button data-page="profile"><span>◎</span>Профиль</button></nav>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
 <script>
 'use strict';
+(()=>{
+const $=id=>document.getElementById(id);const tg=window.Telegram?.WebApp||null;let initData=tg?.initData||'';let profile=null;let transactions=[];let filter='all';let toastTimer;
+const titles={home:'Добро пожаловать',wallet:'Мой кошелёк',transfer:'Перевод TNC',history:'История операций',market:'Live Биржа',trading:'Трейдинг',assistant:'ИИ Помощник',games:'TNC Games',rewards:'Награды и задания',profile:'Мой профиль'};
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3400)}
+function money(v){const n=Number(String(v??0).replace(',','.'));return Number.isFinite(n)?n.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}):'0,00'}
+function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function authBanner(){const el=$('auth-banner');if(initData){el.hidden=true;return}el.hidden=false;el.textContent='Откройте TNC Mini App через Telegram-бота, чтобы безопасно загрузить аккаунт, баланс и историю. Внешний предпросмотр не имеет доступа к вашему кошельку.';$('connection-label').textContent='Ожидает Telegram';$('recent').innerHTML='<div class="empty">Войдите через Telegram, чтобы загрузить операции.</div>';$('all-history').innerHTML='<div class="empty">История появится после авторизации.</div>'}
+async function api(path,options={}){if(!initData)throw new Error('Откройте приложение через Telegram-бота.');let res;try{res=await fetch(path,{...options,headers:{'X-Telegram-Init-Data':initData,'Content-Type':'application/json',...(options.headers||{})}})}catch{throw new Error('Не удалось связаться с сервером. Проверьте интернет.')}let data={};if((res.headers.get('content-type')||'').includes('application/json'))data=await res.json();if(!res.ok)throw new Error(data.detail||`Ошибка сервера (${res.status})`);return data}
+function setPhoto(el,user){el.replaceChildren();const initial=(user?.first_name||'T').trim().charAt(0).toUpperCase()||'T';if(user?.photo_url){const img=document.createElement('img');img.src=user.photo_url;img.alt='Фото профиля';img.onerror=()=>{el.textContent=initial};el.appendChild(img)}else el.textContent=initial}
+function renderUser(p){const u={...(tg?.initDataUnsafe?.user||{}),...p};const name=u.first_name||'TNC User';const username=u.username?'@'+u.username:'Telegram аккаунт';$('home-name').textContent=name;$('home-handle').textContent=username;$('home-id').textContent=u.telegram_id||'—';$('profile-name').textContent=name;$('profile-handle').textContent=username;$('profile-id').textContent=u.telegram_id||'—';$('profile-first').textContent=name;$('profile-username').textContent=u.username? '@'+u.username:'Не указан';$('top-avatar').textContent=name.trim().charAt(0).toUpperCase()||'T';setPhoto($('home-photo'),u);setPhoto($('profile-photo'),u)}
+function renderTx(items,target){const node=$(target);if(!items.length){node.innerHTML='<div class="empty">Операций пока нет. Новые переводы появятся здесь.</div>';return}node.innerHTML=items.map(tx=>{const outgoing=profile&&Number(tx.sender_id)===Number(profile.telegram_id);const title=tx.kind==='transfer'?(outgoing?'Перевод отправлен':'Перевод получен'):(tx.kind||'Операция');const date=tx.created_at?new Date(Number(tx.created_at)*1000).toLocaleString('ru-RU',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'Дата не указана';return `<div class="tx"><div class="txicon">${outgoing?'↗':'↙'}</div><div class="txmain"><div class="txtitle">${safe(title)}</div><div class="txmeta">${safe(date)} · ID ${safe(tx.id||'—')}</div></div><div class="txamount ${outgoing?'negative':'positive'}">${outgoing?'−':'+'}${safe(money(tx.amount))} TNC</div></div>`}).join('')}
+function renderHistory(){const q=$('history-search').value.trim().toLowerCase();const list=transactions.filter(tx=>{const outgoing=profile&&Number(tx.sender_id)===Number(profile.telegram_id);if(filter==='in'&&outgoing)return false;if(filter==='out'&&!outgoing)return false;return !q||String(tx.id||'').toLowerCase().includes(q)||String(tx.kind||'').toLowerCase().includes(q)||String(tx.sender_id||'').includes(q)||String(tx.receiver_id||'').includes(q)});renderTx(list,'all-history')}
+function renderStats(){let out=0,inc=0;for(const tx of transactions){if(profile&&Number(tx.sender_id)===Number(profile.telegram_id))out+=Number(tx.amount||0);else inc+=Number(tx.amount||0)}$('stat-count').textContent=transactions.length;$('stat-out').textContent=money(out);$('stat-in').textContent=money(inc)}
+async function refresh(){if(!initData){authBanner();return}$('balance').classList.add('loading');try{const [p,h]=await Promise.all([api('/api/profile'),api('/api/wallet/history')]);profile=p;transactions=Array.isArray(h.transactions)?h.transactions:[];const b=money(p.balance);$('balance').textContent=b;$('wallet-balance').textContent=b;$('profile-balance').textContent=b+' TNC';$('transfer-balance').textContent=b+' TNC';renderUser(p);renderTx(transactions.slice(0,5),'recent');renderHistory();renderStats();$('balance-updated').textContent='Обновлено '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});$('connection-label').textContent='Сервер подключён';}catch(e){toast(e.message);$('connection-label').textContent='Нет соединения';$('recent').innerHTML=`<div class="empty">${safe(e.message)}</div>`}finally{$('balance').classList.remove('loading')}}
+async function send(){if(!initData){toast('Откройте приложение через Telegram.');return}const receiver=Number($('receiver').value);const amount=$('amount').value.trim().replace(',','.');if(!Number.isSafeInteger(receiver)||receiver<=0){toast('Введите корректный Telegram ID получателя.');return}if(!amount||!Number.isFinite(Number(amount))||Number(amount)<=0){toast('Введите сумму больше нуля.');return}const btn=$('send');btn.disabled=true;btn.textContent='Выполняем перевод…';try{const result=await api('/api/wallet/transfer',{method:'POST',body:JSON.stringify({receiver_id:receiver,amount})});toast(`Перевод ${money(result.amount)} TNC выполнен.`);$('receiver').value='';$('amount').value='';await refresh();showPage('home')}catch(e){toast(e.message)}finally{btn.disabled=false;btn.textContent='Проверить и отправить →'}}
+function showPage(page){if(!titles[page])return;document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+page));document.querySelectorAll('[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));$('page-title').textContent=titles[page];$('crumb').textContent='TNC / '+page.toUpperCase();document.body.dataset.page=page;if(page==='trading'){loadTradeQuote();loadPaperAccount()}if(page==='assistant'&&initData)$('ai-status').textContent='ГОТОВ К ЗАПРОСУ';window.scrollTo({top:0,behavior:'smooth'})}
+function initTelegram(){if(!tg)return;try{tg.ready();tg.expand();tg.setHeaderColor?.('#090a0c');tg.setBackgroundColor?.('#090a0c');tg.setBottomBarColor?.('#0c0e12');if(tg.requestFullscreen)tg.requestFullscreen().catch(()=>{})}catch(e){console.warn('Telegram WebApp init',e)}}
+async function fullscreen(){try{if(tg?.requestFullscreen){await tg.requestFullscreen();return}if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else toast('Полноэкранный режим не поддерживается.')}catch{toast('Полноэкранный режим недоступен в этом клиенте.')}}
+let spinLevel=0;const spinButton=$('spin-toggle'),spinCoin=$('spin-coin');if(spinButton&&spinCoin){spinButton.addEventListener('click',()=>{spinLevel=(spinLevel+1)%3;spinCoin.classList.remove('fast','hyper');if(spinLevel===1){spinCoin.classList.add('fast');spinButton.textContent=' Турбо-вращение'}else if(spinLevel===2){spinCoin.classList.add('hyper');spinButton.textContent=' Максимальная скорость'}else{spinButton.textContent='⟳ Ускорить вращение'};});}
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go)));$('refresh').addEventListener('click',refresh);$('history-refresh').addEventListener('click',refresh);$('send').addEventListener('click',send);$('fullscreen').addEventListener('click',fullscreen);$('history-search').addEventListener('input',renderHistory);document.querySelectorAll('#history-filter button').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;document.querySelectorAll('#history-filter button').forEach(x=>x.classList.toggle('active',x===b));renderHistory()}));
+// Subtle animated network mesh: decorative only, no wallet/market values are simulated.
+const netCanvas=$('network-layer');
+if(netCanvas&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+ const ctx=netCanvas.getContext('2d');let nodes=[],raf=0;
+ const resizeNet=()=>{const dpr=Math.min(devicePixelRatio||1,2);netCanvas.width=Math.floor(innerWidth*dpr);netCanvas.height=Math.floor(innerHeight*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);nodes=Array.from({length:Math.min(48,Math.floor(innerWidth/25))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,r:Math.random()*1.5+.5}))};
+ const drawNet=()=>{ctx.clearRect(0,0,innerWidth,innerHeight);for(let i=0;i<nodes.length;i++){const a=nodes[i];a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>innerWidth)a.vx*=-1;if(a.y<0||a.y>innerHeight)a.vy*=-1;ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,Math.PI*2);ctx.fillStyle='rgba(115,207,245,.55)';ctx.fill();for(let j=i+1;j<nodes.length;j++){const b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<125){ctx.strokeStyle=`rgba(92,177,220,${(1-d/125)*.12})`;ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}}}raf=requestAnimationFrame(drawNet)};
+ resizeNet();drawNet();addEventListener('resize',resizeNet,{passive:true});document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(raf);if(!document.hidden)drawNet()});
+}
+// Public market reference prices. TNC is deliberately not assigned a fabricated exchange quote.
+async function loadMarket(){const status=$('market-status');try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true',{cache:'no-store'});if(!r.ok)throw new Error('market unavailable');const d=await r.json();[['btc','bitcoin'],['eth','ethereum']].forEach(([k,id])=>{const item=d[id];if(!item||!Number.isFinite(item.usd))throw new Error('incomplete market data');$(''+k+'-price').textContent='$'+item.usd.toLocaleString('en-US',{maximumFractionDigits:2});const change=Number(item.usd_24h_change);const el=$(k+'-change');el.textContent=(change>=0?'+':'')+change.toFixed(2)+'%';el.classList.toggle('down',change<0)});status.textContent='Обновлено '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+' · CoinGecko';}catch(e){status.textContent='Рыночные данные временно недоступны';['btc','eth'].forEach(k=>{$(k+'-price').textContent='—';$(k+'-change').textContent='—'})}}
+loadMarket();setInterval(loadMarket,60000);
+// Live exchange page: public CoinGecko market data only; never fabricate TNC quotes.
+let chartDays=1;
+function fmtUSD(n){return Number(n).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:n<1?5:2})}
+async function loadMarketPage(){try{
+ const r=await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,binancecoin,ripple,dogecoin&order=market_cap_desc&per_page=6&page=1&sparkline=false&price_change_percentage=24h',{cache:'no-store'});if(!r.ok)throw Error('API '+r.status);const rows=await r.json();
+ const by=Object.fromEntries(rows.map(x=>[x.id,x]));const btc=by.bitcoin,eth=by.ethereum,sol=by.solana;if(btc){$('market-btc-main').textContent=fmtUSD(btc.current_price);$('market-btc-change').textContent='24ч: '+(btc.price_change_percentage_24h>=0?'+':'')+Number(btc.price_change_percentage_24h||0).toFixed(2)+'%';$('market-btc-change').className='tiny '+(btc.price_change_percentage_24h>=0?'positive':'negative')};if(eth)$('market-eth-main').textContent=fmtUSD(eth.current_price);if(sol)$('market-sol-main').textContent=fmtUSD(sol.current_price);
+ $('market-coins').innerHTML=rows.map(x=>`<tr><td><span class="coin-cell"><span class="coin-badge">${safe(x.symbol.toUpperCase().slice(0,3))}</span>${safe(x.name)} <span class="muted">${safe(x.symbol.toUpperCase())}</span></span></td><td>${fmtUSD(x.current_price)}</td><td class="${Number(x.price_change_percentage_24h)>=0?'positive':'negative'}">${Number(x.price_change_percentage_24h)>=0?'+':''}${Number(x.price_change_percentage_24h||0).toFixed(2)}%</td></tr>`).join('');$('market-updated').textContent=new Date().toLocaleTimeString('ru-RU');
+ }catch(e){$('market-coins').innerHTML='<tr><td colspan="3">Рыночный API временно недоступен. Попробуйте обновить.</td></tr>';toast('Не удалось загрузить рыночные данные.')}}
+async function loadBtcChart(days=chartDays){chartDays=days;document.querySelectorAll('[data-range]').forEach(b=>b.classList.toggle('active',Number(b.dataset.range)===days));$('chart-status').textContent='Загрузка графика…';try{const r=await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`,{cache:'no-store'});if(!r.ok)throw Error('chart API '+r.status);const data=await r.json();drawBtcChart(data.prices||[]);$('chart-status').textContent='BTC / USD · '+days+' дн. · CoinGecko'}catch(e){$('chart-status').textContent='График временно недоступен';drawBtcChart([])}}
+function drawBtcChart(points){const c=$('btc-chart');if(!c)return;const dpr=Math.min(devicePixelRatio||1,2),w=c.clientWidth||600,h=c.clientHeight||280;c.width=w*dpr;c.height=h*dpr;const x=c.getContext('2d');x.scale(dpr,dpr);x.clearRect(0,0,w,h);if(points.length<2){x.fillStyle='#89919e';x.font='12px sans-serif';x.fillText('Нет данных для графика',16,h/2);return}const vals=points.map(p=>p[1]),min=Math.min(...vals),max=Math.max(...vals),pad=18,range=max-min||1;const coords=vals.map((v,i)=>({x:pad+i/(vals.length-1)*(w-pad*2),y:h-pad-(v-min)/range*(h-pad*2)}));const grad=x.createLinearGradient(0,0,0,h);grad.addColorStop(0,'rgba(93,190,238,.28)');grad.addColorStop(1,'rgba(93,190,238,0)');x.beginPath();coords.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y));x.lineTo(coords.at(-1).x,h-pad);x.lineTo(coords[0].x,h-pad);x.closePath();x.fillStyle=grad;x.fill();x.beginPath();coords.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y));x.strokeStyle='#78d0fa';x.lineWidth=2;x.shadowColor='#4ab9f5';x.shadowBlur=10;x.stroke();x.shadowBlur=0;}
+document.querySelectorAll('[data-range]').forEach(b=>b.addEventListener('click',()=>loadBtcChart(Number(b.dataset.range))));$('market-refresh')?.addEventListener('click',()=>{loadMarketPage();loadBtcChart()});loadMarketPage();loadBtcChart();setInterval(loadMarketPage,60000);
+// Server-backed generative assistant. No canned answers are presented as AI.
+let chatBusy=false;const chatHistory=[];
+function addBubble(text,who){const box=$('chat-messages'),el=document.createElement('div');el.className='bubble '+who;el.textContent=text;box.appendChild(el);box.scrollTop=box.scrollHeight}
+async function sendAssistant(q){if(chatBusy)return;if(!initData){addBubble('Откройте приложение через Telegram, чтобы авторизоваться и использовать ИИ.','bot');return}chatBusy=true;const form=$('assistant-form'),btn=form.querySelector('button[type="submit"]');btn.disabled=true;btn.textContent='Думаю…';$('ai-status').textContent='ОТВЕЧАЮ';const wait=document.createElement('div');wait.className='bubble bot typing';wait.textContent='Формирую ответ…';$('chat-messages').appendChild(wait);try{const result=await api('/api/assistant/chat',{method:'POST',body:JSON.stringify({message:q,history:chatHistory.slice(-12)})});wait.remove();const answer=result.reply||'Модель вернула пустой ответ.';addBubble(answer,'bot');chatHistory.push({role:'user',content:q},{role:'assistant',content:answer});$('ai-status').textContent='ИИ ПОДКЛЮЧЁН'}catch(e){wait.remove();addBubble('Не удалось получить ответ от серверной ИИ-модели: '+e.message+'. Проверьте подключение AI API на сервере.','bot');$('ai-status').textContent='НЕТ ПОДКЛЮЧЕНИЯ'}finally{chatBusy=false;btn.disabled=false;btn.textContent='Отправить'}}
+$('assistant-form')?.addEventListener('submit',e=>{e.preventDefault();const input=$('assistant-input'),q=input.value.trim();if(!q)return;addBubble(q,'user');input.value='';sendAssistant(q)});document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{$('assistant-input').value=b.dataset.prompt;$('assistant-form').requestSubmit()}));
 
-(() => {
-  const $ = id => document.getElementById(id);
-  const titles = {
-    home:'Добро пожаловать',
-    transfer:'Перевод TNC',
-    shop:'Магазин TNC',
-    history:'История операций',
-    crypto:'TNC Crypto',
-    games:'TNC Games',
-    profile:'Мой профиль'
-  };
-
-  let tg = window.Telegram?.WebApp || null;
-  let initData = '';
-  let profile = null;
-  let transactions = [];
-  let toastTimer = null;
-  let installPrompt = null;
-
-  function toast(message) {
-    const el = $('toast');
-    el.textContent = message;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
-  }
-
-  function safe(value) {
-    return String(value ?? '').replace(/[&<>"']/g, c => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    })[c]);
-  }
-
-  function money(value) {
-    const number = Number(String(value ?? '0').replace(',','.'));
-    return Number.isFinite(number)
-      ? number.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})
-      : '0,00';
-  }
-
-  function setTelegramApp(app) {
-    tg = app;
-    if (!tg) return;
-
-    try {
-      tg.ready();
-      tg.expand();
-      tg.setHeaderColor?.('#08090b');
-      tg.setBackgroundColor?.('#08090b');
-      tg.setBottomBarColor?.('#0c0e12');
-
-      if (typeof tg.requestFullscreen === 'function') {
-        tg.requestFullscreen().catch(() => {});
-      }
-    } catch (error) {
-      console.warn('Telegram initialization:', error);
-    }
-
-    initData = tg.initData || '';
-    updateAuthNotice();
-    if (initData) refreshData();
-  }
-
-  function loadTelegramSdk() {
-    if (window.Telegram?.WebApp) {
-      setTelegramApp(window.Telegram.WebApp);
-      return;
-    }
-
-    if (!/Telegram/i.test(navigator.userAgent)) {
-      updateAuthNotice();
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-web-app.js';
-    script.async = true;
-    script.onload = () => {
-      if (window.Telegram?.WebApp) setTelegramApp(window.Telegram.WebApp);
-      else updateAuthNotice();
-    };
-    script.onerror = () => {
-      updateAuthNotice('Не удалось загрузить Telegram SDK. Проверьте соединение и откройте Mini App ещё раз.');
-    };
-    document.head.appendChild(script);
-  }
-
-  function updateAuthNotice(customMessage) {
-    const el = $('auth-notice');
-    if (initData) {
-      el.hidden = true;
-      return;
-    }
-    el.hidden = false;
-    el.textContent = customMessage ||
-      'Предпросмотр или установленная PWA-версия открыта вне Telegram. Для входа в аккаунт, просмотра баланса и переводов откройте TNC Wallet через кнопку Mini App в Telegram-боте.';
-  }
-
-  async function api(path, options = {}) {
-    if (!initData) throw new Error('Нет Telegram-авторизации. Откройте Mini App из Telegram.');
-    let response;
-    try {
-      response = await fetch(path, {
-        ...options,
-        headers: {
-          'X-Telegram-Init-Data': initData,
-          'Content-Type':'application/json',
-          ...(options.headers || {})
-        }
-      });
-    } catch {
-      throw new Error('Не удалось связаться с сервером. Проверьте интернет.');
-    }
-
-    const type = response.headers.get('content-type') || '';
-    const data = type.includes('application/json') ? await response.json() : {};
-    if (!response.ok) throw new Error(data.detail || `Ошибка сервера (${response.status})`);
-    return data;
-  }
-
-  function setPhoto(node, user) {
-    const photo = user?.photo_url;
-    const initial = (user?.first_name || 'T').trim().charAt(0).toUpperCase();
-    node.replaceChildren();
-
-    if (photo) {
-      const img = document.createElement('img');
-      img.src = photo;
-      img.alt = 'Аватар';
-      img.onerror = () => { node.textContent = initial; };
-      node.appendChild(img);
-    } else {
-      node.textContent = initial;
-    }
-  }
-
-  function setUserVisuals(user) {
-    const first = user?.first_name || 'TNC User';
-    const username = user?.username || '';
-    const id = user?.id || user?.telegram_id || '';
-    const initial = first.trim().charAt(0).toUpperCase() || 'T';
-
-    $('home-name').textContent = first;
-    $('home-handle').textContent = username ? '@' + username : 'Telegram аккаунт';
-    $('home-id').textContent = id || '—';
-    $('profile-id').textContent = id || '—';
-    $('profile-name').textContent = first;
-    $('profile-first').textContent = first;
-    $('profile-username').textContent = username ? '@' + username : 'Не указан';
-    $('profile-handle').textContent = username ? '@' + username : 'Telegram аккаунт';
-    $('top-avatar').textContent = initial;
-
-    setPhoto($('home-photo'), user);
-    setPhoto($('profile-photo'), user);
-  }
-
-  function renderTransactions(items, target) {
-    const node = $(target);
-    if (!items.length) {
-      node.innerHTML = '<div class="empty">Операций пока нет. Когда появятся переводы, они отобразятся здесь.</div>';
-      return;
-    }
-
-    node.innerHTML = items.map(tx => {
-      const outgoing = profile && Number(tx.sender_id) === Number(profile.telegram_id);
-      const title = tx.kind === 'transfer'
-        ? (outgoing ? 'Перевод отправлен' : 'Перевод получен')
-        : (tx.kind || 'Операция');
-      const date = tx.created_at
-        ? new Date(Number(tx.created_at) * 1000).toLocaleString('ru-RU',{
-            day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'
-          })
-        : 'Дата не указана';
-
-      return `<div class="tx">
-        <div class="tx-icon">${outgoing ? '↗' : '↙'}</div>
-        <div class="tx-main">
-          <div class="tx-title">${safe(title)}</div>
-          <div class="tx-meta">${safe(date)} · ID ${safe(tx.id || '—')}</div>
-        </div>
-        <div class="tx-amount ${outgoing ? 'negative' : 'positive'}">
-          ${outgoing ? '−' : '+'}${safe(money(tx.amount))} TNC
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  async function refreshData() {
-    if (!initData) {
-      updateAuthNotice();
-      $('recent').innerHTML = '<div class="empty">Откройте Mini App из Telegram, чтобы загрузить баланс и операции.</div>';
-      $('all-history').innerHTML = '<div class="empty">История доступна после авторизации.</div>';
-      return;
-    }
-
-    $('balance').classList.add('loading');
-    try {
-      const [p,h] = await Promise.all([
-        api('/api/profile'),
-        api('/api/wallet/history')
-      ]);
-
-      profile = p;
-      transactions = h.transactions || [];
-      $('balance').textContent = money(p.balance);
-      $('profile-balance').textContent = money(p.balance) + ' TNC';
-
-      const telegramUser = tg?.initDataUnsafe?.user || {};
-      setUserVisuals({
-        ...telegramUser,
-        ...p,
-        id:p.telegram_id,
-        first_name:p.first_name || telegramUser.first_name
-      });
-
-      renderTransactions(transactions.slice(0,4),'recent');
-      renderTransactions(transactions,'all-history');
-    } catch (error) {
-      $('recent').innerHTML = `<div class="empty">${safe(error.message)}</div>`;
-      $('all-history').innerHTML = `<div class="empty">${safe(error.message)}</div>`;
-      toast(error.message);
-    } finally {
-      $('balance').classList.remove('loading');
-    }
-  }
-
-  async function sendTnc() {
-    if (!initData) {
-      toast('Откройте приложение через Telegram Mini App.');
-      return;
-    }
-
-    const receiverId = Number($('receiver').value);
-    const amount = $('amount').value.trim();
-
-    if (!Number.isSafeInteger(receiverId) || receiverId <= 0) {
-      toast('Введите корректный Telegram ID получателя.');
-      return;
-    }
-    if (!amount || !Number.isFinite(Number(amount)) || Number(amount) <= 0) {
-      toast('Введите сумму больше нуля.');
-      return;
-    }
-
-    const button = $('send-button');
-    button.disabled = true;
-    button.textContent = 'Выполняем перевод…';
-
-    try {
-      const result = await api('/api/wallet/transfer',{
-        method:'POST',
-        body:JSON.stringify({receiver_id:receiverId,amount})
-      });
-      toast(`Перевод ${money(result.amount)} TNC выполнен.`);
-      $('receiver').value = '';
-      $('amount').value = '';
-      await refreshData();
-      showPage('home');
-    } catch (error) {
-      toast(error.message);
-    } finally {
-      button.disabled = false;
-      button.textContent = 'Подтвердить перевод →';
-    }
-  }
-
-  async function purchaseTnc(amount) {
-    if (!initData || !tg?.openInvoice) {
-      toast('Откройте магазин внутри Telegram.');
-      return;
-    }
-
-    const value = String(amount).replace(",", ".");
-    if (!Number.isFinite(Number(value)) || Number(value) < 0.1 ||
-        Number(value) > 1000000 || Math.round(Number(value) * 10) !== Number(value) * 10) {
-      toast('Введите сумму от 0,1 TNC с шагом 0,1.');
-      return;
-    }
-
-    const buttons = document.querySelectorAll('[data-shop-amount], #shop-custom-buy');
-    buttons.forEach(button => button.disabled = true);
-
-    try {
-      const result = await api('/api/shop/invoice', {
-        method: 'POST',
-        body: JSON.stringify({amount: value})
-      });
-
-      tg.openInvoice(result.invoice_url, async status => {
-        if (status === 'paid') {
-          toast('Оплата подтверждена! Обновляем баланс…');
-          await refreshData();
-        } else if (status === 'failed') {
-          toast('Платёж не прошёл. Попробуйте ещё раз.');
-        } else if (status === 'cancelled') {
-          toast('Оплата отменена.');
-        }
-      });
-    } catch (error) {
-      toast(error.message || 'Не удалось создать счёт.');
-    } finally {
-      buttons.forEach(button => button.disabled = false);
-    }
-  }
-
-  document.querySelectorAll('[data-shop-amount]').forEach(button => {
-    button.addEventListener('click', () => purchaseTnc(button.dataset.shopAmount));
-  });
-
-  const shopAmountInput = $('shop-amount');
-  const shopPriceEl = $('shop-price');
-  if (shopAmountInput && shopPriceEl) {
-    shopAmountInput.addEventListener('input', () => {
-      const value = Number(shopAmountInput.value);
-      if (!Number.isFinite(value) || value <= 0) {
-        shopPriceEl.textContent = '— ⭐';
-        return;
-      }
-      const stars = Math.round(value * 50);
-      shopPriceEl.textContent = stars.toLocaleString('ru-RU') + ' ⭐';
-    });
-  }
-
-  $('shop-custom-buy')?.addEventListener('click', () => {
-    const value = shopAmountInput?.value;
-    if (!value) {
-      toast('Введите сумму от 0,1 TNC.');
-      return;
-    }
-    purchaseTnc(value);
-  });
-
-  function showPage(page) {
-    if (!titles[page]) return;
-    document.querySelectorAll('.page').forEach(el => {
-      el.classList.toggle('active',el.id === 'page-' + page);
-    });
-    document.querySelectorAll('[data-page]').forEach(el => {
-      el.classList.toggle('active',el.dataset.page === page);
-    });
-    $('page-title').textContent = titles[page];
-    $('top-eyebrow').textContent = 'TNC WALLET / ' + page.toUpperCase();
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-
-  async function toggleFullscreen() {
-    try {
-      if (tg?.requestFullscreen && !tg.isFullscreen) {
-        await tg.requestFullscreen();
-        toast('Полноэкранный режим включён');
-        return;
-      }
-      if (tg?.exitFullscreen && tg.isFullscreen) {
-        await tg.exitFullscreen();
-        return;
-      }
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      } else if (document.documentElement.requestFullscreen) {
-        await document.documentElement.requestFullscreen();
-      } else {
-        toast('Полноэкранный режим не поддерживается этим приложением.');
-      }
-    } catch {
-      toast('Полноэкранный режим недоступен в этом клиенте.');
-    }
-  }
-
-  function isStandalone() {
-    return window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone === true;
-  }
-
-  function setupInstall() {
-    const button = $('install-btn');
-
-    if (isStandalone()) {
-      button.hidden = true;
-      return;
-    }
-
-    window.addEventListener('beforeinstallprompt', event => {
-      event.preventDefault();
-      installPrompt = event;
-      button.hidden = false;
-    });
-
-    window.addEventListener('appinstalled', () => {
-      installPrompt = null;
-      button.hidden = true;
-      toast('TNC Wallet установлен!');
-    });
-
-    button.addEventListener('click', async () => {
-      if (installPrompt) {
-        installPrompt.prompt();
-        await installPrompt.userChoice;
-        installPrompt = null;
-        button.hidden = true;
-        return;
-      }
-
-      const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-      if (ios) {
-        toast('В Safari нажмите «Поделиться», затем «На экран Домой».');
-      } else {
-        toast('Откройте меню браузера и выберите «Установить приложение» или «Добавить на главный экран».');
-      }
-    });
-  }
-
-  function setupServiceWorker() {
-    if (!('serviceWorker' in navigator)) return;
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
-
-    navigator.serviceWorker.register('/app/sw.js',{scope:'/app/'})
-      .catch(error => console.warn('PWA service worker:',error));
-  }
-
-  document.querySelectorAll('[data-page]').forEach(button => {
-    button.addEventListener('click',() => showPage(button.dataset.page));
-  });
-  document.querySelectorAll('[data-go]').forEach(button => {
-    button.addEventListener('click',() => showPage(button.dataset.go));
-  });
-
-  $('refresh-btn').addEventListener('click',refreshData);
-  $('quick-refresh').addEventListener('click',refreshData);
-  $('history-refresh').addEventListener('click',refreshData);
-  $('send-button').addEventListener('click',sendTnc);
-  $('fullscreen-btn').addEventListener('click',toggleFullscreen);
-
-  document.addEventListener('fullscreenchange',() => {
-    $('fullscreen-btn').textContent = document.fullscreenElement || tg?.isFullscreen ? '' : '';
-  });
-
-  setupInstall();
-  setupServiceWorker();
-  loadTelegramSdk();
+// Paper trading module: isolated virtual USD account, separate from TNC balances.
+const tradeState={asset:'bitcoin',symbol:'BTC',price:0,change:0,side:'buy',days:1,cash:0,positions:[]};
+const assetMeta={bitcoin:['BTC','Bitcoin'],ethereum:['ETH','Ethereum'],solana:['SOL','Solana'],binancecoin:['BNB','BNB'],ripple:['XRP','XRP'],dogecoin:['DOGE','Dogecoin']};
+function tradeUSD(v){return Number(v||0).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2})}
+async function paperApi(path,opts={}){return api(path,opts)}
+async function loadTradeQuote(){const asset=$('trade-asset').value;tradeState.asset=asset;tradeState.symbol=assetMeta[asset][0];$('trade-asset-title').textContent=assetMeta[asset][1]+' · '+tradeState.symbol+' / USD';try{const d=await paperApi('/api/paper-trading/quote?asset='+encodeURIComponent(asset));tradeState.price=Number(d.price);tradeState.change=Number(d.change_24h||0);$('trade-price').textContent=tradeUSD(tradeState.price);$('trade-price-change').textContent=(tradeState.change>=0?'+':'')+tradeState.change.toFixed(2)+'% за 24ч';$('trade-price-change').className='tiny '+(tradeState.change>=0?'positive':'negative');$('order-price').textContent=tradeUSD(tradeState.price);updateOrderEstimate();await loadTradeChart()}catch(e){$('trade-price').textContent='Котировка недоступна';$('trade-chart-status').textContent=e.message;toast('Не удалось получить серверную котировку: '+e.message)}}
+async function loadTradeChart(){const days=tradeState.days;try{const r=await fetch('https://api.coingecko.com/api/v3/coins/'+encodeURIComponent(tradeState.asset)+'/market_chart?vs_currency=usd&days='+days,{cache:'no-store'});if(!r.ok)throw Error('chart '+r.status);const d=await r.json();drawTradeChart(d.prices||[]);$('trade-chart-status').textContent=tradeState.symbol+' / USD · '+days+' дн. · CoinGecko'}catch(e){$('trade-chart-status').textContent='График временно недоступен';drawTradeChart([])}}
+function drawTradeChart(points){const c=$('trade-chart');if(!c)return;const dpr=Math.min(devicePixelRatio||1,2),w=c.clientWidth||600,h=c.clientHeight||270;c.width=w*dpr;c.height=h*dpr;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);if(points.length<2){x.fillStyle='#89919e';x.font='12px sans-serif';x.fillText('Нет данных для графика',16,h/2);return}const vals=points.map(p=>p[1]),min=Math.min(...vals),max=Math.max(...vals),pad=18,range=max-min||1,coords=vals.map((v,i)=>({x:pad+i/(vals.length-1)*(w-pad*2),y:h-pad-(v-min)/range*(h-pad*2)}));const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(83,195,245,.25)');g.addColorStop(1,'rgba(83,195,245,0)');x.beginPath();coords.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y));x.lineTo(coords[coords.length-1].x,h-pad);x.lineTo(coords[0].x,h-pad);x.closePath();x.fillStyle=g;x.fill();x.beginPath();coords.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y));x.strokeStyle='#70d4ff';x.lineWidth=2;x.shadowColor='#4ab9f5';x.shadowBlur=12;x.stroke();x.shadowBlur=0}
+function updateOrderEstimate(){const qty=Number($('trade-amount').value||0),total=qty*tradeState.price;$('order-total').textContent=tradeState.price?tradeUSD(total):'—';$('order-available').textContent=tradeState.side==='buy'?tradeUSD(tradeState.cash):((tradeState.positions.find(p=>p.asset===tradeState.asset)?.quantity||0).toFixed(6)+' '+tradeState.symbol)}
+async function loadPaperAccount(){try{const d=await paperApi('/api/paper-trading/account');tradeState.cash=Number(d.cash_usd||0);tradeState.positions=d.positions||[];$('paper-cash').textContent=tradeUSD(d.cash_usd);$('paper-equity').textContent=tradeUSD(d.equity_usd);$('paper-position-count').textContent=tradeState.positions.length;$('paper-positions').innerHTML=tradeState.positions.length?tradeState.positions.map(p=>`<tr><td>${safe(p.symbol)}</td><td>${Number(p.quantity).toFixed(6)}</td><td>${tradeUSD(p.average_price)}</td><td>${tradeUSD(p.market_value)}</td></tr>`).join(''):'<tr><td colspan="4">Открытых позиций пока нет.</td></tr>';$('order-available').textContent=tradeState.side==='buy'?tradeUSD(tradeState.cash):'—';await loadPaperOrders()}catch(e){$('paper-cash').textContent='—';$('paper-positions').innerHTML='<tr><td colspan="4">'+safe(e.message)+'</td></tr>'}}
+async function loadPaperOrders(){try{const d=await paperApi('/api/paper-trading/orders');const rows=d.orders||[];$('paper-orders').innerHTML=rows.length?rows.map(o=>`<tr><td>${safe(new Date(o.created_at).toLocaleString('ru-RU'))}</td><td class="${o.side==='buy'?'positive':'negative'}">${o.side==='buy'?'Покупка':'Продажа'}</td><td>${safe(o.symbol)}</td><td>${tradeUSD(o.total_usd)}</td><td>Исполнен · Demo</td></tr>`).join(''):'<tr><td colspan="5">Ордера пока отсутствуют.</td></tr>'}catch(e){$('paper-orders').innerHTML='<tr><td colspan="5">'+safe(e.message)+'</td></tr>'}}
+async function submitPaperOrder(){const qty=Number($('trade-amount').value);if(!Number.isFinite(qty)||qty<=0){toast('Укажите корректное количество актива.');return}const btn=$('paper-submit');btn.disabled=true;btn.textContent='Исполнение…';try{const d=await paperApi('/api/paper-trading/order',{method:'POST',body:JSON.stringify({asset:tradeState.asset,side:tradeState.side,quantity:qty})});toast((tradeState.side==='buy'?'Покупка':'Продажа')+' исполнена в PAPER-режиме по '+tradeUSD(d.price));$('trade-amount').value='';await loadPaperAccount();updateOrderEstimate()}catch(e){toast(e.message)}finally{btn.disabled=false;btn.textContent='Подтвердить учебный ордер'}}
+$('trade-asset')?.addEventListener('change',loadTradeQuote);$('trade-amount')?.addEventListener('input',updateOrderEstimate);$('paper-submit')?.addEventListener('click',submitPaperOrder);$('paper-refresh')?.addEventListener('click',()=>{loadTradeQuote();loadPaperAccount()});document.querySelectorAll('[data-side]').forEach(b=>b.addEventListener('click',()=>{tradeState.side=b.dataset.side;document.querySelectorAll('[data-side]').forEach(x=>x.classList.toggle('active',x===b));$('paper-submit').textContent=tradeState.side==='buy'?'Подтвердить учебную покупку':'Подтвердить учебную продажу';updateOrderEstimate()}));document.querySelectorAll('[data-portion]').forEach(b=>b.addEventListener('click',()=>{const pct=Number(b.dataset.portion)/100;let qty;if(tradeState.side==='buy')qty=tradeState.price?tradeState.cash*pct/tradeState.price:0;else qty=(tradeState.positions.find(p=>p.asset===tradeState.asset)?.quantity||0)*pct;$('trade-amount').value=qty?qty.toFixed(6):'';updateOrderEstimate()}));document.querySelectorAll('[data-trade-range]').forEach(b=>b.addEventListener('click',()=>{tradeState.days=Number(b.dataset.tradeRange);document.querySelectorAll('[data-trade-range]').forEach(x=>x.classList.toggle('active',x===b));loadTradeChart()}));
+initTelegram();if('serviceWorker'in navigator&&(/^https:/.test(location.protocol)||location.hostname==='localhost'))navigator.serviceWorker.register('/app/sw.js',{scope:'/app/'}).catch(e=>console.warn('Service worker',e));authBanner();if(initData)refresh();
 })();
 </script>
-<style>
-#tnc-games-entry{
- position:fixed;right:18px;bottom:22px;z-index:9998;
- padding:15px 23px;border-radius:16px;
- background:linear-gradient(110deg,#b88a42,#f0d18b);
- color:#17120a;font-weight:900;font-size:14px;
- text-decoration:none;box-shadow:0 8px 30px #0009;
-}
-#tnc-games-overlay{
- display:none;position:fixed;inset:0;z-index:9999;
- background:#08090d;
-}
-#tnc-games-overlay.open{display:block}
-#tnc-games-frame{width:100%;height:100%;border:0;background:#08090d}
-#tnc-games-close{
- position:absolute;top:12px;right:14px;z-index:2;
- width:42px;height:42px;border:1px solid #555;
- border-radius:50%;background:#17171d;color:white;
- font-size:23px;cursor:pointer;
-}
-</style>
-
-<a href="#" id="tnc-games-entry">🎮 ИГРЫ</a>
-
-<div id="tnc-games-overlay">
- <button id="tnc-games-close" aria-label="Закрыть"></button>
- <iframe id="tnc-games-frame" title="TNC Games"></iframe>
-</div>
-
-<script>
-(function(){
- const entry=document.getElementById("tnc-games-entry");
- const overlay=document.getElementById("tnc-games-overlay");
- const frame=document.getElementById("tnc-games-frame");
- const close=document.getElementById("tnc-games-close");
-
- entry.addEventListener("click",function(e){
-  e.preventDefault();
-  overlay.classList.add("open");
-  if(!frame.src) frame.src="/app/games.html";
- });
-
- close.addEventListener("click",function(){
-  overlay.classList.remove("open");
- });
-})();
-</script>
-</body>
-</html>
+</body></html>
