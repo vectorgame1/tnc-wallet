@@ -105,7 +105,7 @@ def check_stars_order(payload, user_id, stars):
     with engine.connect() as conn:
         row = conn.execute(
             text("""
-                SELECT user_id, stars, tokens, status
+                SELECT user_id, stars, tokens, status, created_at
                 FROM tnc_game_stars_orders
                 WHERE payload=:payload
             """),
@@ -118,6 +118,7 @@ def check_stars_order(payload, user_id, stars):
         int(row["user_id"]) == int(user_id)
         and int(row["stars"]) == int(stars)
         and row["status"] == "pending"
+        and int(time.time()) - int(row["created_at"]) <= 3600
     )
 
 
@@ -135,7 +136,7 @@ def complete_stars_payment(payload, user_id, stars, charge_id):
     with engine.begin() as conn:
         order = conn.execute(
             text("""
-                SELECT user_id, stars, tokens, status, charge_id
+                SELECT user_id, stars, tokens, status, charge_id, created_at
                 FROM tnc_game_stars_orders
                 WHERE payload=:payload
             """),
@@ -158,6 +159,8 @@ def complete_stars_payment(payload, user_id, stars, charge_id):
 
         if order["status"] != "pending":
             raise ValueError("Заказ недоступен для оплаты.")
+        if now - int(order["created_at"]) > 3600:
+            raise ValueError("Срок действия заказа истёк. Создай новый счёт.")
 
         tokens = int(order["tokens"])
 
