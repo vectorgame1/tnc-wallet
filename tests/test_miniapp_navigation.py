@@ -26,6 +26,12 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertIn("не более 6 знаков после запятой", self.html)
         self.assertIn("Завершённый перевод нельзя отменить.", self.html)
 
+    def test_black_red_theme_is_applied(self):
+        self.assertIn("--bg:#050506", self.html)
+        self.assertIn("--gold:#ff2638", self.html)
+        self.assertIn("TNC REDLINE visual system", self.html)
+        self.assertNotIn("--gold:#e7bd68", self.html)
+
 
 if __name__ == "__main__":
     unittest.main()
