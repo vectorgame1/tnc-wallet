@@ -74,41 +74,42 @@ class TransferFlow(StatesGroup):
     confirm = State()
 
 
+MORE = "Ещё"
+
+
 def main_keyboard():
-    """Compact start menu: Mini App, two frequent actions, and one More entry."""
+    """Persistent compact reply menu: one app launch, two primary actions, one More row."""
     webapp_url = (getattr(settings, "WEBAPP_URL", "") or "").strip()
     app_button = (
-        InlineKeyboardButton(text=MINI_APP, web_app=WebAppInfo(url=webapp_url))
+        KeyboardButton(text=MINI_APP, web_app=WebAppInfo(url=webapp_url))
         if webapp_url.startswith("https://")
-        else InlineKeyboardButton(text=MINI_APP, callback_data="menu:miniapp")
+        else KeyboardButton(text=MINI_APP)
     )
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [app_button],
-        [
-            InlineKeyboardButton(text=WALLET, callback_data="menu:wallet"),
-            InlineKeyboardButton(text=TRANSFER, callback_data="menu:transfer"),
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [app_button],
+            [KeyboardButton(text=WALLET), KeyboardButton(text=TRANSFER)],
+            [KeyboardButton(text=MORE)],
         ],
-        [InlineKeyboardButton(text="Ещё", callback_data="menu:more")],
-    ])
+        resize_keyboard=True,
+        is_persistent=True,
+        input_field_placeholder="Выберите действие TNC",
+    )
 
 
 def more_keyboard():
-    """Secondary destinations are grouped behind one compact menu entry."""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text=HISTORY, callback_data="menu:history"),
-            InlineKeyboardButton(text=ACCOUNT, callback_data="menu:account"),
+    """Secondary actions are grouped in a simple reply keyboard, not inline buttons."""
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text=HISTORY), KeyboardButton(text=ACCOUNT)],
+            [KeyboardButton(text=SHOP), KeyboardButton(text=GT_BALANCE)],
+            [KeyboardButton(text=COMMUNITY), KeyboardButton(text="Помощь")],
+            [KeyboardButton(text="← Главное меню")],
         ],
-        [
-            InlineKeyboardButton(text=SHOP, callback_data="menu:shop"),
-            InlineKeyboardButton(text=GT_BALANCE, callback_data="menu:games"),
-        ],
-        [
-            InlineKeyboardButton(text=COMMUNITY, callback_data="menu:community"),
-            InlineKeyboardButton(text="Помощь", callback_data="menu:help"),
-        ],
-        [InlineKeyboardButton(text="← Главное меню", callback_data="menu:back")],
-    ])
+        resize_keyboard=True,
+        is_persistent=True,
+        input_field_placeholder="Дополнительные разделы",
+    )
 
 def cancel_keyboard():
     return ReplyKeyboardMarkup(
@@ -183,8 +184,8 @@ async def send_section(
         photo_by_section = {
             "TNC ECOSYSTEM": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
             "TNC WALLET": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=1280&q=90",
-            "TNC TRANSFER": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=90",
-            "TNC SUPPORT": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=90",
+            "TNC TRANSFER": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
+            "TNC SUPPORT": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
             "TNC GAMES": "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=1280&q=90",
         }
         photo_url = photo_by_section.get(section, photo_by_section["TNC ECOSYSTEM"])
@@ -217,9 +218,9 @@ async def send_operation_image(
         # operation references remain in the signed server-generated caption.
         photo_by_operation = {
             "deposit": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=1280&q=90",
-            "withdraw": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=90",
-            "received": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=90",
-            "sent": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=90",
+            "withdraw": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
+            "received": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
+            "sent": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
             "bonus": "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1280&q=90",
             "reward": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1280&q=90",
             "refund": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
@@ -315,6 +316,23 @@ async def menu_callback(callback: CallbackQuery, state: FSMContext):
     elif action == "help":
         await state.clear()
         await help_handler(message)
+
+
+@dp.message(F.text == MORE)
+async def more_menu_handler(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Дополнительные разделы:", reply_markup=more_keyboard())
+
+
+@dp.message(F.text == "← Главное меню")
+async def back_to_main_menu_handler(message: Message, state: FSMContext):
+    await state.clear()
+    await show_home(message, greeting=False)
+
+
+@dp.message(F.text == "Помощь")
+async def menu_help_handler(message: Message):
+    await help_handler(message)
 
 
 @dp.message(CommandStart())
