@@ -121,10 +121,15 @@ class GameRoundTests(unittest.TestCase):
 
     def test_stars_payment_is_idempotent(self):
         payload, expected_tokens = create_stars_order(self.user_id, 2)
+        charge_id = "test-charge-" + uuid.uuid4().hex
         first = complete_stars_payment(
-            payload, self.user_id, 2, "test-charge-" + uuid.uuid4().hex
+            payload, self.user_id, 2, charge_id
+        )
+        second = complete_stars_payment(
+            payload, self.user_id, 2, charge_id
         )
         self.assertFalse(first["already_processed"])
+        self.assertTrue(second["already_processed"])
         self.assertEqual(first["tokens"], expected_tokens)
 
         with engine.connect() as conn:
