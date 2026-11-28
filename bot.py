@@ -72,24 +72,23 @@ class TransferFlow(StatesGroup):
 
 
 def main_keyboard():
-    """Единая точка входа: все действия выполняются внутри Mini App."""
+    """Полная навигация бота + отдельный безопасный запуск Mini App."""
     webapp_url = (getattr(settings, "WEBAPP_URL", "") or "").strip()
-    if not webapp_url.startswith("https://"):
-        return ReplyKeyboardMarkup(
-            keyboard=[[KeyboardButton(text="Mini App временно недоступен")]],
-            resize_keyboard=True,
-            is_persistent=True,
-        )
+    rows = [
+        [KeyboardButton(text=WALLET), KeyboardButton(text=TRANSFER)],
+        [KeyboardButton(text=HISTORY), KeyboardButton(text=ACCOUNT)],
+        [KeyboardButton(text=SHOP), KeyboardButton(text=GT_BALANCE)],
+        [KeyboardButton(text=COMMUNITY)],
+    ]
+    if webapp_url.startswith("https://"):
+        rows.append([KeyboardButton(text=MINI_APP, web_app=WebAppInfo(url=webapp_url))])
+    else:
+        rows.append([KeyboardButton(text=MINI_APP)])
     return ReplyKeyboardMarkup(
-        keyboard=[[
-            KeyboardButton(
-                text=MINI_APP,
-                web_app=WebAppInfo(url=webapp_url),
-            )
-        ]],
+        keyboard=rows,
         resize_keyboard=True,
         is_persistent=True,
-        input_field_placeholder="Открой TNC Mini App",
+        input_field_placeholder="Выбери раздел TNC",
     )
 
 def cancel_keyboard():
@@ -223,27 +222,30 @@ async def send_operation_image(
 
 
 async def show_home(message: Message, greeting=True):
+    name = html.escape(message.from_user.first_name or "User")
+    caption = (
+        f"<b>{'Добро пожаловать в TNC, ' + name if greeting else 'TNC ECOSYSTEM'}</b>\n\n"
+        "<b>ТВОЙ АККАУНТ</b>\n"
+        "• <b>Кошелёк TNC</b> — внутренний баланс и доступные средства.\n"
+        "• <b>Перевести TNC</b> — перевод другому пользователю по Telegram ID с подтверждением.\n"
+        "• <b>История операций</b> — входящие, исходящие и пополнения.\n"
+        "• <b>Мой аккаунт</b> — сведения о Telegram-профиле и состоянии аккаунта.\n\n"
+        "<b>ЭКОСИСТЕМА</b>\n"
+        "• <b>Магазин TNC</b> — пополнение через Telegram Stars.\n"
+        "• <b>Баланс GT</b> — отдельные игровые очки; GT не конвертируются в TNC и не выводятся.\n"
+        "• <b>Реферальная ссылка</b> — персональная ссылка приглашения.\n"
+        "• <b>Открыть приложение</b> — полный интерфейс TNC Mini App.\n\n"
+        "Выбери нужный раздел на клавиатуре. Для возврата сюда отправь /menu.\n"
+        "<i>TNC — внутренний учётный баланс экосистемы, не обещание блокчейн-актива или денежного вывода.</i>"
+    )
     if greeting:
-        name = html.escape(message.from_user.first_name or "User")
-        caption = (
-            f" <b>Добро пожаловать в TNC, {name}!</b>\n\n"
-            "Твой единый аккаунт цифровой экосистемы.\n"
-            "Выбирай раздел с помощью клавиатуры ниже."
+        await send_section(
+            message, "TNC ECOSYSTEM", "WELCOME TO TNC",
+            "YOUR ACCOUNT. YOUR ECOSYSTEM.",
+            "WALLET  •  TRANSFERS  •  ACCOUNT", caption,
         )
     else:
-        caption = (
-            " <b>TNC ECOSYSTEM</b>\n\n"
-            "Главное меню. Выбери нужный раздел."
-        )
-
-    await send_section(
-        message,
-        "TNC ECOSYSTEM",
-        "WELCOME TO TNC",
-        "YOUR ACCOUNT. YOUR ECOSYSTEM.",
-        "WALLET  •  TRANSFERS  •  ACCOUNT",
-        caption,
-    )
+        await message.answer(caption, reply_markup=main_keyboard(), parse_mode="HTML")
 
 
 # --------------------------------------------------
