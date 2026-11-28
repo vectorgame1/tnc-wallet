@@ -9,27 +9,34 @@ class BotNavigationTests(unittest.TestCase):
         with patch.object(bot.settings, "WEBAPP_URL", "https://example.test/app/"):
             keyboard = bot.main_keyboard()
 
-        labels = [button.text for row in keyboard.inline_keyboard for button in row]
+        labels = [button.text for row in keyboard.keyboard for button in row]
         self.assertEqual(len(labels), 4)
-        self.assertTrue({bot.WALLET, bot.TRANSFER, bot.MINI_APP, "Ещё"}.issubset(set(labels)))
+        self.assertTrue({bot.WALLET, bot.TRANSFER, bot.MINI_APP, bot.MORE}.issubset(set(labels)))
         self.assertNotIn(bot.HISTORY, labels)
         self.assertNotIn(bot.SHOP, labels)
-        mini_app = next(button for row in keyboard.inline_keyboard for button in row if button.text == bot.MINI_APP)
+        mini_app = next(button for row in keyboard.keyboard for button in row if button.text == bot.MINI_APP)
         self.assertIsNotNone(mini_app.web_app)
         self.assertEqual(mini_app.web_app.url, "https://example.test/app/")
+        self.assertEqual(keyboard.is_persistent, True)
 
     def test_mini_app_remains_reachable_when_url_is_not_configured(self):
         with patch.object(bot.settings, "WEBAPP_URL", ""):
             keyboard = bot.main_keyboard()
 
-        mini_app = next(button for row in keyboard.inline_keyboard for button in row if button.text == bot.MINI_APP)
+        mini_app = next(button for row in keyboard.keyboard for button in row if button.text == bot.MINI_APP)
         self.assertIsNone(mini_app.web_app)
-        self.assertEqual(mini_app.callback_data, "menu:miniapp")
-        labels = {button.text for row in keyboard.inline_keyboard for button in row}
+        labels = {button.text for row in keyboard.keyboard for button in row}
         self.assertIn(bot.WALLET, labels)
         self.assertIn(bot.TRANSFER, labels)
-        self.assertIn("Ещё", labels)
+        self.assertIn(bot.MORE, labels)
         self.assertNotIn(bot.HISTORY, labels)
+
+    def test_secondary_menu_is_reply_keyboard_and_contains_less_used_actions(self):
+        keyboard = bot.more_keyboard()
+        labels = [button.text for row in keyboard.keyboard for button in row]
+        self.assertEqual(len(labels), 7)
+        self.assertTrue({bot.HISTORY, bot.ACCOUNT, bot.SHOP, bot.GT_BALANCE, bot.COMMUNITY, "Помощь", "← Главное меню"}.issubset(set(labels)))
+
 
     def test_menu_callbacks_route_to_existing_handlers(self):
         source = open(bot.__file__, encoding="utf-8-sig").read()
