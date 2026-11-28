@@ -8,11 +8,11 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 WIDTH = 1080
 HEIGHT = 720
 
-GOLD = (239, 190, 85)
+GOLD = (255, 38, 56)
 WHITE = (250, 249, 246)
 MUTED = (163, 165, 175)
-GREEN = (66, 205, 137)
-RED = (238, 100, 105)
+GREEN = (255, 83, 97)
+RED = (255, 38, 56)
 
 
 def get_font(size, bold=False):
@@ -36,7 +36,7 @@ def money(value):
 
 
 def base_image():
-    image = Image.new("RGB", (WIDTH, HEIGHT), (8, 10, 16))
+    image = Image.new("RGB", (WIDTH, HEIGHT), (5, 5, 7))
     draw = ImageDraw.Draw(image, "RGBA")
 
     # Фоновое золотое свечение
@@ -45,11 +45,11 @@ def base_image():
 
     gd.ellipse(
         (650, -250, 1350, 450),
-        fill=(191, 137, 48, 48),
+        fill=(190, 0, 28, 58),
     )
     gd.ellipse(
         (-300, 450, 400, 1100),
-        fill=(125, 82, 30, 22),
+        fill=(105, 0, 20, 30),
     )
 
     glow = glow.filter(ImageFilter.GaussianBlur(85))
@@ -60,8 +60,8 @@ def base_image():
     draw.rounded_rectangle(
         (48, 42, 1032, 678),
         radius=42,
-        fill=(16, 19, 27, 248),
-        outline=(191, 145, 63, 175),
+        fill=(12, 12, 16, 250),
+        outline=(255, 38, 56, 210),
         width=2,
     )
 
@@ -76,7 +76,7 @@ def base_image():
     # Монета TNC
     draw.ellipse(
         (870, 78, 972, 180),
-        fill=(94, 64, 24, 255),
+        fill=(70, 8, 16, 255),
         outline=GOLD,
         width=4,
     )
@@ -155,8 +155,8 @@ def create_section_image(section, title, subtitle, detail=""):
         draw.rounded_rectangle(
             (105, 485, 975, 565),
             radius=20,
-            fill=(196, 148, 59, 25),
-            outline=(220, 174, 91, 85),
+            fill=(255, 38, 56, 24),
+            outline=(255, 38, 56, 110),
             width=2,
         )
         draw.text(
@@ -243,7 +243,7 @@ def create_transaction_image(
 
     draw.line(
         (105, 565, 975, 565),
-        fill=(205, 163, 83, 80),
+        fill=(255, 38, 56, 90),
         width=2,
     )
 
