@@ -26,24 +26,25 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertIn("не более 6 знаков после запятой", self.html)
         self.assertIn("Завершённый перевод нельзя отменить.", self.html)
 
-    def test_editorial_visual_system_replaces_previous_visual_system(self):
-        self.assertIn("--bg:#f3f1ec", self.html)
-        self.assertIn("--blue:#2855d9", self.html)
-        self.assertIn("TNC — Private Finance", self.html)
-        self.assertIn("TNC editorial rebuild", self.html)
+    def test_new_forest_and_copper_visual_system_replaces_old_themes(self):
+        self.assertIn("--canvas:#f2f0e9", self.html)
+        self.assertIn("--forest:#173b32", self.html)
+        self.assertIn("TNC — Your Account", self.html)
+        self.assertIn("PRIVATE ACCOUNT", self.html)
+        self.assertNotIn("--blue:#2855d9", self.html)
         self.assertNotIn("TNC REDLINE visual system", self.html)
         self.assertNotIn("--gold:#ff2638", self.html)
 
-    def test_home_uses_new_photo_led_dashboard_instead_of_legacy_hero(self):
+    def test_home_uses_new_editorial_dashboard_and_architecture_photos(self):
         self.assertIn('class="home-masthead"', self.html)
-        self.assertIn("Деньги.", self.html)
+        self.assertIn("Ваш счёт.", self.html)
         self.assertIn(".home-masthead-photo", self.html)
         self.assertIn("images.unsplash.com", self.html)
         self.assertNotIn("COMPLETE TNC VISUAL RESET", self.html)
         self.assertNotIn('class="crypto-orbit"', self.html)
         self.assertNotIn("coin-core", self.html)
 
-    def test_mobile_navigation_is_swipeable_and_keeps_all_sections(self):
+    def test_mobile_navigation_keeps_all_sections_reachable(self):
         self.assertIn(".mobilebar{", self.html)
         self.assertIn('id="mobile-more-menu"', self.html)
         self.assertIn("mobile-more-menu", self.html)
@@ -66,7 +67,7 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertIn("$('mobile-more')?.addEventListener", self.html)
         self.assertIn("$('mobile-more-menu')?.classList.remove('open')", self.html)
 
-    def test_bot_keyboard_keeps_compact_menu_and_secondary_destinations(self):
+    def test_bot_uses_compact_reply_menu_and_secondary_destinations(self):
         bot_source = (Path(__file__).resolve().parents[1] / "bot.py").read_text(encoding="utf-8-sig")
         for label in ("Кошелёк TNC", "Перевести TNC", "История операций", "Мой аккаунт",
                       "Баланс GT", "Магазин TNC", "Реферальная ссылка", "Открыть приложение"):
@@ -78,7 +79,9 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertIn("images.unsplash.com", bot_source)
         self.assertIn("photo_by_operation", bot_source)
         self.assertIn("def more_keyboard():", bot_source)
-        self.assertIn('callback_data="menu:more"', bot_source)
+        self.assertIn('F.text == MORE', bot_source)
+        self.assertIn('KeyboardButton(text=MORE)', bot_source)
+        self.assertIn('ReplyKeyboardMarkup(', bot_source)
 
 
 if __name__ == "__main__":
