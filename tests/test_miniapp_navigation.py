@@ -19,6 +19,7 @@ class MiniAppNavigationTests(unittest.TestCase):
                      "assistant", "shop", "games", "rewards", "admin", "profile"):
             self.assertIn(f'id="page-{page}"', self.html)
         self.assertIn('id="mobile-more-menu"', self.html)
+        self.assertIn('data-page="home"', self.html)
         self.assertIn('id="connection-label"', self.html)
         self.assertIn('id="home-photo"', self.html)
         self.assertNotIn("img.src=user.photo_url", self.html)
