@@ -1,33 +1,26 @@
-
 from io import BytesIO
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
-
-WIDTH = 1080
-HEIGHT = 720
-
-GOLD = (255, 38, 56)
-WHITE = (250, 249, 246)
-MUTED = (163, 165, 175)
-GREEN = (255, 83, 97)
-RED = (255, 38, 56)
+WIDTH, HEIGHT = 1080, 720
+BG = (17, 19, 16)
+PANEL = (27, 30, 25)
+INK = (242, 241, 232)
+MUTED = (157, 162, 145)
+LIME = (200, 241, 105)
+GOOD = (184, 233, 134)
+BAD = (255, 140, 130)
 
 
 def get_font(size, bold=False):
     names = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf",
-        "C:/Windows/Fonts/segoeuib.ttf" if bold else "C:/Windows/Fonts/segoeui.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-        if bold else
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ]
-
     for name in names:
         if Path(name).exists():
             return ImageFont.truetype(name, size)
-
     return ImageFont.load_default()
 
 
@@ -36,92 +29,34 @@ def money(value):
 
 
 def base_image():
-    image = Image.new("RGB", (WIDTH, HEIGHT), (5, 5, 7))
-    draw = ImageDraw.Draw(image, "RGBA")
-
-    # Красное фоновое свечение
+    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
     glow = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     gd = ImageDraw.Draw(glow)
-
-    gd.ellipse(
-        (650, -250, 1350, 450),
-        fill=(190, 0, 28, 58),
-    )
-    gd.ellipse(
-        (-300, 450, 400, 1100),
-        fill=(105, 0, 20, 30),
-    )
-
-    glow = glow.filter(ImageFilter.GaussianBlur(85))
+    gd.ellipse((620, -300, 1320, 400), fill=(200, 241, 105, 30))
+    gd.ellipse((-300, 430, 420, 1080), fill=(200, 241, 105, 15))
+    glow = glow.filter(ImageFilter.GaussianBlur(100))
     image = Image.alpha_composite(image.convert("RGBA"), glow)
     draw = ImageDraw.Draw(image, "RGBA")
 
-    # Основная панель
-    draw.rounded_rectangle(
-        (48, 42, 1032, 678),
-        radius=42,
-        fill=(12, 12, 16, 250),
-        outline=(255, 38, 56, 210),
-        width=2,
-    )
+    # Editorial frame: no coin, neon outline, or generic crypto badge.
+    draw.rounded_rectangle((38, 38, 1042, 682), radius=30, fill=(*PANEL, 248), outline=(255, 255, 255, 18), width=2)
+    draw.rectangle((38, 38, 50, 682), fill=(*LIME, 255))
+    draw.text((92, 83), "TNC  /  ACCOUNT SYSTEMS", font=get_font(21, True), fill=INK)
+    draw.text((92, 119), "PERSONAL FINANCE INTERFACE", font=get_font(13, True), fill=MUTED)
+    draw.line((92, 164, 986, 164), fill=(255, 255, 255, 28), width=2)
 
-    # Декоративная рамка
-    draw.rounded_rectangle(
-        (67, 61, 1013, 659),
-        radius=32,
-        outline=(255, 255, 255, 16),
-        width=1,
-    )
-
-    # Монета TNC
-    draw.ellipse(
-        (870, 78, 972, 180),
-        fill=(70, 8, 16, 255),
-        outline=GOLD,
-        width=4,
-    )
-    draw.ellipse(
-        (880, 88, 962, 170),
-        outline=(255, 154, 163, 220),
-        width=2,
-    )
-    draw.text(
-        (921, 129),
-        "T",
-        font=get_font(55, True),
-        fill=GOLD,
-        anchor="mm",
-    )
-
-    draw.text(
-        (100, 94),
-        "TNC",
-        font=get_font(49, True),
-        fill=GOLD,
-    )
-    draw.text(
-        (245, 112),
-        "ECOSYSTEM  /  DIGITAL FINANCE",
-        font=get_font(18, True),
-        fill=MUTED,
-    )
-
-    draw.line(
-        (100, 170, 980, 170),
-        fill=(255, 38, 56, 75),
-        width=2,
-    )
-
+    # Abstract architectural motif on the right.
+    draw.polygon([(790, 205), (982, 205), (982, 397), (888, 350)], fill=(200, 241, 105, 230))
+    draw.polygon([(790, 205), (888, 350), (790, 495), (694, 350)], fill=(68, 76, 57, 255))
+    draw.polygon([(888, 350), (982, 397), (888, 542), (790, 495)], fill=(38, 43, 34, 255))
+    draw.line((790, 205, 888, 350, 982, 397), fill=(242, 241, 232, 100), width=2)
+    draw.text((92, 625), "TNC  •  INTERNAL ACCOUNT RECORD", font=get_font(14, True), fill=MUTED)
     return image
 
 
 def finish(image):
     output = BytesIO()
-    image.convert("RGB").save(
-        output,
-        format="PNG",
-        optimize=True,
-    )
+    image.convert("RGB").save(output, format="PNG", optimize=True)
     output.seek(0)
     return output
 
@@ -129,145 +64,34 @@ def finish(image):
 def create_section_image(section, title, subtitle, detail=""):
     image = base_image()
     draw = ImageDraw.Draw(image, "RGBA")
-
-    draw.text(
-        (105, 225),
-        section.upper(),
-        font=get_font(23, True),
-        fill=GOLD,
-    )
-
-    draw.text(
-        (105, 310),
-        title,
-        font=get_font(55, True),
-        fill=WHITE,
-    )
-
-    draw.text(
-        (105, 395),
-        subtitle,
-        font=get_font(27),
-        fill=MUTED,
-    )
-
+    draw.text((94, 218), str(section).upper()[:48], font=get_font(18, True), fill=LIME)
+    draw.text((90, 285), str(title)[:28], font=get_font(51, True), fill=INK)
+    draw.text((94, 366), str(subtitle)[:54], font=get_font(24), fill=MUTED)
     if detail:
-        draw.rounded_rectangle(
-            (105, 485, 975, 565),
-            radius=20,
-            fill=(255, 38, 56, 24),
-            outline=(255, 38, 56, 110),
-            width=2,
-        )
-        draw.text(
-            (140, 525),
-            detail[:65],
-            font=get_font(22, True),
-            fill=GOLD,
-            anchor="lm",
-        )
-
-    draw.text(
-        (105, 610),
-        "YOUR ACCOUNT. YOUR ECOSYSTEM.",
-        font=get_font(18, True),
-        fill=(150, 144, 151),
-    )
-
+        draw.rounded_rectangle((92, 445, 690, 525), radius=13, fill=(200, 241, 105, 18), outline=(200, 241, 105, 90), width=2)
+        draw.text((118, 485), str(detail)[:48], font=get_font(18, True), fill=LIME, anchor="lm")
     return finish(image)
 
 
-def create_transaction_image(
-    amount,
-    operation="deposit",
-    username="TNC USER",
-    operation_id="",
-):
+def create_transaction_image(amount, operation="deposit", username="TNC USER", operation_id=""):
     styles = {
-        "deposit": ("ПОПОЛНЕНИЕ", "+", GREEN, "Средства зачислены"),
-        "withdraw": ("СПИСАНИЕ", "−", RED, "Средства списаны"),
-        "received": ("ПЕРЕВОД ПОЛУЧЕН", "+", GREEN, "Входящий перевод"),
-        "sent": ("ПЕРЕВОД ОТПРАВЛЕН", "−", RED, "Исходящий перевод"),
-        "bonus": ("БОНУС TNC", "+", GOLD, "Награда зачислена"),
-        "reward": ("НАГРАДА", "+", GOLD, "Поздравляем с достижением"),
-        "refund": ("ВОЗВРАТ", "+", GREEN, "Средства возвращены"),
+        "deposit": ("ACCOUNT CREDIT", "+", GOOD, "Funds added to your TNC account"),
+        "withdraw": ("ACCOUNT DEBIT", "−", BAD, "Funds deducted from your TNC account"),
+        "received": ("TRANSFER RECEIVED", "+", GOOD, "Incoming internal transfer"),
+        "sent": ("TRANSFER SENT", "−", BAD, "Outgoing internal transfer"),
+        "bonus": ("ACCOUNT BONUS", "+", LIME, "A bonus was credited"),
+        "reward": ("REWARD", "+", LIME, "An achievement reward was credited"),
+        "refund": ("REFUND", "+", GOOD, "Funds returned to your account"),
     }
-
-    title, sign, color, subtitle = styles.get(
-        operation,
-        styles["deposit"],
-    )
-
+    title, sign, color, subtitle = styles.get(operation, styles["deposit"])
     image = base_image()
     draw = ImageDraw.Draw(image, "RGBA")
-
-    draw.rounded_rectangle(
-        (105, 205, 975, 278),
-        radius=20,
-        fill=(*color, 27),
-        outline=(*color, 125),
-        width=2,
-    )
-
-    draw.text(
-        (540, 241),
-        title,
-        font=get_font(29, True),
-        fill=color,
-        anchor="mm",
-    )
-
-    draw.text(
-        (540, 365),
-        f"{sign}{money(amount)}",
-        font=get_font(91, True),
-        fill=WHITE,
-        anchor="mm",
-    )
-
-    draw.text(
-        (540, 445),
-        "TNC",
-        font=get_font(38, True),
-        fill=GOLD,
-        anchor="mm",
-    )
-
-    draw.text(
-        (540, 505),
-        subtitle,
-        font=get_font(25),
-        fill=MUTED,
-        anchor="mm",
-    )
-
-    draw.line(
-        (105, 565, 975, 565),
-        fill=(255, 38, 56, 90),
-        width=2,
-    )
-
-    draw.text(
-        (105, 600),
-        str(username)[:35],
-        font=get_font(20, True),
-        fill=WHITE,
-    )
-
-    draw.text(
-        (975, 600),
-        "TNC WALLET",
-        font=get_font(19, True),
-        fill=GOLD,
-        anchor="ra",
-    )
-
+    draw.text((94, 214), title, font=get_font(19, True), fill=color)
+    draw.text((88, 285), f"{sign}{money(amount)}", font=get_font(78, True), fill=INK)
+    draw.text((96, 382), "TNC", font=get_font(22, True), fill=LIME)
+    draw.text((96, 432), subtitle, font=get_font(19), fill=MUTED)
+    draw.line((94, 510, 690, 510), fill=(255, 255, 255, 28), width=2)
+    draw.text((96, 542), str(username)[:32], font=get_font(17, True), fill=INK)
     if operation_id:
-        draw.text(
-            (105, 632),
-            f"ID: {str(operation_id)[:30]}",
-            font=get_font(13),
-            fill=MUTED,
-        )
-
+        draw.text((96, 576), f"REFERENCE  /  {str(operation_id)[:26]}", font=get_font(12), fill=MUTED)
     return finish(image)
