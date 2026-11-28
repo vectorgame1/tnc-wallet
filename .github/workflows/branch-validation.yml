@@ -20,21 +20,21 @@ jobs:
         with:
           node-version: "22"
       - name: Compile Python sources
-        run: python -m compileall -q app bot.py
+        run: python -m compileall -q app bot.py tests
       - name: Install application dependencies
         run: python -m pip install -r requirements.txt
       - name: Import API and register routers
         run: python -c "import app.api; print('FastAPI import and router registration OK')"
-      - name: Check Mini App JavaScript syntax
       - name: Run GT wallet and game transaction tests
         run: python -m unittest discover -s tests -v
+      - name: Check Mini App JavaScript syntax
         run: |
           python - <<'PY'
           import re
           from pathlib import Path
           html = Path("webapp/index.html").read_text(encoding="utf-8-sig")
-          scripts = re.findall(r"<script\b([^>]*)>(.*?)</script>", html, re.I | re.S)
-          inline = [body for attrs, body in scripts if not re.search(r"\bsrc\s*=", attrs, re.I)]
+          scripts = re.findall(r"<script\\b([^>]*)>(.*?)</script>", html, re.I | re.S)
+          inline = [body for attrs, body in scripts if not re.search(r"\\bsrc\\s*=", attrs, re.I)]
           if not inline:
               raise SystemExit("No inline application script found")
           for index, body in enumerate(inline):
