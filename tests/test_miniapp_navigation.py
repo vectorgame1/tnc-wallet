@@ -46,6 +46,15 @@ class MiniAppNavigationTests(unittest.TestCase):
         for page in ("home", "wallet", "transfer", "history", "market", "trading", "assistant", "shop", "games", "rewards", "profile"):
             self.assertIn(f'data-page="{page}"', self.html)
 
+    def test_bot_keyboard_keeps_full_menu_and_single_miniapp_entry(self):
+        bot_source = (Path(__file__).resolve().parents[1] / "bot.py").read_text(encoding="utf-8-sig")
+        for label in ("Кошелёк TNC", "Перевести TNC", "История операций", "Мой аккаунт",
+                      "Баланс GT", "Магазин TNC", "Реферальная ссылка", "Открыть приложение"):
+            self.assertIn(label, bot_source)
+        self.assertIn("def main_keyboard():", bot_source)
+        self.assertIn("WebAppInfo(url=webapp_url)", bot_source)
+        self.assertIn("def show_home(", bot_source)
+
 
 if __name__ == "__main__":
     unittest.main()
