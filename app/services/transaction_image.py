@@ -39,7 +39,7 @@ def base_image():
     image = Image.new("RGB", (WIDTH, HEIGHT), (5, 5, 7))
     draw = ImageDraw.Draw(image, "RGBA")
 
-    # Фоновое золотое свечение
+    # Красное фоновое свечение
     glow = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     gd = ImageDraw.Draw(glow)
 
@@ -82,7 +82,7 @@ def base_image():
     )
     draw.ellipse(
         (880, 88, 962, 170),
-        outline=(255, 221, 151, 220),
+        outline=(255, 154, 163, 220),
         width=2,
     )
     draw.text(
@@ -108,7 +108,7 @@ def base_image():
 
     draw.line(
         (100, 170, 980, 170),
-        fill=(205, 163, 83, 75),
+        fill=(255, 38, 56, 75),
         width=2,
     )
 
@@ -171,7 +171,7 @@ def create_section_image(section, title, subtitle, detail=""):
         (105, 610),
         "YOUR ACCOUNT. YOUR ECOSYSTEM.",
         font=get_font(18, True),
-        fill=(139, 141, 151),
+        fill=(150, 144, 151),
     )
 
     return finish(image)
