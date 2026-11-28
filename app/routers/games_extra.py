@@ -52,6 +52,18 @@ def prepare():
                 created_at BIGINT NOT NULL
             )
         """))
+        conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_tnc_crash_rounds_user_created
+            ON tnc_crash_rounds (user_id, created_at DESC)
+        """))
+        conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_tnc_extra_rounds_user_created
+            ON tnc_extra_game_rounds (user_id, created_at DESC)
+        """))
+        conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_tnc_extra_rounds_created
+            ON tnc_extra_game_rounds (created_at DESC)
+        """))
 
 
 class DicePlay(BaseModel):
