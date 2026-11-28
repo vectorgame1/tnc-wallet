@@ -208,7 +208,7 @@ async def shop_invoice(
     try:
         invoice_url = await bot.create_invoice_link(
             title="TNC Coin",
-            description=f"РџРѕРїРѕР»РЅРµРЅРёРµ Р±Р°Р»Р°РЅСЃР° РЅР° {body.amount} TNC.",
+            description=f"Пополнение баланса на {body.amount} TNC.",
             payload=payload,
             currency="XTR",
             prices=[
