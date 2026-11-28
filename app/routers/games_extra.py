@@ -126,11 +126,11 @@ def slots_play(data: SlotsPlay, uid: int = Depends(player)):
     symbols = ["A", "B", "C", "D", "7"]
     reels = [secrets.choice(symbols) for _ in range(3)]
     if reels[0] == reels[1] == reels[2] == "7":
-        multiplier = 10_000
+        multiplier = 2_000
     elif reels[0] == reels[1] == reels[2]:
-        multiplier = 500
+        multiplier = 400
     elif len(set(reels)) == 2:
-        multiplier = 150
+        multiplier = 140
     else:
         multiplier = 0
     result = settle(uid, "slots", data.stake, multiplier > 0, multiplier,
