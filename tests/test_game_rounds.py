@@ -198,7 +198,7 @@ class GameRoundTests(unittest.TestCase):
         )
         self.assertFalse(first["already_processed"])
 
-        with self.assertRaises(Exception):
+        with self.assertRaisesRegex(ValueError, "уже привязан"):
             complete_stars_payment(
                 second_payload, self.user_id, 1, charge_id
             )
