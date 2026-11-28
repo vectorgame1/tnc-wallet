@@ -92,7 +92,7 @@ def auth(raw, db):
 
 
 class Transfer(BaseModel):
-    receiver_id: int
+    receiver_id: int = Field(gt=0, le=9223372036854775807)
     amount: str = Field(min_length=1, max_length=40)
 
 
@@ -105,14 +105,14 @@ class GameStarsInvoice(BaseModel):
 
 
 class GameAdminAdjustment(BaseModel):
-    user_id: int = Field(gt=0)
+    user_id: int = Field(gt=0, le=9223372036854775807)
     amount: int = Field(gt=0, le=1000000000)
     action: str
     reason: str = Field(default="", max_length=255)
 
 
 class GameAdminBan(BaseModel):
-    user_id: int = Field(gt=0)
+    user_id: int = Field(gt=0, le=9223372036854775807)
     banned: bool
     reason: str = Field(default="", max_length=255)
 
