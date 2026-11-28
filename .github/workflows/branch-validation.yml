@@ -33,8 +33,8 @@ jobs:
           import re
           from pathlib import Path
           html = Path("webapp/index.html").read_text(encoding="utf-8-sig")
-          scripts = re.findall(r"<script\\b([^>]*)>(.*?)</script>", html, re.I | re.S)
-          inline = [body for attrs, body in scripts if not re.search(r"\\bsrc\\s*=", attrs, re.I)]
+          scripts = re.findall(r"<script\b([^>]*)>(.*?)</script>", html, re.I | re.S)
+          inline = [body for attrs, body in scripts if not re.search(r"\bsrc\s*=", attrs, re.I)]
           if not inline:
               raise SystemExit("No inline application script found")
           for index, body in enumerate(inline):
