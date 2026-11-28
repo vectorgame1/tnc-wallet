@@ -115,7 +115,7 @@ def crash_play(data: CrashPlay, user_id: int = Depends(current_player)):
                     "op": str(uuid.uuid4()),
                     "uid": user_id,
                     "amount": -data.stake,
-                    "ref": round_id,
+                    "ref": round_id + ":bet",
                     "created": now,
                 },
             )
@@ -141,7 +141,7 @@ def crash_play(data: CrashPlay, user_id: int = Depends(current_player)):
                         "op": str(uuid.uuid4()),
                         "uid": user_id,
                         "amount": payout,
-                        "ref": round_id,
+                        "ref": round_id + ":win",
                         "created": now,
                     },
                 )
