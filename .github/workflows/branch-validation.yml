@@ -3,6 +3,7 @@ name: Branch validation
 on:
   push:
     branches:
+      - main
       - tnc-rebuild
   pull_request:
     branches:
