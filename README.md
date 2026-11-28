@@ -47,4 +47,4 @@ TNC Coin здесь — внутренняя запись в базе, а не �
 - Do not enable multiple Render instances or multiple Uvicorn workers until bot polling is separated into its own service and the API-side polling startup is disabled.
 - Configure `BOT_TOKEN`, `DATABASE_URL` (managed PostgreSQL), `WEBAPP_URL`, and `ADMIN_IDS` in the Render environment. Keep secrets only in Render environment settings, never in Git.
 - Keep the existing PostgreSQL database. Deployments must use additive migrations only; take a database backup before production changes.
-- Check `/health`, Telegram bot polling logs, Mini App authorization, wallet transfers, and Stars payment confirmation after deployment. CI passing does not replace a live Telegram/Render smoke test.
+- Check `/health` for liveness and `/ready` for PostgreSQL readiness, Telegram bot polling logs, Mini App authorization, wallet transfers, and Stars payment confirmation after deployment. CI passing does not replace a live Telegram/Render smoke test.
