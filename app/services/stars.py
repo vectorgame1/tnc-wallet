@@ -3,6 +3,7 @@ import uuid
 from decimal import Decimal
 
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from app.database.connection import engine
 
 UNIT = 10 ** 6
@@ -117,66 +118,79 @@ def check_order(payload, user_id, stars_amount):
         return False
     if int(row["stars_amount"]) != int(stars_amount):
         return False
-    if int(time.time()) - int(row["created_at"]) > 3600:
+    now = int(time.time())
+    created_at = int(row["created_at"])
+    if created_at < now - 3600 or created_at > now + 60:
         return False
     return True
 
 
 def complete_payment(payload, user_id, stars_amount, charge_id):
+    if not charge_id or len(str(charge_id)) > 255:
+        return False
+
     ensure_table()
+    now = int(time.time())
 
-    with engine.begin() as conn:
-        result = conn.execute(text("""
-            UPDATE tnc_stars_orders
-            SET status = 'paid', charge_id = :charge
-            WHERE payload = :payload
-              AND user_id = :uid
-              AND stars_amount = :stars
-              AND status = 'pending'
-              AND charge_id IS NULL
-              AND created_at >= :min_created
-        """), {
-            "charge": charge_id,
-            "payload": payload,
-            "uid": int(user_id),
-            "stars": int(stars_amount),
-            "min_created": int(time.time()) - 3600,
-        })
+    try:
+        with engine.begin() as conn:
+            result = conn.execute(text("""
+                UPDATE tnc_stars_orders
+                SET status = 'paid', charge_id = :charge
+                WHERE payload = :payload
+                  AND user_id = :uid
+                  AND stars_amount = :stars
+                  AND status = 'pending'
+                  AND charge_id IS NULL
+                  AND created_at >= :min_created
+                  AND created_at <= :max_created
+            """), {
+                "charge": charge_id,
+                "payload": payload,
+                "uid": int(user_id),
+                "stars": int(stars_amount),
+                "min_created": now - 3600,
+                "max_created": now + 60,
+            })
 
-        if result.rowcount != 1:
-            return False
+            if result.rowcount != 1:
+                return False
 
-        order = conn.execute(text("""
-            SELECT tnc_units FROM tnc_stars_orders
-            WHERE payload = :payload
-        """), {"payload": payload}).mappings().first()
+            order = conn.execute(text("""
+                SELECT tnc_units FROM tnc_stars_orders
+                WHERE payload = :payload
+            """), {"payload": payload}).mappings().first()
 
-        if not order:
-            raise ValueError("Заказ не найден.")
+            if not order:
+                raise ValueError("Заказ не найден.")
 
-        units = int(order["tnc_units"])
+            units = int(order["tnc_units"])
 
-        wallet_result = conn.execute(text("""
-            UPDATE tnc_wallets
-            SET balance_units = balance_units + :units
-            WHERE user_id = :uid
-        """), {"units": units, "uid": int(user_id)})
+            wallet_result = conn.execute(text("""
+                UPDATE tnc_wallets
+                SET balance_units = balance_units + :units
+                WHERE user_id = :uid
+            """), {"units": units, "uid": int(user_id)})
 
-        if wallet_result.rowcount != 1:
-            raise ValueError("Кошелёк пользователя не найден.")
+            if wallet_result.rowcount != 1:
+                raise ValueError("Кошелёк пользователя не найден.")
 
-        conn.execute(text("""
-            INSERT INTO tnc_transactions
-            (operation_id, sender_id, receiver_id, amount_units,
-             kind, description, created_at)
-            VALUES (:op, NULL, :uid, :units,
-                    'stars_purchase', :description, :created)
-        """), {
-            "op": str(uuid.uuid4()),
-            "uid": int(user_id),
-            "units": units,
-            "description": "Покупка TNC за Telegram Stars",
-            "created": int(time.time()),
-        })
+            conn.execute(text("""
+                INSERT INTO tnc_transactions
+                (operation_id, sender_id, receiver_id, amount_units,
+                 kind, description, created_at)
+                VALUES (:op, NULL, :uid, :units,
+                        'stars_purchase', :description, :created)
+            """), {
+                "op": str(uuid.uuid4()),
+                "uid": int(user_id),
+                "units": units,
+                "description": "Покупка TNC за Telegram Stars",
+                "created": now,
+            })
 
-    return True
+        return True
+    except IntegrityError:
+        # Telegram charge IDs are globally unique. A duplicate callback must
+        # roll back the order update and wallet credit without raising upstream.
+        return False
