@@ -165,7 +165,7 @@ def mines_play(data: MinesPlay, uid: int = Depends(player)):
     return result
 
 
-@router.get("/history")
+@router.get("/extra-history")
 def extra_games_history(uid: int = Depends(player)):
     allowed(uid)
     prepare()
