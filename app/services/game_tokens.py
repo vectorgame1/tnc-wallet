@@ -75,8 +75,8 @@ def create_stars_order(user_id, stars):
     init_game_tables()
     user_id = int(user_id)
     stars = int(stars)
-    if stars < 1:
-        raise ValueError("Минимальная покупка — 1 Star.")
+    if stars < 1 or stars > 10000:
+        raise ValueError("Количество Stars должно быть от 1 до 10 000.")
 
     tokens = stars * GT_PER_STAR
     payload = "gt_" + uuid.uuid4().hex
