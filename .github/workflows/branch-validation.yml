@@ -1,0 +1,74 @@
+name: Branch validation
+
+on:
+  push:
+    branches:
+      - tnc-rebuild
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compile Python sources
+        run: python -m compileall -q app bot.py tests
+      - name: Install application dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Import API and register routers
+        run: python -c "import app.api; print('FastAPI import and router registration OK')"
+      - name: Run complete test suite
+        run: python -m unittest discover -s tests -v
+      - name: Check Mini App JavaScript syntax
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          html = Path("webapp/index.html").read_text(encoding="utf-8-sig")
+          scripts = re.findall(r"<script\b([^>]*)>(.*?)</script>", html, re.I | re.S)
+          inline = [body for attrs, body in scripts if not re.search(r"\bsrc\s*=", attrs, re.I)]
+          if not inline:
+              raise SystemExit("No inline application script found")
+          for index, body in enumerate(inline):
+              Path(f"/tmp/tnc-inline-{index}.js").write_text(body, encoding="utf-8")
+          print(f"Prepared {len(inline)} inline script(s)")
+          PY
+          for file in /tmp/tnc-inline-*.js; do node --check "$file"; done
+
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tnc_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d tnc_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tnc_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install application dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Import API against PostgreSQL
+        run: python -c "import app.api; print('FastAPI import with PostgreSQL configuration OK')"
+      - name: Run complete test suite on PostgreSQL
+        run: python -m unittest discover -s tests -v

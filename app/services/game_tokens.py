@@ -2,6 +2,7 @@
 import uuid
 
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from app.database.connection import engine
 
 GT_PER_STAR = 5000
@@ -37,6 +38,8 @@ def init_game_tables():
             created_at BIGINT NOT NULL
         )
         """,
+        "CREATE INDEX IF NOT EXISTS idx_tnc_game_transactions_user_created ON tnc_game_transactions (user_id, created_at DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_tnc_game_stars_orders_user_created ON tnc_game_stars_orders (user_id, created_at DESC)",
     ]
     with engine.begin() as conn:
         for statement in statements:
@@ -75,8 +78,8 @@ def create_stars_order(user_id, stars):
     init_game_tables()
     user_id = int(user_id)
     stars = int(stars)
-    if stars < 1:
-        raise ValueError("Минимальная покупка — 1 Star.")
+    if stars < 1 or stars > 10000:
+        raise ValueError("Количество Stars должно быть от 1 до 10 000.")
 
     tokens = stars * GT_PER_STAR
     payload = "gt_" + uuid.uuid4().hex
@@ -105,7 +108,7 @@ def check_stars_order(payload, user_id, stars):
     with engine.connect() as conn:
         row = conn.execute(
             text("""
-                SELECT user_id, stars, tokens, status
+                SELECT user_id, stars, tokens, status, created_at
                 FROM tnc_game_stars_orders
                 WHERE payload=:payload
             """),
@@ -118,6 +121,7 @@ def check_stars_order(payload, user_id, stars):
         int(row["user_id"]) == int(user_id)
         and int(row["stars"]) == int(stars)
         and row["status"] == "pending"
+        and int(time.time()) - 3600 <= int(row["created_at"]) <= int(time.time()) + 60
     )
 
 
@@ -129,86 +133,97 @@ def complete_stars_payment(payload, user_id, stars, charge_id):
     init_game_tables()
     user_id = int(user_id)
     stars = int(stars)
+    if not charge_id or len(str(charge_id)) > 255:
+        raise ValueError("Некорректный идентификатор платежа.")
     charge_id = str(charge_id)
     now = int(time.time())
 
-    with engine.begin() as conn:
-        order = conn.execute(
-            text("""
-                SELECT user_id, stars, tokens, status, charge_id
-                FROM tnc_game_stars_orders
-                WHERE payload=:payload
-            """),
-            {"payload": payload},
-        ).mappings().first()
+    try:
+        with engine.begin() as conn:
+            order = conn.execute(
+                text("""
+                    SELECT user_id, stars, tokens, status, charge_id, created_at
+                    FROM tnc_game_stars_orders
+                    WHERE payload=:payload
+                """),
+                {"payload": payload},
+            ).mappings().first()
 
-        if not order:
-            raise ValueError("Заказ GT не найден.")
+            if not order:
+                raise ValueError("Заказ GT не найден.")
 
-        if int(order["user_id"]) != user_id or int(order["stars"]) != stars:
-            raise ValueError("Данные платежа не совпадают с заказом.")
+            if int(order["user_id"]) != user_id or int(order["stars"]) != stars:
+                raise ValueError("Данные платежа не совпадают с заказом.")
 
-        if order["status"] == "paid":
-            if order["charge_id"] == charge_id:
-                return {
-                    "already_processed": True,
-                    "tokens": int(order["tokens"]),
-                }
-            raise ValueError("Заказ уже оплачен другим платежом.")
+            if order["status"] == "paid":
+                if order["charge_id"] == charge_id:
+                    return {
+                        "already_processed": True,
+                        "tokens": int(order["tokens"]),
+                    }
+                raise ValueError("Заказ уже оплачен другим платежом.")
 
-        if order["status"] != "pending":
-            raise ValueError("Заказ недоступен для оплаты.")
+            if order["status"] != "pending":
+                raise ValueError("Заказ недоступен для оплаты.")
+            created_at = int(order["created_at"])
+            if created_at < now - 3600 or created_at > now + 60:
+                raise ValueError("Заказ просрочен или имеет некорректную дату. Создай новый счёт.")
 
-        tokens = int(order["tokens"])
+            tokens = int(order["tokens"])
 
-        conn.execute(
-            text("""
-                INSERT INTO tnc_game_wallets (user_id, balance)
-                VALUES (:uid, 0)
-                ON CONFLICT (user_id) DO NOTHING
-            """),
-            {"uid": user_id},
-        )
+            conn.execute(
+                text("""
+                    INSERT INTO tnc_game_wallets (user_id, balance)
+                    VALUES (:uid, 0)
+                    ON CONFLICT (user_id) DO NOTHING
+                """),
+                {"uid": user_id},
+            )
 
-        updated = conn.execute(
-            text("""
-                UPDATE tnc_game_stars_orders
-                SET status='paid', charge_id=:charge
-                WHERE payload=:payload AND status='pending'
-            """),
-            {"charge": charge_id, "payload": payload},
-        )
+            updated = conn.execute(
+                text("""
+                    UPDATE tnc_game_stars_orders
+                    SET status='paid', charge_id=:charge
+                    WHERE payload=:payload AND status='pending'
+                """),
+                {"charge": charge_id, "payload": payload},
+            )
 
-        if updated.rowcount != 1:
-            raise ValueError("Заказ уже был обработан.")
+            if updated.rowcount != 1:
+                raise ValueError("Заказ уже был обработан.")
 
-        conn.execute(
-            text("""
-                UPDATE tnc_game_wallets
-                SET balance=balance + :tokens
-                WHERE user_id=:uid
-            """),
-            {"tokens": tokens, "uid": user_id},
-        )
+            conn.execute(
+                text("""
+                    UPDATE tnc_game_wallets
+                    SET balance=balance + :tokens
+                    WHERE user_id=:uid
+                """),
+                {"tokens": tokens, "uid": user_id},
+            )
 
-        conn.execute(
-            text("""
-                INSERT INTO tnc_game_transactions
-                (operation_id, user_id, amount, kind, description,
-                 reference, created_at)
-                VALUES (:op, :uid, :amount, 'stars_purchase',
-                        'Покупка GT за Telegram Stars', :ref, :created)
-            """),
-            {
-                "op": str(uuid.uuid4()),
-                "uid": user_id,
-                "amount": tokens,
-                "ref": charge_id,
-                "created": now,
-            },
-        )
+            conn.execute(
+                text("""
+                    INSERT INTO tnc_game_transactions
+                    (operation_id, user_id, amount, kind, description,
+                     reference, created_at)
+                    VALUES (:op, :uid, :amount, 'stars_purchase',
+                            'Покупка GT за Telegram Stars', :ref, :created)
+                """),
+                {
+                    "op": str(uuid.uuid4()),
+                    "uid": user_id,
+                    "amount": tokens,
+                    "ref": charge_id,
+                    "created": now,
+                },
+            )
 
-    return {"already_processed": False, "tokens": tokens}
+            return {"already_processed": False, "tokens": tokens}
+    except IntegrityError as error:
+        # The unique charge_id constraint prevents one Telegram payment from
+        # crediting multiple orders. engine.begin rolls back the failed transaction.
+        raise ValueError("Этот Telegram-платёж уже привязан к другому заказу.") from error
+
 
 def init_admin_tables():
     init_game_tables()

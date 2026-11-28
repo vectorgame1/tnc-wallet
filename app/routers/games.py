@@ -43,6 +43,10 @@ def ensure_tables():
                 created_at BIGINT NOT NULL
             )
         """))
+        conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_tnc_crash_rounds_user_created
+            ON tnc_crash_rounds (user_id, created_at DESC)
+        """))
 
 
 class CrashPlay(BaseModel):
@@ -82,7 +86,9 @@ def crash_play(data: CrashPlay, user_id: int = Depends(current_player)):
     if target < 110 or target > 1000:
         raise HTTPException(status_code=400, detail="Некорректный множитель")
 
-    crash_multiplier = secrets.randbelow(901) + 100
+    # Crash-point distribution: P(crash >= x) ~= 0.99 / x, giving ~99% RTP.
+    # Multiplier is stored in hundredths; target remains capped at 10.00x.
+    crash_multiplier = max(100, 990000 // (secrets.randbelow(10000) + 1))
     won = crash_multiplier >= target
     payout = data.stake * target // 100 if won else 0
     now = int(time.time())
@@ -113,7 +119,7 @@ def crash_play(data: CrashPlay, user_id: int = Depends(current_player)):
                     "op": str(uuid.uuid4()),
                     "uid": user_id,
                     "amount": -data.stake,
-                    "ref": round_id,
+                    "ref": round_id + ":bet",
                     "created": now,
                 },
             )
@@ -139,7 +145,7 @@ def crash_play(data: CrashPlay, user_id: int = Depends(current_player)):
                         "op": str(uuid.uuid4()),
                         "uid": user_id,
                         "amount": payout,
-                        "ref": round_id,
+                        "ref": round_id + ":win",
                         "created": now,
                     },
                 )

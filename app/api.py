@@ -1,4 +1,5 @@
 ﻿from app.routers.games import router as games_router
+from app.routers.games_extra import router as extra_games_router
 import asyncio
 import logging
 from contextlib import asynccontextmanager
@@ -9,10 +10,11 @@ from aiogram.types import LabeledPrice
 from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.database.connection import init_database, get_db
+from app.database.connection import init_database, get_db, engine
 from app.core.security import verify
 from app.services.accounts import get_or_create_user
 from app.services.wallet import balance, fmt, history, send
@@ -22,6 +24,9 @@ from app.services.game_tokens import (
     get_history as get_gt_history,
     create_stars_order as create_gt_order,
     GT_PER_STAR,
+    admin_adjust_tokens,
+    set_game_ban,
+    get_admin_log,
 )
 
 
@@ -74,6 +79,7 @@ app = FastAPI(
 )
 
 app.include_router(games_router)
+app.include_router(extra_games_router)
 
 def auth(raw, db):
     try:
@@ -86,7 +92,7 @@ def auth(raw, db):
 
 
 class Transfer(BaseModel):
-    receiver_id: int
+    receiver_id: int = Field(gt=0, le=9223372036854775807)
     amount: str = Field(min_length=1, max_length=40)
 
 
@@ -95,7 +101,20 @@ class ShopInvoice(BaseModel):
 
 
 class GameStarsInvoice(BaseModel):
-    stars: int = Field(ge=1)
+    stars: int = Field(ge=1, le=10000)
+
+
+class GameAdminAdjustment(BaseModel):
+    user_id: int = Field(gt=0, le=9223372036854775807)
+    amount: int = Field(gt=0, le=1000000000)
+    action: str
+    reason: str = Field(default="", max_length=255)
+
+
+class GameAdminBan(BaseModel):
+    user_id: int = Field(gt=0, le=9223372036854775807)
+    banned: bool
+    reason: str = Field(default="", max_length=255)
 
 
 @app.get("/")
@@ -105,7 +124,20 @@ def root():
 
 @app.get("/health")
 def health():
+    # Liveness only: the process is running.
     return {"status": "ok"}
+
+
+@app.get("/ready")
+def readiness():
+    # Readiness: verify that the configured database can serve requests.
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+    except Exception:
+        logging.getLogger("tnc.api").exception("Database readiness check failed")
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    return {"status": "ready", "database": "ok"}
 
 
 @app.get("/api/profile")
@@ -174,7 +206,7 @@ async def shop_invoice(
     user = auth(raw, db)
 
     if not settings.BOT_TOKEN:
-        raise HTTPException(503, "РћРїР»Р°С‚Р° РІСЂРµРјРµРЅРЅРѕ РЅРµРґРѕСЃС‚СѓРїРЅР°.")
+        raise HTTPException(503, "Оплата временно недоступна.")
 
     from app.services.stars import create_custom_order
 
@@ -190,7 +222,7 @@ async def shop_invoice(
     try:
         invoice_url = await bot.create_invoice_link(
             title="TNC Coin",
-            description=f"РџРѕРїРѕР»РЅРµРЅРёРµ Р±Р°Р»Р°РЅСЃР° РЅР° {body.amount} TNC.",
+            description=f"Пополнение баланса на {body.amount} TNC.",
             payload=payload,
             currency="XTR",
             prices=[
@@ -206,7 +238,7 @@ async def shop_invoice(
         )
         raise HTTPException(
             502,
-            "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ СЃС‡С‘С‚ Telegram Stars.",
+            "Не удалось создать счёт Telegram Stars.",
         )
     finally:
         await bot.session.close()
@@ -252,7 +284,7 @@ async def games_stars_invoice(
     user = auth(raw, db)
 
     if not settings.BOT_TOKEN:
-        raise HTTPException(503, "РћРїР»Р°С‚Р° РІСЂРµРјРµРЅРЅРѕ РЅРµРґРѕСЃС‚СѓРїРЅР°.")
+        raise HTTPException(503, "Оплата временно недоступна.")
 
     try:
         payload, tokens = create_gt_order(
@@ -266,7 +298,7 @@ async def games_stars_invoice(
     try:
         invoice_url = await bot.create_invoice_link(
             title="TNC Game Tokens",
-            description=f"РџРѕРєСѓРїРєР° {tokens:,} GT Р·Р° {body.stars} Stars.",
+            description=f"Покупка {tokens:,} GT за {body.stars} Stars.",
             payload=payload,
             currency="XTR",
             prices=[
@@ -282,7 +314,7 @@ async def games_stars_invoice(
         )
         raise HTTPException(
             502,
-            "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ СЃС‡С‘С‚ Telegram Stars.",
+            "Не удалось создать счёт Telegram Stars.",
         )
     finally:
         await bot.session.close()
@@ -294,6 +326,56 @@ async def games_stars_invoice(
         "currency": "XTR",
         "rate": GT_PER_STAR,
     }
+
+
+def admin_auth(raw, db):
+    user = auth(raw, db)
+    if int(user.telegram_id) not in settings.ADMIN_IDS:
+        raise HTTPException(403, "Недостаточно прав администратора.")
+    return user
+
+
+@app.get("/api/admin/games")
+def admin_games_overview(
+    raw: str = Header(alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    admin = admin_auth(raw, db)
+    return {
+        "admin_id": int(admin.telegram_id),
+        "logs": get_admin_log(50),
+    }
+
+
+@app.post("/api/admin/games/adjust")
+def admin_games_adjust(
+    body: GameAdminAdjustment,
+    raw: str = Header(alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    admin = admin_auth(raw, db)
+    if body.action not in ("admin_add", "admin_take"):
+        raise HTTPException(400, "Допустимые действия: admin_add, admin_take.")
+    try:
+        balance = admin_adjust_tokens(
+            admin.telegram_id, body.user_id, body.amount, body.action, body.reason
+        )
+    except ValueError as error:
+        raise HTTPException(400, str(error))
+    return {"user_id": body.user_id, "balance": balance, "action": body.action}
+
+
+@app.post("/api/admin/games/ban")
+def admin_games_ban(
+    body: GameAdminBan,
+    raw: str = Header(alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    admin = admin_auth(raw, db)
+    banned = set_game_ban(
+        admin.telegram_id, body.user_id, body.banned, body.reason
+    )
+    return {"user_id": body.user_id, "banned": banned}
 
 
 web = Path(__file__).resolve().parents[1] / "webapp"
