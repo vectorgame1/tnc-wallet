@@ -6,7 +6,7 @@ from sqlalchemy import text
 
 from app.database.connection import Base, SessionLocal, engine
 from app.database.models import User, Wallet, Transaction
-from app.services.stars import create_custom_order, complete_payment, ensure_table, UNIT
+from app.services.stars import create_custom_order, complete_payment, check_order, ensure_table, UNIT
 
 
 class TNCStarsPaymentTests(unittest.TestCase):
@@ -70,10 +70,9 @@ class TNCStarsPaymentTests(unittest.TestCase):
         self.assertTrue(complete_payment(
             first_payload, self.user_id, first_stars, charge
         ))
-        with self.assertRaises(Exception):
-            complete_payment(
-                second_payload, self.user_id, second_stars, charge
-            )
+        self.assertFalse(complete_payment(
+            second_payload, self.user_id, second_stars, charge
+        ))
 
         self.assertEqual(self.balance(), UNIT)
         with engine.connect() as conn:
@@ -93,6 +92,25 @@ class TNCStarsPaymentTests(unittest.TestCase):
         self.assertFalse(complete_payment(
             payload, self.user_id, stars, "tnc-expired-" + uuid.uuid4().hex
         ))
+        self.assertEqual(self.balance(), 0)
+
+    def test_future_dated_order_is_rejected(self):
+        payload, stars = create_custom_order(self.user_id, "1")
+        with engine.begin() as conn:
+            conn.execute(text("""
+                UPDATE tnc_stars_orders SET created_at=:created
+                WHERE payload=:payload
+            """), {"created": int(time.time()) + 120, "payload": payload})
+
+        self.assertFalse(check_order(payload, self.user_id, stars))
+        self.assertFalse(complete_payment(
+            payload, self.user_id, stars, "tnc-future-" + uuid.uuid4().hex
+        ))
+        self.assertEqual(self.balance(), 0)
+
+    def test_empty_charge_id_is_rejected(self):
+        payload, stars = create_custom_order(self.user_id, "1")
+        self.assertFalse(complete_payment(payload, self.user_id, stars, ""))
         self.assertEqual(self.balance(), 0)
 
 
