@@ -61,6 +61,14 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertIn('id="amount"', self.html)
         self.assertIn('id="history-search"', self.html)
         self.assertIn('id="shop-custom-buy"', self.html)
+        for required_id in ("balance", "wallet-balance", "receiver", "amount", "send",
+                            "history-search", "market-btc-main", "trade-asset", "assistant-form",
+                            "shop-custom-amount", "gt-balance", "weekly-leaderboard",
+                            "admin-tnc-credit", "profile-id"):
+            self.assertIn(f'id="{required_id}"', self.html)
+        self.assertIn("Ваш счёт.", self.html)
+        self.assertIn("QUICK ACCESS", self.html)
+        self.assertNotIn("img.src=user.photo_url", self.html)
 
     def test_new_mobile_more_drawer_keeps_secondary_pages_reachable(self):
         self.assertIn('id="mobile-more-menu"', self.html)
