@@ -176,7 +176,7 @@ async def shop_invoice(
     user = auth(raw, db)
 
     if not settings.BOT_TOKEN:
-        raise HTTPException(503, "РћРїР»Р°С‚Р° РІСЂРµРјРµРЅРЅРѕ РЅРµРґРѕСЃС‚СѓРїРЅР°.")
+        raise HTTPException(503, "Оплата временно недоступна.")
 
     from app.services.stars import create_custom_order
 
@@ -254,7 +254,7 @@ async def games_stars_invoice(
     user = auth(raw, db)
 
     if not settings.BOT_TOKEN:
-        raise HTTPException(503, "РћРїР»Р°С‚Р° РІСЂРµРјРµРЅРЅРѕ РЅРµРґРѕСЃС‚СѓРїРЅР°.")
+        raise HTTPException(503, "Оплата временно недоступна.")
 
     try:
         payload, tokens = create_gt_order(
@@ -268,7 +268,7 @@ async def games_stars_invoice(
     try:
         invoice_url = await bot.create_invoice_link(
             title="TNC Game Tokens",
-            description=f"РџРѕРєСѓРїРєР° {tokens:,} GT Р·Р° {body.stars} Stars.",
+            description=f"Покупка {tokens:,} GT за {body.stars} Stars.",
             payload=payload,
             currency="XTR",
             prices=[
