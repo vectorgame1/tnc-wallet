@@ -42,3 +42,33 @@ jobs:
           print(f"Prepared {len(inline)} inline script(s)")
           PY
           for file in /tmp/tnc-inline-*.js; do node --check "$file"; done
+
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tnc_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d tnc_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tnc_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install application dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Import API against PostgreSQL
+        run: python -c "import app.api; print('FastAPI import with PostgreSQL configuration OK')"
+      - name: Run GT wallet and game transaction tests on PostgreSQL
+        run: python -m unittest discover -s tests -v
