@@ -62,6 +62,26 @@ class TNCStarsPaymentTests(unittest.TestCase):
         self.assertFalse(complete_payment(payload, self.user_id, stars + 1, charge))
         self.assertEqual(self.balance(), 0)
 
+    def test_same_telegram_charge_cannot_pay_two_orders(self):
+        first_payload, first_stars = create_custom_order(self.user_id, "1")
+        second_payload, second_stars = create_custom_order(self.user_id, "1")
+        charge = "tnc-shared-" + uuid.uuid4().hex
+
+        self.assertTrue(complete_payment(
+            first_payload, self.user_id, first_stars, charge
+        ))
+        with self.assertRaises(Exception):
+            complete_payment(
+                second_payload, self.user_id, second_stars, charge
+            )
+
+        self.assertEqual(self.balance(), UNIT)
+        with engine.connect() as conn:
+            second_status = conn.execute(text("""
+                SELECT status FROM tnc_stars_orders WHERE payload=:payload
+            """), {"payload": second_payload}).scalar_one()
+        self.assertEqual(second_status, "pending")
+
     def test_expired_order_is_not_credited(self):
         payload, stars = create_custom_order(self.user_id, "1")
         with engine.begin() as conn:
