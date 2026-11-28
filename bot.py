@@ -72,32 +72,25 @@ class TransferFlow(StatesGroup):
 
 
 def main_keyboard():
-    """В меню остаются только реализованные функции."""
-    rows = []
+    """Единая точка входа: все действия выполняются внутри Mini App."""
     webapp_url = (getattr(settings, "WEBAPP_URL", "") or "").strip()
-
-    if webapp_url.startswith("https://"):
-        rows.append([
+    if not webapp_url.startswith("https://"):
+        return ReplyKeyboardMarkup(
+            keyboard=[[KeyboardButton(text="Mini App временно недоступен")]],
+            resize_keyboard=True,
+            is_persistent=True,
+        )
+    return ReplyKeyboardMarkup(
+        keyboard=[[
             KeyboardButton(
                 text=MINI_APP,
                 web_app=WebAppInfo(url=webapp_url),
             )
-        ])
-
-    rows.extend([
-        [KeyboardButton(text=WALLET), KeyboardButton(text=TRANSFER)],
-        [KeyboardButton(text=HISTORY), KeyboardButton(text=ACCOUNT)],
-        [KeyboardButton(text=GT_BALANCE), KeyboardButton(text=SHOP)],
-        [KeyboardButton(text=COMMUNITY)],
-    ])
-
-    return ReplyKeyboardMarkup(
-        keyboard=rows,
+        ]],
         resize_keyboard=True,
         is_persistent=True,
-        input_field_placeholder="Выбери действие TNC",
+        input_field_placeholder="Открой TNC Mini App",
     )
-
 
 def cancel_keyboard():
     return ReplyKeyboardMarkup(
