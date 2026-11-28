@@ -8,6 +8,7 @@ from pathlib import Path
 from aiogram import Bot
 from aiogram.types import LabeledPrice
 from fastapi import FastAPI, Depends, Header, HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
@@ -17,7 +18,7 @@ from app.core.config import settings
 from app.database.connection import init_database, get_db, engine
 from app.core.security import verify
 from app.services.accounts import get_or_create_user
-from app.services.wallet import balance, fmt, history, send
+from app.services.wallet import balance, fmt, history, send, deposit, withdraw
 from app.services.game_tokens import (
     init_game_tables,
     get_balance as get_gt_balance,
@@ -117,9 +118,17 @@ class GameAdminBan(BaseModel):
     reason: str = Field(default="", max_length=255)
 
 
+class TNCAdminAdjustment(BaseModel):
+    user_id: int = Field(gt=0, le=9223372036854775807)
+    amount: str = Field(min_length=1, max_length=40)
+    action: str
+    reason: str = Field(min_length=1, max_length=255)
+
+
 @app.get("/")
 def root():
-    return {"service": "TNC Ecosystem", "status": "online"}
+    # Telegram may be configured with the bare service URL. Always open the Mini App.
+    return RedirectResponse(url="/app/", status_code=307)
 
 
 @app.get("/health")
@@ -376,6 +385,33 @@ def admin_games_ban(
         admin.telegram_id, body.user_id, body.banned, body.reason
     )
     return {"user_id": body.user_id, "banned": banned}
+
+
+@app.post("/api/admin/wallet/adjust")
+def admin_wallet_adjust(
+    body: TNCAdminAdjustment,
+    raw: str = Header(alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    admin = admin_auth(raw, db)
+    if body.action not in ("credit", "debit"):
+        raise HTTPException(400, "Допустимые действия: credit, debit.")
+    description = f"Admin {body.action} by {admin.telegram_id}: {body.reason}"[:255]
+    try:
+        if body.action == "credit":
+            tx = deposit(db, body.user_id, body.amount, description=description)
+        else:
+            tx = withdraw(db, body.user_id, body.amount, description=description)
+        current_balance = balance(db, body.user_id)
+    except ValueError as error:
+        raise HTTPException(400, str(error))
+    return {
+        "user_id": body.user_id,
+        "balance": fmt(current_balance),
+        "action": body.action,
+        "amount": fmt(tx.amount_units),
+        "transaction_id": tx.operation_id,
+    }
 
 
 web = Path(__file__).resolve().parents[1] / "webapp"
