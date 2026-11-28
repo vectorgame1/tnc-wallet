@@ -75,6 +75,7 @@ class TransferFlow(StatesGroup):
 
 
 MORE = "Ещё"
+GAMES = "Игровой зал"
 
 
 def main_keyboard():
@@ -88,12 +89,13 @@ def main_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
             [app_button],
-            [KeyboardButton(text=WALLET), KeyboardButton(text=TRANSFER)],
+            [KeyboardButton(text=GAMES)],
+            [KeyboardButton(text=GT_BALANCE), KeyboardButton(text=WALLET)],
             [KeyboardButton(text=MORE)],
         ],
         resize_keyboard=True,
         is_persistent=True,
-        input_field_placeholder="Выберите действие TNC",
+        input_field_placeholder="Добро пожаловать в TNC CLUB",
     )
 
 
@@ -101,14 +103,14 @@ def more_keyboard():
     """Secondary actions are grouped in a simple reply keyboard, not inline buttons."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text=HISTORY), KeyboardButton(text=ACCOUNT)],
-            [KeyboardButton(text=SHOP), KeyboardButton(text=GT_BALANCE)],
+            [KeyboardButton(text=TRANSFER), KeyboardButton(text=HISTORY)],
+            [KeyboardButton(text=ACCOUNT), KeyboardButton(text=SHOP)],
             [KeyboardButton(text=COMMUNITY), KeyboardButton(text="Помощь")],
             [KeyboardButton(text="← Главное меню")],
         ],
         resize_keyboard=True,
         is_persistent=True,
-        input_field_placeholder="Дополнительные разделы",
+        input_field_placeholder="Аккаунт и дополнительные разделы",
     )
 
 def cancel_keyboard():
@@ -176,32 +178,13 @@ async def send_section(
     caption: str = "",
 ):
     safe_caption = caption or (
-        f"<b>{html.escape(title)}</b>\\n\\n{html.escape(subtitle)}"
+        f"<b>{html.escape(title)}</b>\n\n{html.escape(subtitle)}"
     )
-    try:
-        # Use real editorial photography for bot section covers; the caption carries
-        # the live account-specific information and the wallet remains server-backed.
-        photo_by_section = {
-            "TNC ECOSYSTEM": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
-            "TNC WALLET": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=1280&q=90",
-            "TNC TRANSFER": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
-            "TNC SUPPORT": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
-            "TNC GAMES": "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=1280&q=90",
-        }
-        photo_url = photo_by_section.get(section, photo_by_section["TNC ECOSYSTEM"])
-        await message.answer_photo(
-            photo=photo_url,
-            caption=safe_caption,
-            reply_markup=main_keyboard(),
-            parse_mode="HTML",
-        )
-    except Exception:
-        logger.exception("Section image rendering failed: %s", section)
-        await message.answer(
-            safe_caption,
-            reply_markup=main_keyboard(),
-            parse_mode="HTML",
-        )
+    await message.answer(
+        safe_caption,
+        reply_markup=main_keyboard(),
+        parse_mode="HTML",
+    )
 
 
 async def send_operation_image(
@@ -213,59 +196,29 @@ async def send_operation_image(
     operation_id: str = "",
     caption: str = "",
 ):
-    try:
-        # Real photo covers for transaction notifications. Exact amounts and
-        # operation references remain in the signed server-generated caption.
-        photo_by_operation = {
-            "deposit": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=1280&q=90",
-            "withdraw": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
-            "received": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
-            "sent": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
-            "bonus": "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1280&q=90",
-            "reward": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1280&q=90",
-            "refund": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
-        }
-        photo_url = photo_by_operation.get(operation, photo_by_operation["deposit"])
-        await bot.send_photo(
-            chat_id=chat_id,
-            photo=photo_url,
-            caption=caption,
-            parse_mode="HTML",
-        )
-    except Exception:
-        logger.exception("Transaction image rendering failed: %s", operation)
-        await bot.send_message(
-            chat_id=chat_id,
-            text=caption or (
-                f"<b>{html.escape(operation.title())}</b>\\n"
-                f"Сумма: <b>{amount:g} TNC</b>\\n"
-                f"Операция: <code>{html.escape(operation_id)}</code>"
-            ),
-            parse_mode="HTML",
-        )
+    text = caption or (
+        f"<b>{html.escape(operation.title())}</b>\n"
+        f"Сумма: <b>{amount:g} TNC</b>\n"
+        f"Операция: <code>{html.escape(operation_id)}</code>"
+    )
+    await bot.send_message(chat_id=chat_id, text=text, parse_mode="HTML")
 
 
 async def show_home(message: Message, greeting=True):
-    name = html.escape(message.from_user.first_name or "User")
+    name = html.escape(message.from_user.first_name or "игрок")
+    heading = f"Добро пожаловать, {name}!" if greeting else "TNC CLUB"
     caption = (
-        f"<b>{'Добро пожаловать, ' + name + '.' if greeting else 'TNC / ЛИЧНЫЙ КАБИНЕТ'}</b>\n"
-        "<i>Ваш аккаунт. Ваш контроль.</i>\n\n"
-        "<b>ФИНАНСЫ</b>\n"
-        "Кошелёк · переводы · история операций · профиль.\n\n"
-        "<b>ЭКОСИСТЕМА</b>\n"
-        "Пополнение через Telegram Stars · игровые баллы GT · реферальная программа.\n\n"
-        "Нажмите <b>«Открыть приложение»</b>, чтобы перейти в полный интерфейс TNC. "
-        "Либо выберите нужное действие в меню ниже.\n\n"
-        "<i>TNC — внутренний учётный баланс. GT — отдельные игровые баллы; они не конвертируются в TNC и не выводятся.</i>"
+        f"<b>{heading}</b>\n"
+        "<b>ИГРОВОЙ КЛУБ В TELEGRAM</b>\n\n"
+        "Выбирай игру, следи за результатами и открывай достижения. "
+        "Всё главное — в одном месте.\n\n"
+        "<b>ИГРОВОЙ ЗАЛ</b>\n"
+        "Crash · Dice · Slots · Mines\n\n"
+        "<b>ТВОЙ АККАУНТ</b>\n"
+        "Баланс GT · профиль · история · достижения\n\n"
+        "<i>GT — игровые баллы внутри TNC CLUB. Они не являются деньгами, не выводятся и не обмениваются на TNC.</i>"
     )
-    if greeting:
-        await send_section(
-            message, "TNC ECOSYSTEM", "YOUR TNC SPACE",
-            "ACCOUNT · WALLET · ACTIVITY",
-            "ONE ACCOUNT / ONE PLACE", caption,
-        )
-    else:
-        await message.answer(caption, reply_markup=main_keyboard(), parse_mode="HTML")
+    await message.answer(caption, reply_markup=main_keyboard(), parse_mode="HTML")
 
 
 # --------------------------------------------------
@@ -316,6 +269,18 @@ async def menu_callback(callback: CallbackQuery, state: FSMContext):
     elif action == "help":
         await state.clear()
         await help_handler(message)
+
+
+@dp.message(F.text == GAMES)
+async def games_lobby_handler(message: Message):
+    await message.answer(
+        "<b>ИГРОВОЙ ЗАЛ TNC</b>\\n\\n"
+        "Crash · Dice · Slots · Mines\\n\\n"
+        "Открой Mini App, чтобы выбрать игру и посмотреть свой игровой прогресс.\\n\\n"
+        "<i>Игры используют отдельные баллы GT. GT не имеют денежной стоимости, не выводятся и не конвертируются в TNC.</i>",
+        reply_markup=main_keyboard(),
+        parse_mode="HTML",
+    )
 
 
 @dp.message(F.text == MORE)
