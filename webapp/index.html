@@ -125,6 +125,15 @@ main{max-width:none;padding-top:26px}
 .mine-grid{display:grid;grid-template-columns:repeat(5,22px);gap:5px}.mine-grid i{height:22px;border-radius:5px;background:#29465c;border:1px solid #6bc8e8;animation:minePulse .7s ease-in-out infinite alternate;animation-delay:calc(var(--i)*18ms)}
 @keyframes crashRise{to{transform:scale(1.12);color:#ffe1a0;text-shadow:0 0 24px #e6bd72}}@keyframes diceRoll{0%{transform:rotate(0) translateY(0)}50%{transform:rotate(180deg) translateY(-5px)}100%{transform:rotate(360deg) translateY(0)}}@keyframes slotSpin{to{transform:translateY(-7px);filter:brightness(1.25)}}@keyframes minePulse{to{background:#4b9cba;box-shadow:0 0 12px #64c9e8}}
 @media(prefers-reduced-motion:reduce){.game-animation *{animation:none!important}}
+/* Unified navigation and responsive TNC application shell */
+.mobilebar{display:flex;align-items:stretch;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#49627a #0b111a}
+.mobilebar button{flex:0 0 76px;min-width:76px;padding:7px 4px 5px;border-radius:11px;white-space:normal;line-height:1.2}
+.mobilebar button.active{background:linear-gradient(180deg,#62cfff18,#e6bd720d);border:1px solid #67cfff35;color:#dff5ff}
+.mobilebar button span{display:block}
+@media(min-width:1001px){.mobilebar{display:none}}
+@media(max-width:1000px){main{padding-bottom:calc(105px + var(--safeB))}.topbar{position:sticky;top:0;z-index:12;padding:10px 0;background:#080d15eF;backdrop-filter:blur(18px)}}
+@media(max-width:620px){.mobilebar{padding:6px 6px calc(7px + var(--safeB));gap:4px}.mobilebar button{flex-basis:68px;min-width:68px;font-size:9px}.mobilebar button span{font-size:19px}.pageintro h2{font-size:23px}.shop-package-grid{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.mobilebar button span{transition:none}}
 </style>
 </head>
 <body data-page="home">
@@ -144,6 +153,7 @@ main{max-width:none;padding-top:26px}
   </nav>
   <div class="navlabel" style="margin-top:25px">ECOSYSTEM</div>
   <nav class="nav">
+    <button data-page="shop"><span class="navicon">▣</span>Магазин TNC</button>
     <button data-page="games"><span class="navicon">◇</span>Games</button>
     <button data-page="rewards"><span class="navicon">◇</span>Награды</button>
     <button data-page="profile"><span class="navicon">◎</span>Профиль</button>
@@ -200,6 +210,30 @@ main{max-width:none;padding-top:26px}
  <div class="assistant-shell"><article class="card chat-card"><div class="cardhead"><div style="display:flex;align-items:center;gap:12px"><div class="assistant-orb"><span></span></div><div><b>TNC Assistant</b><div class="muted tiny">Генеративная модель · серверное подключение</div></div></div><span class="ai-status" id="ai-status">ПРОВЕРКА ПОДКЛЮЧЕНИЯ</span></div><div class="chat-messages" id="chat-messages"><div class="bubble bot">Здравствуйте! Я TNC Assistant. Задавайте вопросы на любые темы: криптовалюты, технологии, учёба, программирование, финансы и работа с приложением. Для ответов используется серверная ИИ-модель, если администратор подключил AI API.</div></div><div class="suggestions"><button data-prompt="Объясни, как работает блокчейн, на простом примере">Объясни блокчейн</button><button data-prompt="Помоги разобраться в графике BTC и объясни основные показатели">Разобрать график</button><button data-prompt="Составь план изучения Python на 30 дней">План обучения</button><button data-prompt="Как защитить криптокошелёк от мошенников?">Безопасность</button></div><form class="chat-compose" id="assistant-form"><input id="assistant-input" autocomplete="off" maxlength="4000" placeholder="Напишите любой вопрос…" aria-label="Сообщение помощнику"><button class="btn gold" type="submit" aria-label="Отправить сообщение">Отправить</button></form><div class="muted tiny" style="padding:0 16px 14px">ИИ может ошибаться. Не используйте ответы как единственный источник финансовых или юридических решений.</div></article>
  <aside class="assistant-side"><article class="card"><div class="eyebrow">AI CAPABILITIES</div><h3>Универсальный помощник</h3><p class="muted tiny">Может объяснять сложные темы, писать и проверять код, помогать с текстами, планированием и анализом информации. Доступные возможности зависят от подключённой модели.</p></article><article class="card"><div class="eyebrow">КОНФИДЕНЦИАЛЬНОСТЬ</div><p class="muted tiny">Сообщения отправляются на сервер для обработки ИИ. Не передавайте секретные ключи, пароли, seed-фразы, коды авторизации или персональные платёжные данные.</p></article><article class="card"><div class="eyebrow">TNC WALLET</div><p class="muted tiny">Помощник не выполняет переводы, не меняет баланс и не размещает реальные биржевые ордера.</p><button class="btn block" data-go="wallet">Перейти в кошелёк</button></article></aside></div>
 </section>
+<section class="page" id="page-shop">
+ <div class="pageintro"><div class="eyebrow">TNC WALLET / TELEGRAM STARS</div><h2>Магазин TNC</h2><p>Пополнение внутреннего баланса TNC через защищённый счёт Telegram Stars. Зачисление выполняет сервер после подтверждения успешного платежа Telegram.</p></div>
+ <div class="grid twocol">
+  <article class="card"><div class="eyebrow">CHOOSE A PACKAGE</div><h3 style="margin:10px 0 6px">Готовые пакеты</h3><p class="muted tiny">Тариф: 1 TNC = 50 Telegram Stars. Выбери пакет, затем подтверди счёт в Telegram.</p>
+   <div class="grid twocol" style="margin-top:17px">
+    <button class="btn gold" data-shop-amount="1">1 TNC <span class="muted">· 50 Stars</span></button>
+    <button class="btn" data-shop-amount="10">10 TNC <span class="muted">· 500 Stars</span></button>
+    <button class="btn" data-shop-amount="100">100 TNC <span class="muted">· 5 000 Stars</span></button>
+    <button class="btn" data-shop-amount="1000">1 000 TNC <span class="muted">· 50 000 Stars</span></button>
+   </div>
+  </article>
+  <article class="card"><div class="eyebrow">CUSTOM AMOUNT</div><h3 style="margin:10px 0 6px">Своя сумма</h3><p class="muted tiny">Укажи сумму TNC. Сервер проверит тариф и создаст счёт; до успешной оплаты баланс не меняется.</p>
+   <div class="field"><label for="shop-custom-amount">КОЛИЧЕСТВО TNC</label><input id="shop-custom-amount" type="number" min="0.000001" max="1000000" step="0.000001" placeholder="Например, 25"></div>
+   <div class="info"><span class="muted">Расчётная стоимость</span><strong id="shop-custom-stars">— Stars</strong></div>
+   <button class="btn gold block" id="shop-custom-buy">Создать счёт Telegram Stars</button>
+  </article>
+ </div>
+ <article class="card" style="margin-top:17px"><div class="eyebrow">PAYMENT & ACCOUNT SAFETY</div><h3 style="margin:10px 0">Как проходит пополнение</h3>
+  <div class="info"><span class="muted">1. Создание заказа</span><strong>Сервер создаёт ожидающий счёт</strong></div>
+  <div class="info"><span class="muted">2. Оплата</span><strong>Подтверждение проходит в Telegram</strong></div>
+  <div class="info"><span class="muted">3. Зачисление</span><strong>Только после успешного платежа</strong></div>
+  <div class="notice">Не отправляй Stars или деньги вручную другим пользователям. Не закрывай и не оплачивай повторно счёт при ошибке: сначала проверь баланс и историю. TNC здесь — внутренний баланс экосистемы, не банковский вклад и не отдельный блокчейн-актив.</div>
+ </article>
+</section>
 <section class="page" id="page-games"><div class="pageintro"><div class="eyebrow">TNC PLAY · SERVER CONTROLLED</div><h2>Игровая вселенная</h2><p>GT — отдельные закрытые игровые баллы. Они не являются TNC Coin, не переводятся в TNC и не выводятся.</p></div>
 <div class="card" style="margin-bottom:16px"><div class="cardhead"><div><div class="eyebrow">GT WALLET</div><div class="balance" id="gt-balance" style="font-size:clamp(32px,5vw,48px)">—</div><div class="currency">GAME TOKENS</div></div><button class="btn" id="gt-refresh">Обновить баланс</button></div><div class="notice">Курс пополнения: 1 Telegram Star = 5 000 GT. Покупка подтверждается платёжной системой Telegram.</div><div class="quickrow" style="margin-top:14px"><input id="gt-stars" type="number" min="1" max="10000" value="10" class="search" style="max-width:150px" aria-label="Количество Stars"><button class="btn gold" id="gt-buy">Пополнить за Stars</button></div></div>
 <div class="grid twocol">
@@ -214,13 +248,13 @@ main{max-width:none;padding-top:26px}
 <section class="page" id="page-admin"><div class="pageintro"><div class="eyebrow">RESTRICTED · ADMIN ONLY</div><h2>Управление игровым сервисом</h2><p>Доступ проверяется сервером по ADMIN_IDS. Все изменения баланса и блокировки записываются в журнал.</p></div><div class="grid twocol"><article class="card"><div class="eyebrow">GT WALLET ADJUSTMENT</div><div class="field"><label for="admin-user-id">Telegram ID пользователя</label><input id="admin-user-id" type="number" min="1" placeholder="Например, 123456789"></div><div class="field"><label for="admin-gt-amount">Количество GT</label><input id="admin-gt-amount" type="number" min="1" max="1000000000" placeholder="Количество GT"></div><div class="field"><label for="admin-gt-reason">Причина операции</label><input id="admin-gt-reason" maxlength="255" placeholder="Причина (обязательно для аудита)"></div><div class="quickrow"><button class="btn gold" id="admin-gt-add">Начислить GT</button><button class="btn" id="admin-gt-take">Списать GT</button></div></article><article class="card"><div class="eyebrow">TNC COIN · ADMIN WALLET</div><p class="muted tiny">Реальный внутренний баланс TNC. Начисление и списание идут отдельной транзакцией и не затрагивают GT.</p><div class="field"><label for="admin-tnc-user">Telegram ID пользователя</label><input id="admin-tnc-user" type="number" min="1" placeholder="Telegram ID"></div><div class="field"><label for="admin-tnc-amount">Количество TNC</label><input id="admin-tnc-amount" type="number" min="0.000001" step="0.000001" max="1000000" placeholder="Например, 10.5"></div><div class="field"><label for="admin-tnc-reason">Причина операции</label><input id="admin-tnc-reason" maxlength="255" placeholder="Обязательная причина"></div><div class="quickrow"><button class="btn gold" id="admin-tnc-credit">Начислить TNC</button><button class="btn" id="admin-tnc-debit">Списать TNC</button></div></article><article class="card"><div class="eyebrow">GAME ACCESS CONTROL</div><div class="field"><label for="admin-ban-user">Telegram ID пользователя</label><input id="admin-ban-user" type="number" min="1" placeholder="Telegram ID"></div><div class="field"><label for="admin-ban-reason">Причина ограничения</label><input id="admin-ban-reason" maxlength="255" placeholder="Причина"></div><div class="quickrow"><button class="btn" id="admin-game-ban">Запретить игры</button><button class="btn" id="admin-game-unban">Снять запрет</button></div><div class="notice" style="margin-top:14px">Блокировка действует только на игры и не меняет TNC-кошелёк, аккаунт или переводы.</div></article></div><div class="sectionhead"><h2>Журнал действий администратора</h2><button class="btn" id="admin-refresh">Обновить</button></div><div class="transactions" id="admin-audit-log"><div class="empty">Загрузка журнала…</div></div></section>
 <section class="page" id="page-profile"><div class="pageintro"><div class="eyebrow">IDENTITY & SECURITY</div><h2>Мой профиль</h2><p>Данные Telegram-аккаунта, связанного с TNC.</p></div><div class="grid profilegrid"><article class="card profilehero"><div class="photo" id="profile-photo">T</div><h3 id="profile-name">TNC User</h3><p id="profile-handle">Telegram account</p><span class="pill">● TNC ACCOUNT</span></article><article class="card"><div class="eyebrow">ACCOUNT INFORMATION</div><div class="info" style="margin-top:15px"><span class="muted">Telegram ID</span><strong id="profile-id">—</strong></div><div class="info"><span class="muted">Имя</span><strong id="profile-first">—</strong></div><div class="info"><span class="muted">Username</span><strong id="profile-username">—</strong></div><div class="info"><span class="muted">Баланс</span><strong id="profile-balance">—</strong></div><div class="settingsrow"><span>Авторизация</span><span class="status">Telegram initData</span></div><div class="settingsrow"><span>Серверная проверка</span><span class="status">Включена</span></div><div class="notice">Для защиты аккаунта не передавайте Telegram initData, токен бота или данные авторизации третьим лицам.</div></article></div></section>
 </main></div>
-<nav class="mobilebar" aria-label="Разделы приложения"><button class="active" data-page="home"><span>⌂</span>Главная</button><button data-page="wallet"><span>◈</span>Кошелёк</button><button data-page="transfer"><span>⇄</span>Перевод</button><button data-page="history"><span>◷</span>История</button><button data-page="market"><span>⌁</span>Биржа</button><button data-page="trading"><span>↗</span>Трейдинг</button><button data-page="assistant"><span>✧</span>ИИ</button><button data-page="games"><span>◇</span>Games</button><button data-page="rewards"><span>◇</span>Награды</button><button data-page="profile"><span>◎</span>Профиль</button><button data-page="admin" id="admin-mobile" hidden><span>⚙</span>Админ</button></nav>
+<nav class="mobilebar" aria-label="Разделы приложения"><button class="active" data-page="home"><span>⌂</span>Главная</button><button data-page="wallet"><span>◈</span>Кошелёк</button><button data-page="transfer"><span>⇄</span>Перевод</button><button data-page="history"><span>◷</span>История</button><button data-page="market"><span>⌁</span>Биржа</button><button data-page="trading"><span>↗</span>Трейдинг</button><button data-page="assistant"><span>✧</span>ИИ</button><button data-page="shop"><span>▣</span>Магазин</button><button data-page="games"><span>◇</span>Games</button><button data-page="rewards"><span>◇</span>Награды</button><button data-page="profile"><span>◎</span>Профиль</button><button data-page="admin" id="admin-mobile" hidden><span>⚙</span>Админ</button></nav>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 'use strict';
 (()=>{
 const $=id=>document.getElementById(id);const tg=window.Telegram?.WebApp||null;let initData=tg?.initData||'';let profile=null;let transactions=[];let filter='all';let toastTimer;
-const titles={home:'Добро пожаловать',wallet:'Мой кошелёк',transfer:'Перевод TNC',history:'История операций',market:'Live Биржа',trading:'Трейдинг',assistant:'ИИ Помощник',games:'TNC Games',rewards:'Награды и задания',profile:'Мой профиль',admin:'Администрирование'};
+const titles={home:'Добро пожаловать',wallet:'Мой кошелёк',transfer:'Перевод TNC',history:'История операций',market:'Live Биржа',trading:'Трейдинг',assistant:'ИИ Помощник',shop:'Магазин TNC',games:'TNC Games',rewards:'Награды и задания',profile:'Мой профиль',admin:'Администрирование'};
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3400)}
 function money(v){const n=Number(String(v??0).replace(',','.'));return Number.isFinite(n)?n.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}):'0,00'}
 function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -265,7 +299,22 @@ $('admin-gt-take')?.addEventListener('click',()=>adminAdjust('admin_take'));
 $('admin-game-ban')?.addEventListener('click',()=>adminBan(true));
 $('admin-game-unban')?.addEventListener('click',()=>adminBan(false));
 $('admin-refresh')?.addEventListener('click',()=>refreshAdmin().catch(e=>toast(e.message)));
-async function send(){if(!initData){toast('Откройте приложение через Telegram.');return}const receiver=Number($('receiver').value);const amount=$('amount').value.trim().replace(',','.');if(!Number.isSafeInteger(receiver)||receiver<=0){toast('Введите корректный Telegram ID получателя.');return}if(!amount||!Number.isFinite(Number(amount))||Number(amount)<=0){toast('Введите сумму больше нуля.');return}const btn=$('send');btn.disabled=true;btn.textContent='Выполняем перевод…';try{const result=await api('/api/wallet/transfer',{method:'POST',body:JSON.stringify({receiver_id:receiver,amount})});toast(`Перевод ${money(result.amount)} TNC выполнен.`);$('receiver').value='';$('amount').value='';await refresh();showPage('home')}catch(e){toast(e.message)}finally{btn.disabled=false;btn.textContent='Проверить и отправить →'}}
+async function send(){
+ if(!initData){toast('Откройте приложение через Telegram.');return}
+ const receiver=Number($('receiver').value),amount=$('amount').value.trim().replace(',','.');
+ const current=Number(String(profile?.balance??0).replace(',','.'));
+ if(!Number.isSafeInteger(receiver)||receiver<=0){toast('Введите корректный Telegram ID получателя.');return}
+ if(profile&&receiver===Number(profile.telegram_id)){toast('Нельзя отправить TNC самому себе.');return}
+ if(!amount||!Number.isFinite(Number(amount))||Number(amount)<=0||Number(amount)>1000000){toast('Сумма должна быть больше нуля и не превышать 1 000 000 TNC.');return}
+ if(!/^\\d+(?:\\.\\d{1,6})?$/.test(amount)){toast('Допустимо не более 6 знаков после запятой.');return}
+ if(Number(amount)>current){toast('Недостаточно средств. Обнови баланс перед переводом.');return}
+ const confirmed=window.confirm('Подтвердить перевод '+money(amount)+' TNC пользователю '+receiver+'? Завершённый перевод нельзя отменить.');
+ if(!confirmed)return;
+ const btn=$('send');btn.disabled=true;btn.textContent='Выполняем перевод…';
+ try{const result=await api('/api/wallet/transfer',{method:'POST',body:JSON.stringify({receiver_id:receiver,amount})});toast('Перевод '+money(result.amount)+' TNC выполнен. ID: '+(result.operation_id||'—'));$('receiver').value='';$('amount').value='';await refresh();showPage('home')}
+ catch(e){toast(e.message)}
+ finally{btn.disabled=false;btn.textContent='Проверить и отправить →'}
+}
 function showPage(page){if(!titles[page])return;document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+page));document.querySelectorAll('[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));$('page-title').textContent=titles[page];$('crumb').textContent='TNC / '+page.toUpperCase();document.body.dataset.page=page;if(page==='trading'){loadTradeQuote();loadPaperAccount()}if(page==='games'&&initData){refreshGT().catch(e=>toast(e.message));refreshGTHistory().catch(e=>toast(e.message))}if(page==='rewards'&&initData)refreshProgress().catch(e=>toast(e.message));if(page==='assistant'&&initData)$('ai-status').textContent='ГОТОВ К ЗАПРОСУ';window.scrollTo({top:0,behavior:'smooth'})}
 async function refreshGT(){try{const d=await api('/api/games/wallet');$('gt-balance').textContent=Number(d.balance||0).toLocaleString('ru-RU');return d}catch(e){$('gt-balance').textContent='—';throw e}}
 async function refreshGTHistory(){const [d,c,e]=await Promise.all([api('/api/games/history'),api('/api/games/crash/history'),api('/api/games/extra-history')]);const rows=d.transactions||[];$('gt-history').innerHTML=rows.length?rows.map(x=>'<div class="tx"><div class="txicon">GT</div><div class="txmain"><div class="txtitle">'+safe(x.description||x.kind)+'</div><div class="txmeta">'+safe(x.kind)+' · '+safe(new Date(Number(x.created_at)*1000).toLocaleString('ru-RU'))+'</div></div><div class="txamount '+(Number(x.amount)>=0?'positive':'negative')+'">'+(Number(x.amount)>0?'+':'')+Number(x.amount).toLocaleString('ru-RU')+' GT</div></div>').join(''):'<div class="empty">Игровых операций пока нет.</div>';const rounds=[...(c.items||[]).map(x=>({...x,game:'crash'})),...(e.items||[])].sort((a,b)=>Number(b.created_at)-Number(a.created_at));$('gt-round-history').innerHTML=rounds.length?rounds.map(x=>'<div class="tx"><div class="txicon">'+safe(String(x.game||'game').toUpperCase())+'</div><div class="txmain"><div class="txtitle">'+safe(x.game.toUpperCase())+' · '+((x.won||Number(x.payout)>0)?'Победа':'Раунд')+'</div><div class="txmeta">'+safe(new Date(Number(x.created_at)*1000).toLocaleString('ru-RU'))+' · '+safe(x.outcome||('Цель '+(Number(x.target_multiplier||0)/100)+'x, crash '+(Number(x.crash_multiplier||0)/100)+'x'))+'</div></div><div class="txamount '+(Number(x.payout)-Number(x.stake)>=0?'positive':'negative')+'">'+(Number(x.payout)-Number(x.stake)>0?'+':'')+(Number(x.payout)-Number(x.stake)).toLocaleString('ru-RU')+' GT</div></div>').join(''):'<div class="empty">Раундов пока нет.</div>'}
@@ -282,6 +331,29 @@ async function refreshProgress(){
  const items=l.items||[];
  $('weekly-leaderboard').innerHTML=items.length?items.map(x=>'<div class="tx"><div class="txicon">'+Number(x.place)+'</div><div class="txmain"><div class="txtitle">'+safe(x.name)+(x.is_me?' · ВЫ':'')+'</div><div class="txmeta">'+Number(x.wins)+' побед · '+Number(x.rounds)+' раундов</div></div><div class="txamount '+(Number(x.net)>=0?'positive':'negative')+'">'+(Number(x.net)>0?'+':'')+Number(x.net).toLocaleString('ru-RU')+' GT</div></div>').join(''):'<div class="empty">За последние 7 дней раундов пока нет.</div>';
 }
+// TNC Shop: invoice creation is server-side; balance changes only after Telegram confirms payment.
+async function createTncInvoice(amount){
+ if(!initData){toast('Откройте приложение через Telegram.');return}
+ const value=String(amount??'').trim().replace(',','.');
+ if(!/^\\d+(?:\\.\\d{1,6})?$/.test(value)||Number(value)<=0||Number(value)>1000000){toast('Укажи сумму от 0.000001 до 1 000 000 TNC, максимум 6 знаков после запятой.');return}
+ const buttons=[...document.querySelectorAll('[data-shop-amount]')];buttons.forEach(b=>b.disabled=true);
+ const custom=$('shop-custom-buy');if(custom)custom.disabled=true;
+ try{
+  const d=await api('/api/shop/invoice',{method:'POST',body:JSON.stringify({amount:value})});
+  if(!d.invoice_url)throw new Error('Telegram не вернул ссылку на счёт.');
+  if(tg?.openInvoice){
+   tg.openInvoice(d.invoice_url,status=>{
+    if(status==='paid'){toast('Telegram подтвердил оплату. Обновляем баланс…');refresh().catch(()=>{});}
+    else if(status==='failed')toast('Telegram не подтвердил оплату. Баланс не изменён.');
+    else if(status==='cancelled')toast('Оплата отменена. Баланс не изменён.');
+   });
+  }else{window.open(d.invoice_url,'_blank','noopener,noreferrer');toast('Счёт создан. Заверши оплату в Telegram.');}
+ }catch(e){toast('Не удалось создать счёт: '+e.message)}
+ finally{buttons.forEach(b=>b.disabled=false);if(custom)custom.disabled=false}
+}
+document.querySelectorAll('[data-shop-amount]').forEach(b=>b.addEventListener('click',()=>createTncInvoice(b.dataset.shopAmount)));
+$('shop-custom-amount')?.addEventListener('input',e=>{const n=Number(e.target.value);$('shop-custom-stars').textContent=Number.isFinite(n)&&n>0&&n<=1000000?(n*50).toLocaleString('ru-RU',{maximumFractionDigits:2})+' Stars':'— Stars'});
+$('shop-custom-buy')?.addEventListener('click',()=>createTncInvoice($('shop-custom-amount').value));
 $('progress-refresh')?.addEventListener('click',()=>refreshProgress().catch(e=>toast(e.message)));
 function animateGame(game){
  const stage=$('game-animation');stage.className='game-animation active game-'+game;
