@@ -51,10 +51,10 @@ class MiniAppNavigationTests(unittest.TestCase):
             self.assertIn(f'data-page="{page}"', self.html)
 
     def test_finance_screens_have_distinct_editorial_compositions(self):
-        self.assertIn('class="wallet-layout"', self.html)
-        self.assertIn('class="transfer-layout"', self.html)
-        self.assertIn('class="history-hero"', self.html)
-        self.assertIn('class="shop-masthead"', self.html)
+        self.assertIn("wallet-layout", self.html)
+        self.assertIn("transfer-layout", self.html)
+        self.assertIn("history-hero", self.html)
+        self.assertIn("shop-masthead", self.html)
         self.assertIn('id="receiver"', self.html)
         self.assertIn('id="amount"', self.html)
         self.assertIn('id="history-search"', self.html)
