@@ -145,7 +145,6 @@ def mines_play(data: MinesPlay, uid: int = Depends(player)):
     if data.mines + data.picks > 25:
         raise HTTPException(status_code=400, detail="Слишком много мин для выбранного числа клеток")
     safe_total = 25 - data.mines
-    won = secrets.randbelow(25) < safe_total
     # One-shot pick mode: selected number of cells must all be safe.
     probability_num = 1
     probability_den = 1
