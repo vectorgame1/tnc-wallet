@@ -12,11 +12,15 @@ def verify(init_data: str) -> dict:
         raise HTTPException(500, "BOT_TOKEN не настроен на сервере.")
     if not init_data:
         raise HTTPException(401, "Нет Telegram initData.")
+    if len(init_data) > 16384:
+        raise HTTPException(401, "Некорректный размер Telegram initData.")
 
     try:
-        # Безопасный парсинг (не падает на пустых значениях)
-        pairs = parse_qsl(init_data, keep_blank_values=True)
+        # Reject duplicate keys to avoid ambiguous signed payload parsing.
+        pairs = parse_qsl(init_data, keep_blank_values=True, max_num_fields=100)
         data = dict(pairs)
+        if len(data) != len(pairs):
+            raise ValueError("В initData повторяются параметры.")
         
         if "hash" not in data:
             raise ValueError("В initData нет поля hash")
