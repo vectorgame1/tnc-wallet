@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from sqlalchemy import text
 
 from app.database.connection import engine
-from app.routers.games_extra import settle
+from app.routers.games_extra import prepare, settle
 from app.services.game_tokens import (
     complete_stars_payment,
     create_stars_order,
@@ -16,6 +16,7 @@ from app.services.game_tokens import (
 class GameRoundTests(unittest.TestCase):
     def setUp(self):
         init_game_tables()
+        prepare()
         self.user_id = 7_000_000_000 + (uuid.uuid4().int % 1_000_000_000)
         with engine.begin() as conn:
             conn.execute(
