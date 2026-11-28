@@ -75,21 +75,26 @@ class TransferFlow(StatesGroup):
 
 
 def main_keyboard():
-    """Inline command center: Mini App first, account actions grouped by intent."""
+    """Compact start menu: Mini App, two frequent actions, and one More entry."""
     webapp_url = (getattr(settings, "WEBAPP_URL", "") or "").strip()
-    rows = []
-    if webapp_url.startswith("https://"):
-        rows.append([InlineKeyboardButton(
-            text=MINI_APP,
-            web_app=WebAppInfo(url=webapp_url),
-        )])
-    if not webapp_url.startswith("https://"):
-        rows.append([InlineKeyboardButton(text=MINI_APP, callback_data="menu:miniapp")])
-    rows.extend([
+    app_button = (
+        InlineKeyboardButton(text=MINI_APP, web_app=WebAppInfo(url=webapp_url))
+        if webapp_url.startswith("https://")
+        else InlineKeyboardButton(text=MINI_APP, callback_data="menu:miniapp")
+    )
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [app_button],
         [
             InlineKeyboardButton(text=WALLET, callback_data="menu:wallet"),
             InlineKeyboardButton(text=TRANSFER, callback_data="menu:transfer"),
         ],
+        [InlineKeyboardButton(text="Ещё", callback_data="menu:more")],
+    ])
+
+
+def more_keyboard():
+    """Secondary destinations are grouped behind one compact menu entry."""
+    return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text=HISTORY, callback_data="menu:history"),
             InlineKeyboardButton(text=ACCOUNT, callback_data="menu:account"),
@@ -102,8 +107,8 @@ def main_keyboard():
             InlineKeyboardButton(text=COMMUNITY, callback_data="menu:community"),
             InlineKeyboardButton(text="Помощь", callback_data="menu:help"),
         ],
+        [InlineKeyboardButton(text="← Главное меню", callback_data="menu:back")],
     ])
-    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 def cancel_keyboard():
     return ReplyKeyboardMarkup(
@@ -177,10 +182,10 @@ async def send_section(
         # the live account-specific information and the wallet remains server-backed.
         photo_by_section = {
             "TNC ECOSYSTEM": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
-            "TNC WALLET": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1280&q=90",
-            "TNC TRANSFER": "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1280&q=90",
-            "TNC SUPPORT": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1280&q=90",
-            "TNC GAMES": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1280&q=90",
+            "TNC WALLET": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=1280&q=90",
+            "TNC TRANSFER": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=90",
+            "TNC SUPPORT": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=90",
+            "TNC GAMES": "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=1280&q=90",
         }
         photo_url = photo_by_section.get(section, photo_by_section["TNC ECOSYSTEM"])
         await message.answer_photo(
@@ -211,9 +216,9 @@ async def send_operation_image(
         # Real photo covers for transaction notifications. Exact amounts and
         # operation references remain in the signed server-generated caption.
         photo_by_operation = {
-            "deposit": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1280&q=90",
-            "withdraw": "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1280&q=90",
-            "received": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1280&q=90",
+            "deposit": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=1280&q=90",
+            "withdraw": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=90",
+            "received": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=90",
             "sent": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=90",
             "bonus": "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1280&q=90",
             "reward": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1280&q=90",
@@ -277,6 +282,10 @@ async def menu_callback(callback: CallbackQuery, state: FSMContext):
     action = (callback.data or "").split(":", 1)[1]
     if action == "miniapp":
         await miniapp_handler(message)
+    elif action == "more":
+        await message.answer("Дополнительные разделы:", reply_markup=more_keyboard())
+    elif action == "back":
+        await message.answer("Главное меню:", reply_markup=main_keyboard())
     elif action == "transfer":
         await state.clear()
         await transfer_start(message, state)

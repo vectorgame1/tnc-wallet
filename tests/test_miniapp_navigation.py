@@ -26,10 +26,11 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertIn("не более 6 знаков после запятой", self.html)
         self.assertIn("Завершённый перевод нельзя отменить.", self.html)
 
-    def test_swiss_cobalt_system_replaces_previous_visual_system(self):
-        self.assertIn("--bg:#f4f5f7", self.html)
-        self.assertIn("--blue:#2448ff", self.html)
+    def test_editorial_visual_system_replaces_previous_visual_system(self):
+        self.assertIn("--bg:#f3f1ec", self.html)
+        self.assertIn("--blue:#2855d9", self.html)
         self.assertIn("TNC — Private Finance", self.html)
+        self.assertIn("TNC editorial rebuild", self.html)
         self.assertNotIn("TNC REDLINE visual system", self.html)
         self.assertNotIn("--gold:#ff2638", self.html)
 
@@ -65,7 +66,7 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertIn("$('mobile-more')?.addEventListener", self.html)
         self.assertIn("$('mobile-more-menu')?.classList.remove('open')", self.html)
 
-    def test_bot_keyboard_keeps_full_menu_and_single_miniapp_entry(self):
+    def test_bot_keyboard_keeps_compact_menu_and_secondary_destinations(self):
         bot_source = (Path(__file__).resolve().parents[1] / "bot.py").read_text(encoding="utf-8-sig")
         for label in ("Кошелёк TNC", "Перевести TNC", "История операций", "Мой аккаунт",
                       "Баланс GT", "Магазин TNC", "Реферальная ссылка", "Открыть приложение"):
@@ -76,6 +77,8 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertIn("photo_by_section", bot_source)
         self.assertIn("images.unsplash.com", bot_source)
         self.assertIn("photo_by_operation", bot_source)
+        self.assertIn("def more_keyboard():", bot_source)
+        self.assertIn('callback_data="menu:more"', bot_source)
 
 
 if __name__ == "__main__":
