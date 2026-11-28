@@ -1,4 +1,5 @@
 ﻿from app.routers.games import router as games_router
+from app.routers.games_extra import router as extra_games_router
 import asyncio
 import logging
 from contextlib import asynccontextmanager
@@ -74,6 +75,7 @@ app = FastAPI(
 )
 
 app.include_router(games_router)
+app.include_router(extra_games_router)
 
 def auth(raw, db):
     try:
