@@ -23,6 +23,9 @@ from app.services.game_tokens import (
     get_history as get_gt_history,
     create_stars_order as create_gt_order,
     GT_PER_STAR,
+    admin_adjust_tokens,
+    set_game_ban,
+    get_admin_log,
 )
 
 
@@ -98,6 +101,19 @@ class ShopInvoice(BaseModel):
 
 class GameStarsInvoice(BaseModel):
     stars: int = Field(ge=1, le=10000)
+
+
+class GameAdminAdjustment(BaseModel):
+    user_id: int = Field(gt=0)
+    amount: int = Field(gt=0, le=1000000000)
+    action: str
+    reason: str = Field(default="", max_length=255)
+
+
+class GameAdminBan(BaseModel):
+    user_id: int = Field(gt=0)
+    banned: bool
+    reason: str = Field(default="", max_length=255)
 
 
 @app.get("/")
@@ -296,6 +312,56 @@ async def games_stars_invoice(
         "currency": "XTR",
         "rate": GT_PER_STAR,
     }
+
+
+def admin_auth(raw, db):
+    user = auth(raw, db)
+    if int(user.telegram_id) not in settings.ADMIN_IDS:
+        raise HTTPException(403, "Недостаточно прав администратора.")
+    return user
+
+
+@app.get("/api/admin/games")
+def admin_games_overview(
+    raw: str = Header(alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    admin = admin_auth(raw, db)
+    return {
+        "admin_id": int(admin.telegram_id),
+        "logs": get_admin_log(50),
+    }
+
+
+@app.post("/api/admin/games/adjust")
+def admin_games_adjust(
+    body: GameAdminAdjustment,
+    raw: str = Header(alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    admin = admin_auth(raw, db)
+    if body.action not in ("admin_add", "admin_take"):
+        raise HTTPException(400, "Допустимые действия: admin_add, admin_take.")
+    try:
+        balance = admin_adjust_tokens(
+            admin.telegram_id, body.user_id, body.amount, body.action, body.reason
+        )
+    except ValueError as error:
+        raise HTTPException(400, str(error))
+    return {"user_id": body.user_id, "balance": balance, "action": body.action}
+
+
+@app.post("/api/admin/games/ban")
+def admin_games_ban(
+    body: GameAdminBan,
+    raw: str = Header(alias="X-Telegram-Init-Data"),
+    db: Session = Depends(get_db),
+):
+    admin = admin_auth(raw, db)
+    banned = set_game_ban(
+        admin.telegram_id, body.user_id, body.banned, body.reason
+    )
+    return {"user_id": body.user_id, "banned": banned}
 
 
 web = Path(__file__).resolve().parents[1] / "webapp"
