@@ -1,5 +1,6 @@
 from io import BytesIO
 from pathlib import Path
+from hashlib import sha256
 
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
@@ -28,7 +29,7 @@ def money(value):
     return f"{float(value):,.2f}".replace(",", " ").rstrip("0").rstrip(".")
 
 
-def base_image():
+def base_image(variant="account"):
     image = Image.new("RGB", (WIDTH, HEIGHT), BG)
     glow = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     gd = ImageDraw.Draw(glow)
@@ -45,11 +46,33 @@ def base_image():
     draw.text((92, 119), "PERSONAL FINANCE INTERFACE", font=get_font(13, True), fill=MUTED)
     draw.line((92, 164, 986, 164), fill=(255, 255, 255, 28), width=2)
 
-    # Abstract architectural motif on the right.
-    draw.polygon([(790, 205), (982, 205), (982, 397), (888, 350)], fill=(200, 241, 105, 230))
-    draw.polygon([(790, 205), (888, 350), (790, 495), (694, 350)], fill=(68, 76, 57, 255))
-    draw.polygon([(888, 350), (982, 397), (888, 542), (790, 495)], fill=(38, 43, 34, 255))
-    draw.line((790, 205, 888, 350, 982, 397), fill=(242, 241, 232, 100), width=2)
+    # Each bot section/operation gets its own deterministic editorial artwork.
+    # The geometry changes by section key, so the bot no longer repeats one identical card.
+    seed = sha256(str(variant).encode("utf-8")).digest()
+    cx = 790 + seed[0] % 85
+    cy = 345 + seed[1] % 75
+    radius = 112 + seed[2] % 46
+    tilt = seed[3] % 34
+    if seed[4] % 3 == 0:
+        draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius),
+                     outline=(200, 241, 105, 230), width=12)
+        draw.ellipse((cx - radius + 28, cy - radius + 28, cx + radius - 28, cy + radius - 28),
+                     outline=(242, 241, 232, 90), width=3)
+        draw.polygon([(cx, cy-radius+12), (cx+radius-12, cy+tilt),
+                      (cx, cy+radius-12), (cx-radius+12, cy-tilt)],
+                     fill=(68, 76, 57, 210))
+    elif seed[4] % 3 == 1:
+        draw.polygon([(cx-radius, cy-radius//2), (cx+radius, cy-radius//2+tilt),
+                      (cx+radius//2, cy+radius), (cx-radius//2, cy+radius-tilt)],
+                     fill=(200, 241, 105, 220))
+        draw.line((cx-radius, cy-radius//2, cx, cy, cx+radius, cy-radius//2+tilt),
+                  fill=(242, 241, 232, 150), width=4)
+    else:
+        draw.polygon([(cx, cy-radius), (cx+radius, cy), (cx, cy+radius),
+                      (cx-radius, cy)], fill=(68, 76, 57, 255))
+        draw.polygon([(cx, cy-radius), (cx+radius, cy), (cx, cy+radius//3)],
+                     fill=(200, 241, 105, 230))
+        draw.line((cx-radius, cy, cx+radius, cy), fill=(242, 241, 232, 110), width=3)
     draw.text((92, 625), "TNC  •  INTERNAL ACCOUNT RECORD", font=get_font(14, True), fill=MUTED)
     return image
 
@@ -62,7 +85,7 @@ def finish(image):
 
 
 def create_section_image(section, title, subtitle, detail=""):
-    image = base_image()
+    image = base_image(section)
     draw = ImageDraw.Draw(image, "RGBA")
     draw.text((94, 218), str(section).upper()[:48], font=get_font(18, True), fill=LIME)
     draw.text((90, 285), str(title)[:28], font=get_font(51, True), fill=INK)
@@ -84,7 +107,7 @@ def create_transaction_image(amount, operation="deposit", username="TNC USER", o
         "refund": ("REFUND", "+", GOOD, "Funds returned to your account"),
     }
     title, sign, color, subtitle = styles.get(operation, styles["deposit"])
-    image = base_image()
+    image = base_image(operation)
     draw = ImageDraw.Draw(image, "RGBA")
     draw.text((94, 214), title, font=get_font(19, True), fill=color)
     draw.text((88, 285), f"{sign}{money(amount)}", font=get_font(78, True), fill=INK)
