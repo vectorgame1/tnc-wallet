@@ -157,6 +157,69 @@ class GameRoundTests(unittest.TestCase):
             {"admin_add", "admin_take", "game_ban", "game_unban"},
         )
 
+    def test_stars_payment_rejects_wrong_user_or_amount(self):
+        payload, expected_tokens = create_stars_order(self.user_id, 3)
+
+        with self.assertRaises(ValueError):
+            complete_stars_payment(
+                payload, self.user_id + 1, 3, "wrong-user-charge"
+            )
+        with self.assertRaises(ValueError):
+            complete_stars_payment(
+                payload, self.user_id, 4, "wrong-amount-charge"
+            )
+
+        with engine.connect() as conn:
+            balance = conn.execute(
+                text("""
+                    SELECT balance FROM tnc_game_wallets WHERE user_id=:uid
+                """),
+                {"uid": self.user_id},
+            ).scalar_one()
+            status = conn.execute(
+                text("""
+                    SELECT status FROM tnc_game_stars_orders WHERE payload=:payload
+                """),
+                {"payload": payload},
+            ).scalar_one()
+
+        self.assertEqual(balance, 1000)
+        self.assertEqual(status, "pending")
+        self.assertEqual(expected_tokens, 15000)
+
+    def test_stars_charge_id_cannot_credit_two_orders(self):
+        first_payload, _ = create_stars_order(self.user_id, 1)
+        second_payload, _ = create_stars_order(self.user_id, 1)
+        charge_id = "shared-charge-" + uuid.uuid4().hex
+
+        first = complete_stars_payment(
+            first_payload, self.user_id, 1, charge_id
+        )
+        self.assertFalse(first["already_processed"])
+
+        with self.assertRaises(Exception):
+            complete_stars_payment(
+                second_payload, self.user_id, 1, charge_id
+            )
+
+        with engine.connect() as conn:
+            balance = conn.execute(
+                text("""
+                    SELECT balance FROM tnc_game_wallets WHERE user_id=:uid
+                """),
+                {"uid": self.user_id},
+            ).scalar_one()
+            paid_orders = conn.execute(
+                text("""
+                    SELECT COUNT(*) FROM tnc_game_stars_orders
+                    WHERE user_id=:uid AND status='paid'
+                """),
+                {"uid": self.user_id},
+            ).scalar_one()
+
+        self.assertEqual(balance, 6000)
+        self.assertEqual(paid_orders, 1)
+
     def test_stars_payment_is_idempotent(self):
         payload, expected_tokens = create_stars_order(self.user_id, 2)
         charge_id = "test-charge-" + uuid.uuid4().hex
