@@ -26,6 +26,8 @@ jobs:
       - name: Import API and register routers
         run: python -c "import app.api; print('FastAPI import and router registration OK')"
       - name: Check Mini App JavaScript syntax
+      - name: Run GT wallet and game transaction tests
+        run: python -m unittest discover -s tests -v
         run: |
           python - <<'PY'
           import re
