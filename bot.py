@@ -75,15 +75,12 @@ def main_keyboard():
     """Полная навигация бота + отдельный безопасный запуск Mini App."""
     webapp_url = (getattr(settings, "WEBAPP_URL", "") or "").strip()
     rows = [
+        [KeyboardButton(text=MINI_APP, web_app=WebAppInfo(url=webapp_url))] if webapp_url.startswith("https://") else [KeyboardButton(text=MINI_APP)],
         [KeyboardButton(text=WALLET), KeyboardButton(text=TRANSFER)],
         [KeyboardButton(text=HISTORY), KeyboardButton(text=ACCOUNT)],
         [KeyboardButton(text=SHOP), KeyboardButton(text=GT_BALANCE)],
         [KeyboardButton(text=COMMUNITY)],
     ]
-    if webapp_url.startswith("https://"):
-        rows.append([KeyboardButton(text=MINI_APP, web_app=WebAppInfo(url=webapp_url))])
-    else:
-        rows.append([KeyboardButton(text=MINI_APP)])
     return ReplyKeyboardMarkup(
         keyboard=rows,
         resize_keyboard=True,
@@ -159,17 +156,18 @@ async def send_section(
         f"<b>{html.escape(title)}</b>\\n\\n{html.escape(subtitle)}"
     )
     try:
-        image = create_section_image(
-            section=section,
-            title=title,
-            subtitle=subtitle,
-            detail=detail,
-        )
+        # Use real editorial photography for bot section covers; the caption carries
+        # the live account-specific information and the wallet remains server-backed.
+        photo_by_section = {
+            "TNC ECOSYSTEM": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=85",
+            "TNC WALLET": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1280&q=85",
+            "TNC TRANSFER": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=85",
+            "TNC SUPPORT": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1280&q=85",
+            "TNC GAMES": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1280&q=85",
+        }
+        photo_url = photo_by_section.get(section, photo_by_section["TNC ECOSYSTEM"])
         await message.answer_photo(
-            photo=BufferedInputFile(
-                image.getvalue(),
-                filename="tnc-section.png",
-            ),
+            photo=photo_url,
             caption=safe_caption,
             reply_markup=main_keyboard(),
             parse_mode="HTML",
@@ -193,18 +191,21 @@ async def send_operation_image(
     caption: str = "",
 ):
     try:
-        image = create_transaction_image(
-            amount=amount,
-            operation=operation,
-            username=username,
-            operation_id=operation_id,
-        )
+        # Real photo covers for transaction notifications. Exact amounts and
+        # operation references remain in the signed server-generated caption.
+        photo_by_operation = {
+            "deposit": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1280&q=85",
+            "withdraw": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=85",
+            "received": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1280&q=85",
+            "sent": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=85",
+            "bonus": "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1280&q=85",
+            "reward": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1280&q=85",
+            "refund": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1280&q=85",
+        }
+        photo_url = photo_by_operation.get(operation, photo_by_operation["deposit"])
         await bot.send_photo(
             chat_id=chat_id,
-            photo=BufferedInputFile(
-                image.getvalue(),
-                filename="tnc-operation.png",
-            ),
+            photo=photo_url,
             caption=caption,
             parse_mode="HTML",
         )
