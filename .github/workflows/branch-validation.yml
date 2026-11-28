@@ -1,0 +1,38 @@
+name: Branch validation
+
+on:
+  push:
+    branches:
+      - tnc-rebuild
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compile Python sources
+        run: python -m compileall -q app bot.py
+      - name: Check Mini App JavaScript syntax
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          html = Path("webapp/index.html").read_text(encoding="utf-8-sig")
+          scripts = re.findall(r"<script\\b([^>]*)>(.*?)</script>", html, re.I | re.S)
+          inline = [body for attrs, body in scripts if not re.search(r"\\bsrc\\s*=", attrs, re.I)]
+          if not inline:
+              raise SystemExit("No inline application script found")
+          for index, body in enumerate(inline):
+              Path(f"/tmp/tnc-inline-{index}.js").write_text(body, encoding="utf-8")
+          print(f"Prepared {len(inline)} inline script(s)")
+          PY
+          for file in /tmp/tnc-inline-*.js; do node --check "$file"; done
