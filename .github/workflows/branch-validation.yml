@@ -21,6 +21,10 @@ jobs:
           node-version: "22"
       - name: Compile Python sources
         run: python -m compileall -q app bot.py
+      - name: Install application dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Import API and register routers
+        run: python -c "import app.api; print('FastAPI import and router registration OK')"
       - name: Check Mini App JavaScript syntax
         run: |
           python - <<'PY'
