@@ -41,3 +41,10 @@ Telegram требует HTTPS URL. Размести API и webapp на HTTPS-х�
 
 ## Важно
 TNC Coin здесь — внутренняя запись в базе, а не блокчейн-криптовалюта. Рыночные котировки BTC/ETH и учебный трейдинг не являются котировками TNC и не используют реальный брокерский счёт. Перед включением игровых функций на публичном сервисе необходимы тестирование, аудит безопасности, резервное копирование, лимиты, антифрод и юридическая проверка применимых правил. Изменения в ветке tnc-rebuild ещё не означают обновление production/Render. Не удаляй и не пересоздавай рабочую базу данных.
+
+## Render / production notes
+- The FastAPI lifespan starts Telegram long polling automatically when `BOT_TOKEN` is set. Run this service as a single instance with one worker; do not start a second bot polling process against the same token.
+- Do not enable multiple Render instances or multiple Uvicorn workers until bot polling is separated into its own service and the API-side polling startup is disabled.
+- Configure `BOT_TOKEN`, `DATABASE_URL` (managed PostgreSQL), `WEBAPP_URL`, and `ADMIN_IDS` in the Render environment. Keep secrets only in Render environment settings, never in Git.
+- Keep the existing PostgreSQL database. Deployments must use additive migrations only; take a database backup before production changes.
+- Check `/health`, Telegram bot polling logs, Mini App authorization, wallet transfers, and Stars payment confirmation after deployment. CI passing does not replace a live Telegram/Render smoke test.
