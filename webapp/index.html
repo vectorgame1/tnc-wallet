@@ -150,6 +150,33 @@ button:focus-visible,input:focus-visible{outline-color:#ff3548!important}
 .logo,.brand,.accent,.featureicon{color:#ff3548!important}
 .progress,.progress>span,.bar-fill{background:linear-gradient(90deg,#a9001c,#ff3548)!important}
 @media(prefers-reduced-motion:no-preference){.btn,.nav button,.mobilebar button,.card{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.card:hover{border-color:#ff354866!important;box-shadow:0 12px 38px #ff102a12}.btn:hover{transform:translateY(-1px)}}
+
+/* REDLINE: eliminate legacy blue, cyan and gold visual remnants across every screen */
+:root{--gold:#ff2638!important;--gold2:#ff9aa3!important;--green:#ff5361!important;--red:#ff3548!important;--line:#302027!important;--muted:#969097!important}
+.crypto-banner,.market-strip,.trade-account,.trade-warning,.trade-orb,.trade-orb-core,.assistant-orb{background-color:#10090c!important;border-color:#ff354855!important;color:#f5f3f4!important}
+.trade-account{background:radial-gradient(circle at 90% 5%,#ff263822,transparent 38%),linear-gradient(145deg,#1b1015,#101014)!important}
+.trade-orb{box-shadow:0 0 35px #ff263820,inset 0 0 25px #ff263812!important;border-color:#ff354855!important}
+.trade-orb:before,.trade-orb:after,.assistant-orb:before,.assistant-orb:after{border-color:#ff536177!important}
+.trade-orb-core{background:radial-gradient(circle at 35% 25%,#ffb8c0,#c21d34 55%,#30070f)!important;color:#fff!important}
+.trade-orb i,.assistant-orb span{background:#ffb8c0!important;box-shadow:0 0 12px #ff5361!important}
+.trade-orb b{background:#ff2638!important;box-shadow:0 0 12px #ff2638!important}
+.trade-tabs button.active.buy{background:#50101c!important;color:#ffb8c0!important}
+.trade-tabs button.active:not(.buy){background:#50101c!important;color:#ffb8c0!important}
+.trade-presets button:hover,.trade-select:focus{border-color:#ff5361!important}
+.trade-presets button,.trade-select{background:#10090c!important;color:#f5f3f4!important}
+.bubble.user{background:linear-gradient(130deg,#50101c,#211015)!important;border-color:#ff536155!important}
+.bubble.bot{background:#151216!important}
+.suggestions button{color:#ffb8c0!important;border-color:#ff536144!important;background:#ff26380d!important}
+.ai-status{color:#ff9aa3!important;border-color:#ff536155!important}
+.assistant-orb{background:radial-gradient(circle at 32% 27%,#ffd9dc,#ff3548 35%,#30070f 72%)!important;box-shadow:0 0 28px #ff354855,inset -6px -8px 15px #02070c!important}
+.game-animation{border-color:#54212a!important;background:radial-gradient(circle at 50% 35%,#38101a 0,#100b0e 70%)!important}
+.game-animation-label{color:#ff9aa3!important}
+.game-animation.active{border-color:#ff3548!important;box-shadow:inset 0 0 35px #ff263818,0 0 24px #ff263812!important}
+.game-animation.settled{border-color:#ff5361!important;background:radial-gradient(circle at 50% 35%,#49121d,#100b0e 70%)!important}
+.slot-reels b{background:linear-gradient(145deg,#ffd9dc,#bd1e36)!important;color:#18070b!important}
+.mine-grid i{background:#39121b!important;border-color:#ff5361!important}
+@keyframes minePulse{to{background:#a51d32;box-shadow:0 0 12px #ff5361}}
+@keyframes orbSpin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body data-page="home">
