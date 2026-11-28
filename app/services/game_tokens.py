@@ -38,6 +38,8 @@ def init_game_tables():
             created_at BIGINT NOT NULL
         )
         """,
+        "CREATE INDEX IF NOT EXISTS idx_tnc_game_transactions_user_created ON tnc_game_transactions (user_id, created_at DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_tnc_game_stars_orders_user_created ON tnc_game_stars_orders (user_id, created_at DESC)",
     ]
     with engine.begin() as conn:
         for statement in statements:
