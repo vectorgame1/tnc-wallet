@@ -97,7 +97,7 @@ class ShopInvoice(BaseModel):
 
 
 class GameStarsInvoice(BaseModel):
-    stars: int = Field(ge=1)
+    stars: int = Field(ge=1, le=10000)
 
 
 @app.get("/")
