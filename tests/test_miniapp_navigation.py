@@ -56,6 +56,9 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertIn("def main_keyboard():", bot_source)
         self.assertIn("WebAppInfo(url=webapp_url)", bot_source)
         self.assertIn("def show_home(", bot_source)
+        self.assertIn("photo_by_section", bot_source)
+        self.assertIn("images.unsplash.com", bot_source)
+        self.assertIn("photo_by_operation", bot_source)
 
 
 if __name__ == "__main__":
