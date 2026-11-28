@@ -159,11 +159,11 @@ async def send_section(
         # Use real editorial photography for bot section covers; the caption carries
         # the live account-specific information and the wallet remains server-backed.
         photo_by_section = {
-            "TNC ECOSYSTEM": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=85",
-            "TNC WALLET": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1280&q=85",
-            "TNC TRANSFER": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=85",
-            "TNC SUPPORT": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1280&q=85",
-            "TNC GAMES": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1280&q=85",
+            "TNC ECOSYSTEM": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
+            "TNC WALLET": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1280&q=90",
+            "TNC TRANSFER": "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1280&q=90",
+            "TNC SUPPORT": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1280&q=90",
+            "TNC GAMES": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1280&q=90",
         }
         photo_url = photo_by_section.get(section, photo_by_section["TNC ECOSYSTEM"])
         await message.answer_photo(
@@ -194,13 +194,13 @@ async def send_operation_image(
         # Real photo covers for transaction notifications. Exact amounts and
         # operation references remain in the signed server-generated caption.
         photo_by_operation = {
-            "deposit": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1280&q=85",
-            "withdraw": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=85",
-            "received": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1280&q=85",
-            "sent": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=85",
-            "bonus": "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1280&q=85",
-            "reward": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1280&q=85",
-            "refund": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1280&q=85",
+            "deposit": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1280&q=90",
+            "withdraw": "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1280&q=90",
+            "received": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1280&q=90",
+            "sent": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1280&q=90",
+            "bonus": "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1280&q=90",
+            "reward": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1280&q=90",
+            "refund": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1280&q=90",
         }
         photo_url = photo_by_operation.get(operation, photo_by_operation["deposit"])
         await bot.send_photo(
@@ -225,25 +225,21 @@ async def send_operation_image(
 async def show_home(message: Message, greeting=True):
     name = html.escape(message.from_user.first_name or "User")
     caption = (
-        f"<b>{'Добро пожаловать в TNC, ' + name if greeting else 'TNC ECOSYSTEM'}</b>\n\n"
-        "<b>ТВОЙ АККАУНТ</b>\n"
-        "• <b>Кошелёк TNC</b> — внутренний баланс и доступные средства.\n"
-        "• <b>Перевести TNC</b> — перевод другому пользователю по Telegram ID с подтверждением.\n"
-        "• <b>История операций</b> — входящие, исходящие и пополнения.\n"
-        "• <b>Мой аккаунт</b> — сведения о Telegram-профиле и состоянии аккаунта.\n\n"
+        f"<b>{'Добро пожаловать, ' + name + '.' if greeting else 'TNC / ЛИЧНЫЙ КАБИНЕТ'}</b>\n"
+        "<i>Ваш аккаунт. Ваш контроль.</i>\n\n"
+        "<b>ФИНАНСЫ</b>\n"
+        "Кошелёк · переводы · история операций · профиль.\n\n"
         "<b>ЭКОСИСТЕМА</b>\n"
-        "• <b>Магазин TNC</b> — пополнение через Telegram Stars.\n"
-        "• <b>Баланс GT</b> — отдельные игровые очки; GT не конвертируются в TNC и не выводятся.\n"
-        "• <b>Реферальная ссылка</b> — персональная ссылка приглашения.\n"
-        "• <b>Открыть приложение</b> — полный интерфейс TNC Mini App.\n\n"
-        "Выбери нужный раздел на клавиатуре. Для возврата сюда отправь /menu.\n"
-        "<i>TNC — внутренний учётный баланс экосистемы, не обещание блокчейн-актива или денежного вывода.</i>"
+        "Пополнение через Telegram Stars · игровые баллы GT · реферальная программа.\n\n"
+        "Нажмите <b>«Открыть приложение»</b>, чтобы перейти в полный интерфейс TNC. "
+        "Либо выберите нужное действие в меню ниже.\n\n"
+        "<i>TNC — внутренний учётный баланс. GT — отдельные игровые баллы; они не конвертируются в TNC и не выводятся.</i>"
     )
     if greeting:
         await send_section(
-            message, "TNC ECOSYSTEM", "WELCOME TO TNC",
-            "YOUR ACCOUNT. YOUR ECOSYSTEM.",
-            "WALLET  •  TRANSFERS  •  ACCOUNT", caption,
+            message, "TNC ECOSYSTEM", "YOUR TNC SPACE",
+            "ACCOUNT · WALLET · ACTIVITY",
+            "ONE ACCOUNT / ONE PLACE", caption,
         )
     else:
         await message.answer(caption, reply_markup=main_keyboard(), parse_mode="HTML")
