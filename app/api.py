@@ -10,10 +10,11 @@ from aiogram.types import LabeledPrice
 from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.database.connection import init_database, get_db
+from app.database.connection import init_database, get_db, engine
 from app.core.security import verify
 from app.services.accounts import get_or_create_user
 from app.services.wallet import balance, fmt, history, send
@@ -123,7 +124,20 @@ def root():
 
 @app.get("/health")
 def health():
+    # Liveness only: the process is running.
     return {"status": "ok"}
+
+
+@app.get("/ready")
+def readiness():
+    # Readiness: verify that the configured database can serve requests.
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+    except Exception:
+        logging.getLogger("tnc.api").exception("Database readiness check failed")
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    return {"status": "ready", "database": "ok"}
 
 
 @app.get("/api/profile")
