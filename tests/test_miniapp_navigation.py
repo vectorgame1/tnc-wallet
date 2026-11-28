@@ -14,6 +14,16 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertTrue(navigation)
         self.assertEqual(navigation - pages, set())
 
+    def test_all_product_sections_are_recomposed(self):
+        for page in ("home", "wallet", "transfer", "history", "market", "trading",
+                     "assistant", "shop", "games", "rewards", "admin", "profile"):
+            self.assertIn(f'id="page-{page}"', self.html)
+        self.assertIn('id="mobile-more-menu"', self.html)
+        self.assertIn('data-page="home"', self.html)
+        self.assertIn('id="connection-label"', self.html)
+        self.assertIn('id="home-photo"', self.html)
+        self.assertNotIn("img.src=user.photo_url", self.html)
+
     def test_tnc_shop_uses_existing_server_invoice_endpoint(self):
         self.assertIn('id="page-shop"', self.html)
         self.assertIn("'/api/shop/invoice'", self.html)
@@ -61,6 +71,14 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertIn('id="amount"', self.html)
         self.assertIn('id="history-search"', self.html)
         self.assertIn('id="shop-custom-buy"', self.html)
+        for required_id in ("balance", "wallet-balance", "receiver", "amount", "send",
+                            "history-search", "market-btc-main", "trade-asset", "assistant-form",
+                            "shop-custom-amount", "gt-balance", "weekly-leaderboard",
+                            "admin-tnc-credit", "profile-id"):
+            self.assertIn(f'id="{required_id}"', self.html)
+        self.assertIn("Ваш счёт.", self.html)
+        self.assertIn("QUICK ACCESS", self.html)
+        self.assertNotIn("img.src=user.photo_url", self.html)
 
     def test_new_mobile_more_drawer_keeps_secondary_pages_reachable(self):
         self.assertIn('id="mobile-more-menu"', self.html)
