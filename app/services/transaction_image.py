@@ -5,13 +5,13 @@ from hashlib import sha256
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 WIDTH, HEIGHT = 1080, 720
-BG = (17, 19, 16)
-PANEL = (27, 30, 25)
-INK = (242, 241, 232)
-MUTED = (157, 162, 145)
-LIME = (200, 241, 105)
-GOOD = (184, 233, 134)
-BAD = (255, 140, 130)
+BG = (7, 13, 24)
+PANEL = (13, 25, 43)
+INK = (239, 246, 255)
+MUTED = (137, 160, 190)
+LIME = (139, 190, 255)
+GOOD = (104, 220, 180)
+BAD = (255, 128, 145)
 
 
 def get_font(size, bold=False):
@@ -33,8 +33,8 @@ def base_image(variant="account"):
     image = Image.new("RGB", (WIDTH, HEIGHT), BG)
     glow = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     gd = ImageDraw.Draw(glow)
-    gd.ellipse((620, -300, 1320, 400), fill=(200, 241, 105, 30))
-    gd.ellipse((-300, 430, 420, 1080), fill=(200, 241, 105, 15))
+    gd.ellipse((620, -300, 1320, 400), fill=(104, 165, 244, 42))
+    gd.ellipse((-300, 430, 420, 1080), fill=(48, 111, 190, 27))
     glow = glow.filter(ImageFilter.GaussianBlur(100))
     image = Image.alpha_composite(image.convert("RGBA"), glow)
     draw = ImageDraw.Draw(image, "RGBA")
@@ -42,38 +42,25 @@ def base_image(variant="account"):
     # Editorial frame: no coin, neon outline, or generic crypto badge.
     draw.rounded_rectangle((38, 38, 1042, 682), radius=30, fill=(*PANEL, 248), outline=(255, 255, 255, 18), width=2)
     draw.rectangle((38, 38, 50, 682), fill=(*LIME, 255))
-    draw.text((92, 83), "TNC  /  ACCOUNT SYSTEMS", font=get_font(21, True), fill=INK)
-    draw.text((92, 119), "PERSONAL FINANCE INTERFACE", font=get_font(13, True), fill=MUTED)
+    draw.text((92, 83), "TNC  /  PRIVATE ACCOUNT", font=get_font(21, True), fill=INK)
+    draw.text((92, 119), "DIGITAL FINANCE INTERFACE", font=get_font(13, True), fill=MUTED)
     draw.line((92, 164, 986, 164), fill=(255, 255, 255, 28), width=2)
 
-    # Each bot section/operation gets its own deterministic editorial artwork.
-    # The geometry changes by section key, so the bot no longer repeats one identical card.
+    # Cinematic glass architecture instead of the previous flat geometric emblem.
     seed = sha256(str(variant).encode("utf-8")).digest()
-    cx = 790 + seed[0] % 85
-    cy = 345 + seed[1] % 75
-    radius = 112 + seed[2] % 46
-    tilt = seed[3] % 34
-    if seed[4] % 3 == 0:
-        draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius),
-                     outline=(200, 241, 105, 230), width=12)
-        draw.ellipse((cx - radius + 28, cy - radius + 28, cx + radius - 28, cy + radius - 28),
-                     outline=(242, 241, 232, 90), width=3)
-        draw.polygon([(cx, cy-radius+12), (cx+radius-12, cy+tilt),
-                      (cx, cy+radius-12), (cx-radius+12, cy-tilt)],
-                     fill=(68, 76, 57, 210))
-    elif seed[4] % 3 == 1:
-        draw.polygon([(cx-radius, cy-radius//2), (cx+radius, cy-radius//2+tilt),
-                      (cx+radius//2, cy+radius), (cx-radius//2, cy+radius-tilt)],
-                     fill=(200, 241, 105, 220))
-        draw.line((cx-radius, cy-radius//2, cx, cy, cx+radius, cy-radius//2+tilt),
-                  fill=(242, 241, 232, 150), width=4)
-    else:
-        draw.polygon([(cx, cy-radius), (cx+radius, cy), (cx, cy+radius),
-                      (cx-radius, cy)], fill=(68, 76, 57, 255))
-        draw.polygon([(cx, cy-radius), (cx+radius, cy), (cx, cy+radius//3)],
-                     fill=(200, 241, 105, 230))
-        draw.line((cx-radius, cy, cx+radius, cy), fill=(242, 241, 232, 110), width=3)
-    draw.text((92, 625), "TNC  •  INTERNAL ACCOUNT RECORD", font=get_font(14, True), fill=MUTED)
+    slab = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(slab)
+    shift = seed[0] % 34
+    points = [(735+shift, 250), (948, 294+shift), (1004, 542), (790-shift, 590), (700, 465)]
+    sd.polygon([(x+15,y+20) for x,y in points], fill=(0,0,0,100))
+    sd.polygon(points, fill=(110,157,210,42), outline=(190,220,255,125))
+    sd.line([points[0],points[1],points[2]], fill=(224,239,255,190), width=5)
+    sd.line([points[2],points[3],points[4]], fill=(91,145,210,110), width=3)
+    sd.polygon([(770,284),(931,319),(965,500),(812,537)], fill=(185,216,252,22))
+    slab = slab.filter(ImageFilter.GaussianBlur(1.2))
+    image = Image.alpha_composite(image, slab)
+    draw = ImageDraw.Draw(image, "RGBA")
+    draw.text((92, 625), "TNC  /  INTERNAL ACCOUNT RECORD", font=get_font(14, True), fill=MUTED)
     return image
 
 
