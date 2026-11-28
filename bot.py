@@ -11,6 +11,9 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import (
     Message,
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
     KeyboardButton,
     ReplyKeyboardMarkup,
     BufferedInputFile,
@@ -72,21 +75,33 @@ class TransferFlow(StatesGroup):
 
 
 def main_keyboard():
-    """Полная навигация бота + отдельный безопасный запуск Mini App."""
+    """Inline command center: Mini App first, account actions grouped by intent."""
     webapp_url = (getattr(settings, "WEBAPP_URL", "") or "").strip()
-    rows = [
-        [KeyboardButton(text=MINI_APP, web_app=WebAppInfo(url=webapp_url))] if webapp_url.startswith("https://") else [KeyboardButton(text=MINI_APP)],
-        [KeyboardButton(text=WALLET), KeyboardButton(text=TRANSFER)],
-        [KeyboardButton(text=HISTORY), KeyboardButton(text=ACCOUNT)],
-        [KeyboardButton(text=SHOP), KeyboardButton(text=GT_BALANCE)],
-        [KeyboardButton(text=COMMUNITY)],
-    ]
-    return ReplyKeyboardMarkup(
-        keyboard=rows,
-        resize_keyboard=True,
-        is_persistent=True,
-        input_field_placeholder="Выбери раздел TNC",
-    )
+    rows = []
+    if webapp_url.startswith("https://"):
+        rows.append([InlineKeyboardButton(
+            text="Открыть TNC",
+            web_app=WebAppInfo(url=webapp_url),
+        )])
+    rows.extend([
+        [
+            InlineKeyboardButton(text="Кошелёк", callback_data="menu:wallet"),
+            InlineKeyboardButton(text="Перевести", callback_data="menu:transfer"),
+        ],
+        [
+            InlineKeyboardButton(text="Операции", callback_data="menu:history"),
+            InlineKeyboardButton(text="Профиль", callback_data="menu:account"),
+        ],
+        [
+            InlineKeyboardButton(text="Пополнить TNC", callback_data="menu:shop"),
+            InlineKeyboardButton(text="Игры GT", callback_data="menu:games"),
+        ],
+        [
+            InlineKeyboardButton(text="Пригласить", callback_data="menu:community"),
+            InlineKeyboardButton(text="Помощь", callback_data="menu:help"),
+        ],
+    ])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 def cancel_keyboard():
     return ReplyKeyboardMarkup(
@@ -248,6 +263,46 @@ async def show_home(message: Message, greeting=True):
 # --------------------------------------------------
 # START AND COMMANDS
 # --------------------------------------------------
+
+@dp.callback_query(F.data.startswith("menu:"))
+async def menu_callback(callback: CallbackQuery, state: FSMContext):
+    """Route inline command-center actions through the same validated handlers."""
+    await callback.answer()
+    message = callback.message
+    if message is None:
+        return
+
+    action = (callback.data or "").split(":", 1)[1]
+    if action == "transfer":
+        await state.clear()
+        await transfer_start(message, state)
+    elif action == "wallet":
+        await state.clear()
+        await wallet_handler(message)
+    elif action == "history":
+        await state.clear()
+        await history_handler(message)
+    elif action == "account":
+        await state.clear()
+        await account_handler(message)
+    elif action == "shop":
+        await state.clear()
+        await tnc_shop_handler(message)
+    elif action == "community":
+        await state.clear()
+        await community_handler(message)
+    elif action == "games":
+        await state.clear()
+        await message.answer(
+            "<b>Игры GT</b>\n\nОткройте Mini App, чтобы играть в Crash, Dice, Slots и Mines. "
+            "GT — отдельные игровые баллы: они не конвертируются в TNC и не выводятся.",
+            reply_markup=main_keyboard(),
+            parse_mode="HTML",
+        )
+    elif action == "help":
+        await state.clear()
+        await help_handler(message)
+
 
 @dp.message(CommandStart())
 async def start_handler(message: Message, state: FSMContext):
