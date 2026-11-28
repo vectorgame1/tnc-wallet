@@ -14,14 +14,14 @@ from app.services.transaction_image import (
 
 
 class TelegramImageThemeTests(unittest.TestCase):
-    def test_editorial_graphite_lime_palette_is_applied(self):
-        self.assertEqual(BG, (17, 19, 16))
-        self.assertEqual(PANEL, (27, 30, 25))
-        self.assertEqual(INK, (242, 241, 232))
-        self.assertEqual(MUTED, (157, 162, 145))
-        self.assertEqual(LIME, (200, 241, 105))
-        self.assertEqual(GOOD, (184, 233, 134))
-        self.assertEqual(BAD, (255, 140, 130))
+    def test_midnight_ice_palette_is_applied(self):
+        self.assertEqual(BG, (7, 13, 24))
+        self.assertEqual(PANEL, (13, 25, 43))
+        self.assertEqual(INK, (239, 246, 255))
+        self.assertEqual(MUTED, (137, 160, 190))
+        self.assertEqual(LIME, (139, 190, 255))
+        self.assertEqual(GOOD, (104, 220, 180))
+        self.assertEqual(BAD, (255, 128, 145))
 
     def test_section_card_generates_valid_png(self):
         image = create_section_image("TNC WALLET", "YOUR WALLET", "Balance and transactions")
