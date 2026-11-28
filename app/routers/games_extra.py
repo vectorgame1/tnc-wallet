@@ -30,6 +30,18 @@ def prepare():
     init_admin_tables()
     with engine.begin() as conn:
         conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS tnc_crash_rounds (
+                id VARCHAR(36) PRIMARY KEY,
+                user_id BIGINT NOT NULL,
+                stake BIGINT NOT NULL,
+                target_multiplier INTEGER NOT NULL,
+                crash_multiplier INTEGER NOT NULL,
+                won BOOLEAN NOT NULL,
+                payout BIGINT NOT NULL,
+                created_at BIGINT NOT NULL
+            )
+        """))
+        conn.execute(text("""
             CREATE TABLE IF NOT EXISTS tnc_extra_game_rounds (
                 id VARCHAR(36) PRIMARY KEY,
                 user_id BIGINT NOT NULL,
