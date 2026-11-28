@@ -300,7 +300,7 @@ async def games_stars_invoice(
         )
         raise HTTPException(
             502,
-            "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ СЃС‡С‘С‚ Telegram Stars.",
+            "Не удалось создать счёт Telegram Stars.",
         )
     finally:
         await bot.session.close()
