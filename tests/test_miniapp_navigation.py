@@ -50,6 +50,21 @@ class MiniAppNavigationTests(unittest.TestCase):
         for page in ("home", "wallet", "transfer", "history", "market", "trading", "assistant", "shop", "games", "rewards", "profile"):
             self.assertIn(f'data-page="{page}"', self.html)
 
+    def test_finance_screens_have_distinct_editorial_compositions(self):
+        self.assertIn('class="wallet-layout"', self.html)
+        self.assertIn('class="transfer-layout"', self.html)
+        self.assertIn('class="history-hero"', self.html)
+        self.assertIn('class="shop-masthead"', self.html)
+        self.assertIn('id="receiver"', self.html)
+        self.assertIn('id="amount"', self.html)
+        self.assertIn('id="history-search"', self.html)
+        self.assertIn('id="shop-custom-buy"', self.html)
+
+    def test_new_mobile_more_drawer_keeps_secondary_pages_reachable(self):
+        self.assertIn('id="mobile-more-menu"', self.html)
+        self.assertIn("$('mobile-more')?.addEventListener", self.html)
+        self.assertIn("$('mobile-more-menu')?.classList.remove('open')", self.html)
+
     def test_bot_keyboard_keeps_full_menu_and_single_miniapp_entry(self):
         bot_source = (Path(__file__).resolve().parents[1] / "bot.py").read_text(encoding="utf-8-sig")
         for label in ("Кошелёк TNC", "Перевести TNC", "История операций", "Мой аккаунт",
