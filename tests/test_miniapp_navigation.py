@@ -33,6 +33,19 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertNotIn("TNC REDLINE visual system", self.html)
         self.assertNotIn("--gold:#ff2638", self.html)
 
+    def test_home_uses_new_editorial_hero_instead_of_crypto_orbit(self):
+        self.assertIn('class="brand-hero home-only"', self.html)
+        self.assertIn("Без лишнего шума.", self.html)
+        self.assertIn(".brand-hero-art", self.html)
+        self.assertNotIn('class="crypto-orbit"', self.html)
+        self.assertNotIn("coin-core", self.html)
+
+    def test_mobile_navigation_is_swipeable_and_keeps_all_sections(self):
+        self.assertIn(".mobilebar{display:flex", self.html)
+        self.assertIn("overflow-x:auto", self.html)
+        for page in ("home", "wallet", "transfer", "history", "market", "trading", "assistant", "shop", "games", "rewards", "profile"):
+            self.assertIn(f'data-page="{page}"', self.html)
+
 
 if __name__ == "__main__":
     unittest.main()
