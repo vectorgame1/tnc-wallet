@@ -233,7 +233,7 @@ class GameRoundTests(unittest.TestCase):
                 {"created": int(time.time()) - 3601, "payload": payload},
             )
 
-        with self.assertRaisesRegex(ValueError, "Срок действия заказа истёк"):
+        with self.assertRaisesRegex(ValueError, "Заказ просрочен или имеет некорректную дату"):
             complete_stars_payment(
                 payload, self.user_id, 1, "expired-" + uuid.uuid4().hex
             )
