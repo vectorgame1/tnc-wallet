@@ -2,6 +2,7 @@
 import uuid
 
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from app.database.connection import engine
 
 GT_PER_STAR = 5000
@@ -118,7 +119,7 @@ def check_stars_order(payload, user_id, stars):
         int(row["user_id"]) == int(user_id)
         and int(row["stars"]) == int(stars)
         and row["status"] == "pending"
-        and int(time.time()) - int(row["created_at"]) <= 3600
+        and int(time.time()) - 3600 <= int(row["created_at"]) <= int(time.time()) + 60
     )
 
 
@@ -130,10 +131,13 @@ def complete_stars_payment(payload, user_id, stars, charge_id):
     init_game_tables()
     user_id = int(user_id)
     stars = int(stars)
+    if not charge_id or len(str(charge_id)) > 255:
+        raise ValueError("Некорректный идентификатор платежа.")
     charge_id = str(charge_id)
     now = int(time.time())
 
-    with engine.begin() as conn:
+    try:
+        with engine.begin() as conn:
         order = conn.execute(
             text("""
                 SELECT user_id, stars, tokens, status, charge_id, created_at
@@ -159,8 +163,9 @@ def complete_stars_payment(payload, user_id, stars, charge_id):
 
         if order["status"] != "pending":
             raise ValueError("Заказ недоступен для оплаты.")
-        if now - int(order["created_at"]) > 3600:
-            raise ValueError("Срок действия заказа истёк. Создай новый счёт.")
+        created_at = int(order["created_at"])
+        if created_at < now - 3600 or created_at > now + 60:
+            raise ValueError("Заказ просрочен или имеет некорректную дату. Создай новый счёт.")
 
         tokens = int(order["tokens"])
 
@@ -211,7 +216,12 @@ def complete_stars_payment(payload, user_id, stars, charge_id):
             },
         )
 
-    return {"already_processed": False, "tokens": tokens}
+        return {"already_processed": False, "tokens": tokens}
+    except IntegrityError as error:
+        # The unique charge_id constraint prevents one Telegram payment from
+        # crediting multiple orders. engine.begin rolls back the failed transaction.
+        raise ValueError("Этот Telegram-платёж уже привязан к другому заказу.") from error
+
 
 def init_admin_tables():
     init_game_tables()
