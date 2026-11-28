@@ -26,16 +26,16 @@ class MiniAppNavigationTests(unittest.TestCase):
         self.assertIn("не более 6 знаков после запятой", self.html)
         self.assertIn("Завершённый перевод нельзя отменить.", self.html)
 
-    def test_graphite_lime_theme_replaces_legacy_redline(self):
-        self.assertIn("--bg:#10110f", self.html)
-        self.assertIn("--accent:#c8f169", self.html)
-        self.assertIn("TNC — Web3 Digital Ecosystem", self.html)
+    def test_midnight_ice_theme_replaces_previous_visual_system(self):
+        self.assertIn("--bg:#080b12", self.html)
+        self.assertIn("--accent:#79a9ff", self.html)
+        self.assertIn("TNC — Private Finance", self.html)
         self.assertNotIn("TNC REDLINE visual system", self.html)
         self.assertNotIn("--gold:#ff2638", self.html)
 
     def test_home_uses_new_editorial_hero_instead_of_crypto_orbit(self):
         self.assertIn('class="brand-hero home-only"', self.html)
-        self.assertIn("Без лишнего шума.", self.html)
+        self.assertIn("Под контролем.", self.html)
         self.assertIn(".brand-hero-art", self.html)
         self.assertNotIn('class="crypto-orbit"', self.html)
         self.assertNotIn("coin-core", self.html)
