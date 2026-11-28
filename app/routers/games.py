@@ -84,7 +84,7 @@ def crash_play(data: CrashPlay, user_id: int = Depends(current_player)):
 
     # Crash-point distribution: P(crash >= x) ~= 0.99 / x, giving ~99% RTP.
     # Multiplier is stored in hundredths; target remains capped at 10.00x.
-    crash_multiplier = max(100, 9900 // (secrets.randbelow(10000) + 1))
+    crash_multiplier = max(100, 990000 // (secrets.randbelow(10000) + 1))
     won = crash_multiplier >= target
     payout = data.stake * target // 100 if won else 0
     now = int(time.time())
