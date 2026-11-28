@@ -10,6 +10,9 @@ from app.services.game_tokens import (
     complete_stars_payment,
     create_stars_order,
     init_game_tables,
+    admin_adjust_tokens,
+    set_game_ban,
+    is_game_banned,
 )
 
 
@@ -32,6 +35,8 @@ class GameRoundTests(unittest.TestCase):
             for table in (
                 "tnc_game_transactions",
                 "tnc_game_stars_orders",
+                "tnc_game_admin_log",
+                "tnc_game_bans",
                 "tnc_extra_game_rounds",
                 "tnc_crash_rounds",
                 "tnc_game_wallets",
@@ -119,6 +124,38 @@ class GameRoundTests(unittest.TestCase):
             ).scalar_one()
         self.assertEqual(balance, 50)
         self.assertEqual(rounds, 0)
+
+    def test_admin_adjustments_and_game_bans_are_audited(self):
+        balance = admin_adjust_tokens(
+            123456, self.user_id, 200, "admin_add", "test credit"
+        )
+        self.assertEqual(balance, 1200)
+
+        balance = admin_adjust_tokens(
+            123456, self.user_id, 100, "admin_take", "test debit"
+        )
+        self.assertEqual(balance, 1100)
+
+        self.assertTrue(set_game_ban(
+            123456, self.user_id, True, "test restriction"
+        ))
+        self.assertTrue(is_game_banned(self.user_id))
+        self.assertFalse(set_game_ban(
+            123456, self.user_id, False, "test unban"
+        ))
+
+        with engine.connect() as conn:
+            logs = conn.execute(
+                text("""
+                    SELECT action FROM tnc_game_admin_log
+                    WHERE user_id=:uid ORDER BY created_at
+                """),
+                {"uid": self.user_id},
+            ).scalars().all()
+        self.assertEqual(
+            set(logs),
+            {"admin_add", "admin_take", "game_ban", "game_unban"},
+        )
 
     def test_stars_payment_is_idempotent(self):
         payload, expected_tokens = create_stars_order(self.user_id, 2)
