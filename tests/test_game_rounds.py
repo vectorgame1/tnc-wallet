@@ -1,5 +1,6 @@
 import unittest
 import uuid
+import time
 
 from fastapi import HTTPException
 from sqlalchemy import text
@@ -219,6 +220,35 @@ class GameRoundTests(unittest.TestCase):
 
         self.assertEqual(balance, 6000)
         self.assertEqual(paid_orders, 1)
+
+    def test_stars_payment_rejects_expired_order(self):
+        payload, _ = create_stars_order(self.user_id, 1)
+        with engine.begin() as conn:
+            conn.execute(
+                text("""
+                    UPDATE tnc_game_stars_orders
+                    SET created_at=:created
+                    WHERE payload=:payload
+                """),
+                {"created": int(time.time()) - 3601, "payload": payload},
+            )
+
+        with self.assertRaisesRegex(ValueError, "Срок действия заказа истёк"):
+            complete_stars_payment(
+                payload, self.user_id, 1, "expired-" + uuid.uuid4().hex
+            )
+
+        with engine.connect() as conn:
+            status = conn.execute(
+                text("SELECT status FROM tnc_game_stars_orders WHERE payload=:payload"),
+                {"payload": payload},
+            ).scalar_one()
+            balance = conn.execute(
+                text("SELECT balance FROM tnc_game_wallets WHERE user_id=:uid"),
+                {"uid": self.user_id},
+            ).scalar_one()
+        self.assertEqual(status, "pending")
+        self.assertEqual(balance, 1000)
 
     def test_stars_payment_is_idempotent(self):
         payload, expected_tokens = create_stars_order(self.user_id, 2)
