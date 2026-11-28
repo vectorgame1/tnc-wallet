@@ -80,24 +80,26 @@ def main_keyboard():
     rows = []
     if webapp_url.startswith("https://"):
         rows.append([InlineKeyboardButton(
-            text="Открыть TNC",
+            text=MINI_APP,
             web_app=WebAppInfo(url=webapp_url),
         )])
+    if not webapp_url.startswith("https://"):
+        rows.append([InlineKeyboardButton(text=MINI_APP, callback_data="menu:miniapp")])
     rows.extend([
         [
-            InlineKeyboardButton(text="Кошелёк", callback_data="menu:wallet"),
-            InlineKeyboardButton(text="Перевести", callback_data="menu:transfer"),
+            InlineKeyboardButton(text=WALLET, callback_data="menu:wallet"),
+            InlineKeyboardButton(text=TRANSFER, callback_data="menu:transfer"),
         ],
         [
-            InlineKeyboardButton(text="Операции", callback_data="menu:history"),
-            InlineKeyboardButton(text="Профиль", callback_data="menu:account"),
+            InlineKeyboardButton(text=HISTORY, callback_data="menu:history"),
+            InlineKeyboardButton(text=ACCOUNT, callback_data="menu:account"),
         ],
         [
-            InlineKeyboardButton(text="Пополнить TNC", callback_data="menu:shop"),
-            InlineKeyboardButton(text="Игры GT", callback_data="menu:games"),
+            InlineKeyboardButton(text=SHOP, callback_data="menu:shop"),
+            InlineKeyboardButton(text=GT_BALANCE, callback_data="menu:games"),
         ],
         [
-            InlineKeyboardButton(text="Пригласить", callback_data="menu:community"),
+            InlineKeyboardButton(text=COMMUNITY, callback_data="menu:community"),
             InlineKeyboardButton(text="Помощь", callback_data="menu:help"),
         ],
     ])
@@ -273,7 +275,9 @@ async def menu_callback(callback: CallbackQuery, state: FSMContext):
         return
 
     action = (callback.data or "").split(":", 1)[1]
-    if action == "transfer":
+    if action == "miniapp":
+        await miniapp_handler(message)
+    elif action == "transfer":
         await state.clear()
         await transfer_start(message, state)
     elif action == "wallet":
